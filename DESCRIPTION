@@ -27,7 +27,6 @@ Imports:
     stats,
     ggplot2,
     mvtnorm,
-    colorRamps,
     pbdBASE
 Suggests:
     dplyr,
