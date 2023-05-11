@@ -1,0 +1,45 @@
+Package: DiffOp
+Version: 1.0.0
+Date: 2023-05-10
+Title: Nonstationary Spatial Cross-Covariance Functions Based 
+  on the Differential Operators Approach in 3D
+Description: An R package that implements a flexible multivariate 
+  nonstationary cross-covariance function model based on the differential 
+  operators approach defined in 3-dimensional (3D) space. A defining 
+  feature of the model is that it can accommodate nonstationarity in the 
+  variances, colocated correlations, and other spatial features of a 
+  multivariate Gaussian random field, and is particularly flexible along 
+  the vertical dimension. With the implemented cross-covariance function 
+  model, users can simulate synthetic multivariate Gaussian random fields. 
+  Inference for model parameters is done via maximum likelihood estimation. 
+  Predictions at locations with no observations can also be performed.
+Authors@R: c(person("Mary Lai", "Salvana", role=c("aut", "cre"),
+             email="yourlainess@gmail.com", comment=c(ORCID = "0000-0003-4868-7713")),
+             person("Mikyoung", "Jun", role=c("aut"), 
+             email="mjun@central.uh.edu"))
+Author: Mary Lai Salvana [aut, cre] (<https://orcid.org/0000-0003-4868-7713>),
+    Mikyoung Jun [aut]
+Maintainer: Mary Lai Salvana <yourlainess@gmail.com>
+Depends:
+    R (>= 2.15.0)
+Imports:
+    graphics,
+    stats,
+    ggplot2,
+    mvtnorm,
+    colorRamps,
+    pbdBASE
+Suggests:
+    dplyr,
+    testthat,
+    devtools,
+    roxygen2
+Remotes: marysalvana/pbdBASE
+License: GPL-3
+URL: https://github.com/marysalvana/DiffOp
+BugReports: https://github.com/marysalvana/DiffOp/issues
+Encoding: UTF-8
+ByteCompile: true
+LazyData: true
+RoxygenNote: 7.2.0
+Roxygen: list(markdown=TRUE)
