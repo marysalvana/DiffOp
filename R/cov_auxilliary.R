@@ -181,7 +181,8 @@ uni_differential <- function(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, L
 #' where \eqn{a_{h}} and \eqn{a_{v}} are the scale parameters in the horizontal and vertical directions,
 #' respectively, and \eqn{ch(L_1, L_2, l_1 - l_2)} is the chordal distance with the following formula:
 #' \deqn{ch(L_1, L_2, l_1 - l_2) = 2 R \left\{ \sin^2 \left( \frac{L_1 - L_2}{2} \right) + \cos L_1 \cos L_2 \sin^2 \left( \frac{l_1 - l_2}{2} \right) \right\}^{1/2}.}
-#' Here \eqn{R} is the radius of the sphere. Note that for global processes, the relevant sphere is the Earth with \eqn{R=6,371} km.
+#' Here \eqn{R} is the radius of the sphere. Note that for global processes,
+#' the relevant sphere is the Earth with \eqn{R=6,371} km.
 #'
 #' @usage cov_bi_differential(location, beta, scale_horizontal, scale_vertical,
 #' a1, b1, c1, d1, a2, b2, c2, d2, radius)
@@ -657,7 +658,18 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
   return(est_theta)
 }
 
-#' Step 2: MLE estimation of the parameters of the bivariate differential operator cross-covariance function
+#' Maximum Likelihood Estimation of the parameters of the bivariate differential operator cross-covariance function
+#'
+#' @description
+#' \code{est_bi_differential} performs maximum likelihood estimation using a
+#' Newton-type algorithm to carry out a minimization of the negative of the
+#' Gaussian log-likelihood function:
+#' \deqn{l(\boldsymbol{\theta}) = -\frac{q n}{2} \log (2 \pi) - \frac{1}{2} \log |\boldsymbol{\Sigma}(\boldsymbol{\theta})| - \frac{1}{2} \mathbf{Z}^{\top} \boldsymbol{\Sigma}(\boldsymbol{\theta})^{-1} \mathbf{Z},}
+#' Here \eqn{q} is the number of parameters and \eqn{\boldsymbol{\Sigma}}.
+#'
+#' @usage est_bi_differential(location, beta, scale_horizontal, scale_vertical,
+#' a1, b1, c1, d1, a2, b2, c2, d2, radius)
+#'
 #' @param residuals A vector of residuals
 #' @param location An nx3 matrix of coordinates.
 #' @param init_beta A number for colocated correlation parameter.
