@@ -25,7 +25,6 @@ Depends:
 Imports:
     graphics,
     stats,
-    ggplot2,
     mvtnorm,
     pbdBASE
 Suggests:
@@ -40,5 +39,5 @@ BugReports: https://github.com/marysalvana/DiffOp/issues
 Encoding: UTF-8
 ByteCompile: true
 LazyData: true
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3
 Roxygen: list(markdown=TRUE)
