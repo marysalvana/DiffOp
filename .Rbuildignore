@@ -7,3 +7,5 @@
 ^R/cov_auxilliary2\.R$
 ^DiffOp-manual\.pdf$
 ^\.git$
+^job\.sub$
+^testing_diffop_package\.R$

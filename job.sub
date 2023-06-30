@@ -1,0 +1,45 @@
+#!/bin/bash
+#SBATCH -p batch
+#SBATCH -J argo
+
+##SBATCH --partition=jun
+##SBATCH --nodelist=cn603-16-r,cn603-28-l,cn603-29-l
+#SBATCH --time=10:00:00
+#SBATCH -o output/%j.out
+#SBATCH -e output/%j.err
+##SBATCH --mem=200GB
+
+#SBATCH --cpus-per-task=20
+#SBATCH -n 4
+
+##SBATCH --nodes=4
+##SBATCH --ntasks-per-node=1
+##SBATCH --cpus-per-task=32
+
+echo "Starting at `date`"
+echo "Running on hosts: $SLURM_NODELIST"
+echo "Running on $SLURM_NNODES nodes."
+echo "Running $SLURM_NTASKS tasks."
+echo "Current working directory is `pwd`"
+
+module load R/4.2.0-foss-2021b
+
+# set path variable
+path=`pwd -P`
+
+DATASET=$1
+CLASS=$2
+MODEL=$3
+ESTIMATION_STEP=$4
+
+echo "FITTING MODEL ON REAL DATASET"
+
+#mpirun -np $SLURM_NTASKS Rscript ./testing.R  $path $DATASET $SLURM_NTASKS $ESTIMATION_METHOD $FIT_MODEL
+mpiexec -np $SLURM_NTASKS Rscript ./testing.R  $path $DATASET $SLURM_NTASKS $CLASS $MODEL $ESTIMATION_STEP
+
+
+
+
+
+
+
