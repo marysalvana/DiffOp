@@ -1,20 +1,14 @@
 #!/bin/bash
 #SBATCH -p batch
-#SBATCH -J argo
+#SBATCH -J DiffOp
 
-##SBATCH --partition=jun
-##SBATCH --nodelist=cn603-16-r,cn603-28-l,cn603-29-l
 #SBATCH --time=10:00:00
-#SBATCH -o output/%j.out
-#SBATCH -e output/%j.err
+#SBATCH -o %j.out
+#SBATCH -e %j.err
 ##SBATCH --mem=200GB
 
 #SBATCH --cpus-per-task=20
 #SBATCH -n 4
-
-##SBATCH --nodes=4
-##SBATCH --ntasks-per-node=1
-##SBATCH --cpus-per-task=32
 
 echo "Starting at `date`"
 echo "Running on hosts: $SLURM_NODELIST"
@@ -34,8 +28,7 @@ ESTIMATION_STEP=$4
 
 echo "FITTING MODEL ON REAL DATASET"
 
-#mpirun -np $SLURM_NTASKS Rscript ./testing.R  $path $DATASET $SLURM_NTASKS $ESTIMATION_METHOD $FIT_MODEL
-mpiexec -np $SLURM_NTASKS Rscript ./testing.R  $path $DATASET $SLURM_NTASKS $CLASS $MODEL $ESTIMATION_STEP
+mpiexec -np $SLURM_NTASKS Rscript ./testing_diffop_package.R  $path $DATASET $SLURM_NTASKS $CLASS $MODEL $ESTIMATION_STEP
 
 
 
