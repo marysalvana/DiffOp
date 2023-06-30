@@ -95,3 +95,10 @@ Save the job script in a file named `job.sub`. To submit `job.sub`, run the foll
     sbatch job.sub
     ```
 
+---
+
+## Sample R codes using the DiffOp package
+
+
+
+Save the R codes in a file named `testing_diffop_package.R` and submit `job.sub`.
