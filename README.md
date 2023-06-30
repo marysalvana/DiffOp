@@ -90,10 +90,7 @@ This will create the `DiffOp_1.0.0.tar.gz` file.
     mpiexec -np $SLURM_NTASKS Rscript ./testing_diffop_package.R  $path $DATASET $SLURM_NTASKS $CLASS $MODEL $ESTIMATION_STEP
     ```
 
-Save the job script in a file named `job.sub`. To submit `job.sub`, run the following codes on the terminal: 
-    ```
-    sbatch job.sub
-    ```
+Save the job script in a file named `job.sub`. 
 
 ---
 
@@ -102,3 +99,20 @@ Save the job script in a file named `job.sub`. To submit `job.sub`, run the foll
 
 
 Save the R codes in a file named `testing_diffop_package.R` and submit `job.sub`.
+
+## How to run the R code
+
+1. Submit the job script:
+     ```
+     sbatch job.sub
+     ```
+This command will generate a job ID number that you can use to monitor the job.
+
+2. View the R codes output:
+     ```
+     tail -f job_id_number.out
+     ```
+   or 
+     ```
+     vi job_id_number.out
+     ```
