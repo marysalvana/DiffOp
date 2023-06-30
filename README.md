@@ -57,37 +57,37 @@ This will create the `DiffOp_1.0.0.tar.gz` file.
 ## Sample job script to run in UH Carya to run R codes using the DiffOp package
 
     ```
-#!/bin/bash
-#SBATCH -p batch
-#SBATCH -J DiffOp
+    #!/bin/bash
+    #SBATCH -p batch
+    #SBATCH -J DiffOp
 
-#SBATCH --time=10:00:00
-#SBATCH -o %j.out
-#SBATCH -e %j.err
-#SBATCH --mem=100GB
+    #SBATCH --time=10:00:00
+    #SBATCH -o %j.out
+    #SBATCH -e %j.err
+    #SBATCH --mem=100GB
 
-#SBATCH --cpus-per-task=20
-#SBATCH -n 4
+    #SBATCH --cpus-per-task=20
+    #SBATCH -n 4
 
-echo "Starting at `date`"
-echo "Running on hosts: $SLURM_NODELIST"
-echo "Running on $SLURM_NNODES nodes."
-echo "Running $SLURM_NTASKS tasks."
-echo "Current working directory is `pwd`"
+    echo "Starting at `date`"
+    echo "Running on hosts: $SLURM_NODELIST"
+    echo "Running on $SLURM_NNODES nodes."
+    echo "Running $SLURM_NTASKS tasks."
+    echo "Current working directory is `pwd`"
 
-module load R/4.2.0-foss-2021b
+    module load R/4.2.0-foss-2021b
 
-# set path variable
-path=`pwd -P`
+    # set path variable
+    path=`pwd -P`
 
-DATASET=$1
-CLASS=$2
-MODEL=$3
-ESTIMATION_STEP=$4
+    DATASET=$1
+    CLASS=$2
+    MODEL=$3
+    ESTIMATION_STEP=$4
 
-echo "FITTING MODEL ON REAL DATASET"
+    echo "FITTING MODEL ON REAL DATASET"
 
-mpiexec -np $SLURM_NTASKS Rscript ./testing.R  $path $DATASET $SLURM_NTASKS $CLASS $MODEL $ESTIMATION_STEP
+    mpiexec -np $SLURM_NTASKS Rscript ./testing_diffop_package.R  $path $DATASET $SLURM_NTASKS $CLASS $MODEL $ESTIMATION_STEP
     ```
 
 
