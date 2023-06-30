@@ -54,7 +54,7 @@ This will create the `DiffOp_1.0.0.tar.gz` file.
      ```
 ---
 
-## Sample job script to run in UH Carya to run R codes using the DiffOp package
+## Sample job script to run in UH Carya the R codes using the DiffOp package
 
     ```
     #!/bin/bash
