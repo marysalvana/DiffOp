@@ -112,6 +112,11 @@ This command will generate a job ID number that you can use to monitor the job.
      vi job_id_number.out
      ```
 
+3. To check error logs from R code runs:
+     ```
+     vi job_id_number.err
+     ```
+
 ## Authors
 
 DiffOp is authored and maintained by:
