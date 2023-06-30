@@ -80,14 +80,9 @@ This will create the `DiffOp_1.0.0.tar.gz` file.
     # set path variable
     path=`pwd -P`
 
-    DATASET=$1
-    CLASS=$2
-    MODEL=$3
-    ESTIMATION_STEP=$4
-
     echo "FITTING MODEL ON REAL DATASET"
 
-    mpiexec -np $SLURM_NTASKS Rscript ./testing_diffop_package.R  $path $DATASET $SLURM_NTASKS $CLASS $MODEL $ESTIMATION_STEP
+    mpiexec -np $SLURM_NTASKS Rscript ./testing_diffop_package.R  $SLURM_NTASKS
     ```
 
 Save the job script in a file named `job.sub`. 
