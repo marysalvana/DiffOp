@@ -50,7 +50,8 @@ and \eqn{h(L_1, L_2, l_1 - l_2, p_1 - p_2)} is a distance function of the form:
 where \eqn{a_{h}} and \eqn{a_{v}} are the scale parameters in the horizontal and vertical directions,
 respectively, and \eqn{ch(L_1, L_2, l_1 - l_2)} is the chordal distance with the following formula:
 \deqn{ch(L_1, L_2, l_1 - l_2) = 2 R \left\{ \sin^2 \left( \frac{L_1 - L_2}{2} \right) + \cos L_1 \cos L_2 \sin^2 \left( \frac{l_1 - l_2}{2} \right) \right\}^{1/2}.}
-Here \eqn{R} is the radius of the sphere. Note that for global processes, the relevant sphere is the Earth with \eqn{R=6,371} km.
+Here \eqn{R} is the radius of the sphere. Note that for global processes,
+the relevant sphere is the Earth with \eqn{R=6,371} km.
 }
 \examples{
 

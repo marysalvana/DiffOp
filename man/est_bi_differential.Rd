@@ -2,41 +2,10 @@
 % Please edit documentation in R/cov_auxilliary.R
 \name{est_bi_differential}
 \alias{est_bi_differential}
-\title{Step 2: MLE estimation of the parameters of the bivariate differential operator cross-covariance function}
+\title{Maximum Likelihood Estimation of the parameters of the bivariate differential operator cross-covariance function}
 \usage{
-est_bi_differential(
-  residuals,
-  location,
-  init_beta,
-  init_scale_horizontal,
-  init_scale_vertical,
-  init_scale_horizontal_fix = F,
-  init_scale_vertical_fix = F,
-  init_a1,
-  init_b1,
-  init_c1,
-  init_d1 = NULL,
-  init_a1_fix = F,
-  init_b1_fix = F,
-  init_a2,
-  init_b2,
-  init_c2,
-  init_d2 = NULL,
-  init_a2_fix = F,
-  init_b2_fix = F,
-  init_beta_fix = F,
-  radius,
-  basis1,
-  nb1 = ncol(basis1),
-  basis2,
-  nb2 = ncol(basis2),
-  splines_degree = 4,
-  knots1,
-  knots2,
-  MAXIT = 2000,
-  RERUNS = 20,
-  STEPMAX = 1
-)
+est_bi_differential(location, beta, scale_horizontal, scale_vertical,
+a1, b1, c1, d1, a2, b2, c2, d2, radius)
 }
 \arguments{
 \item{residuals}{A vector of residuals}
@@ -105,5 +74,9 @@ est_bi_differential(
 A vector of estimated parameter values.
 }
 \description{
-Step 2: MLE estimation of the parameters of the bivariate differential operator cross-covariance function
+\code{est_bi_differential} performs maximum likelihood estimation using a
+Newton-type algorithm to carry out a minimization of the negative of the
+Gaussian log-likelihood function:
+\deqn{l(\boldsymbol{\theta}) = -\frac{q n}{2} \log (2 \pi) - \frac{1}{2} \log |\boldsymbol{\Sigma}(\boldsymbol{\theta})| - \frac{1}{2} \mathbf{Z}^{\top} \boldsymbol{\Sigma}(\boldsymbol{\theta})^{-1} \mathbf{Z},}
+Here \eqn{q} is the number of parameters and \eqn{\boldsymbol{\Sigma}}.
 }

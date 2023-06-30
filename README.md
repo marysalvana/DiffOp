@@ -1,14 +1,15 @@
-## R/broman
+## DiffOp
 
-[![R build status](https://github.com/kbroman/broman/workflows/R-CMD-check/badge.svg)](https://github.com/kbroman/broman/actions)
-[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/broman)](https://cran.r-project.org/package=broman)
-
-[Karl W Broman](https://kbroman.org)
-
----
-
-R/broman is an [R](https://www.r-project.org) package with miscellaneous R functions that are
-useful to me.
+An R package that implements a flexible multivariate
+  nonstationary cross-covariance function model based on the differential
+  operators approach defined in 3-dimensional (3D) space. A defining
+  feature of the model is that it can accommodate nonstationarity in the
+  variances, colocated correlations, and other spatial features of a
+  multivariate Gaussian random field, and is particularly flexible along
+  the vertical dimension. With the implemented cross-covariance function
+  model, users can simulate synthetic multivariate Gaussian random fields.
+  Inference for model parameters is done via maximum likelihood estimation.
+  Predictions at locations with no observations can also be performed.
 
 ---
 
@@ -25,3 +26,6 @@ General Public License for more details.
 
 A copy of the GNU General Public License, version 3, is available at
 <https://www.r-project.org/Licenses/GPL-3>
+
+---
+
