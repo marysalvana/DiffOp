@@ -115,5 +115,5 @@ This command will generate a job ID number that you can use to monitor the job.
 ## Authors
 
 DiffOp is authored and maintained by:
-* Mary Lai Salvana
-* Mikyoung Jun
+* [Mary Lai Salvana](https://marylaisalvana.com)
+* [Mikyoung Jun](https://sites.google.com/view/mikyoung-jun/home?authuser=0)
