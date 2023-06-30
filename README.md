@@ -98,7 +98,7 @@ Save the job script in a file named `job.sub`.
 
 
 
-Save the R codes in a file named `testing_diffop_package.R` and submit `job.sub`.
+Save the R codes in a file named `testing_diffop_package.R`.
 
 ## How to run the R code
 
@@ -116,3 +116,9 @@ This command will generate a job ID number that you can use to monitor the job.
      ```
      vi job_id_number.out
      ```
+
+## Authors
+
+DiffOp is authored and maintained by:
+* Mary Lai Salvana
+* Mikyoung Jun

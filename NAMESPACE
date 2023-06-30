@@ -2,11 +2,13 @@
 
 export(bsplineBasis)
 export(cov_bi_differential)
+export(cov_bi_differential_parallel)
 export(est_bi_differential)
 export(est_bi_differential_wls)
 export(plot_bi_differential)
 export(predict_bi_differential)
 import(mvtnorm)
+import(pbdBASE)
 import(stats)
 importFrom(graphics,par)
 useDynLib(DiffOp, .registration=TRUE)

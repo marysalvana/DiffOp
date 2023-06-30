@@ -22,22 +22,27 @@ C1 = sin((loc3d[1:10, 3] + 0.1) * pi / 0.5)
 C2 = cos((loc3d[1:10, 3] + 0.1) * pi / 0.5)
 D1 = D2 = 0
 
-cov_mat <- cov_bi_differential(location = loc3d, beta = BETA, scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL, a1 = A1, b1 = B1, c1 = C1, d1 = D1, a2 = A2, b2 = B2, c2 = C2, d2 = D2, radius = earthRadiusKm)
+#cov_mat <- cov_bi_differential(location = loc3d, beta = BETA, scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL, a1 = A1, b1 = B1, c1 = C1, d1 = D1, a2 = A2, b2 = B2, c2 = C2, d2 = D2, radius = earthRadiusKm)
 
-library(MASS)
+#library(MASS)
 
 start_time = Sys.time()
 
 set.seed(1234)
-Z <- mvrnorm(1, mu = rep(0, ncol(cov_mat)), Sigma = cov_mat)
+#Z <- mvrnorm(1, mu = rep(0, ncol(cov_mat)), Sigma = cov_mat)
 
-save(Z, file = 'Z.RData')
+#save(Z, file = 'Z.RData')
 
 end_time = Sys.time()
 
 TOTAL_TIME <- as.numeric(end_time - start_time, units = "secs")
 
 print(TOTAL_TIME)
+
+args <- commandArgs(trailingOnly = TRUE)
+NUM_PROCESSORS = as.numeric(args[1])
+
+cov_mat <- cov_bi_differential_parallel(location = loc3d, beta = BETA, scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL, a1 = A1, b1 = B1, c1 = C1, d1 = D1, a2 = A2, b2 = B2, c2 = C2, d2 = D2, radius = earthRadiusKm, num_processors = NUM_PROCESSORS)
 
 print("DONE . . . ")
 

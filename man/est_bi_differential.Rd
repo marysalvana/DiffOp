@@ -4,8 +4,12 @@
 \alias{est_bi_differential}
 \title{Maximum Likelihood Estimation of the parameters of the bivariate differential operator cross-covariance function}
 \usage{
-est_bi_differential(location, beta, scale_horizontal, scale_vertical,
-a1, b1, c1, d1, a2, b2, c2, d2, radius)
+est_bi_differential(residuals, location, init_beta, init_scale_horizontal, 
+init_scale_vertical, init_scale_horizontal_fix, init_scale_vertical_fix,
+init_a1, init_b1, init_c1, init_d1, init_a1_fix, init_b1_fix, 
+init_a2, init_b2, init_c2, init_d2, init_a2_fix, init_b2_fix, 
+init_beta_fix, radius, basis1, nb1, basis2, nb2, splines_degree,
+knots1, knots2, MAXIT, RERUNS, STEPMAX)
 }
 \arguments{
 \item{residuals}{A vector of residuals}

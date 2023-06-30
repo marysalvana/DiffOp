@@ -25,7 +25,8 @@ Depends:
 Imports:
     graphics,
     stats,
-    mvtnorm
+    mvtnorm,
+    pbdBASE
 Suggests:
     dplyr,
     testthat,

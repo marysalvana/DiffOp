@@ -271,6 +271,120 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 
 }
 
+#' Compute the bivariate differential operator cross-covariance function in parallel
+#'
+#' @description
+#' \code{cov_bi_differential_parallel} evaluates the nonstationary spatial cross-covariance
+#' function model based on the differential operators approach in 3D of the form:
+#' \deqn{C_{ij}(L_1, L_2, l_1 - l_2, p_1, p_2) = K_{ij}^{1} \mathcal{M}_{\nu_{ij} - 1} \{ {h(L_1, L_2, l_1 - l_2, p_1 - p_2)}^{1/2} \}}
+#' \deqn{\quad \quad \quad \quad \quad \quad + K_{ij}^{2} \mathcal{M}_{\nu_{ij}} \{ {h(L_1, L_2, l_1 - l_2, p_1 - p_2)}^{1/2} \},}
+#' for different pairs of locations \eqn{(L_1, l_1, p_1)} and \eqn{(L_2, l_2, p_2)},
+#' where \eqn{L} represents the latitude, \eqn{l} the longitude, and \eqn{p} the pressure coordinates, respectively.
+#' The forms of \eqn{K_{ij}^{1}} and \eqn{K_{ij}^{2}} can be found in Appendix of Salvana, M. L., & Jun, M. (2022)
+#' and \eqn{h(L_1, L_2, l_1 - l_2, p_1 - p_2)} is a distance function of the form:
+#' \deqn{h(L_1, L_2, l_1 - l_2, p_1 - p_2) = {a_{h}^2 ch^2(L_1, L_2, l_1 - l_2) + a_{v}^2 (p_1 - p_2)^2},}
+#' where \eqn{a_{h}} and \eqn{a_{v}} are the scale parameters in the horizontal and vertical directions,
+#' respectively, and \eqn{ch(L_1, L_2, l_1 - l_2)} is the chordal distance with the following formula:
+#' \deqn{ch(L_1, L_2, l_1 - l_2) = 2 R \left\{ \sin^2 \left( \frac{L_1 - L_2}{2} \right) + \cos L_1 \cos L_2 \sin^2 \left( \frac{l_1 - l_2}{2} \right) \right\}^{1/2}.}
+#' Here \eqn{R} is the radius of the sphere. Note that for global processes,
+#' the relevant sphere is the Earth with \eqn{R=6,371} km.
+#'
+#' @usage cov_bi_differential_parallel(location, beta, scale_horizontal, scale_vertical,
+#' a1, b1, c1, d1, a2, b2, c2, d2, radius)
+#'
+#' @param location An \eqn{n \times 3} matrix of coordinates.
+#' @param beta A numeric constant indicating the colocated correlation parameter.
+#' @param scale_horizontal A numeric constant indicating the horizontal scale parameter.
+#' @param scale_vertical A numeric constant indicating the vertical scale parameter.
+#' @param a1 A numeric constant indicating the anisotropy in latitude parameter associated with variable 1.
+#' @param b1 A numeric constant indicating the anisotropy in longitude parameter associated with variable 1.
+#' @param c1 A numeric vector indicating the nonstationary parameters with depth associated with variable 1.
+#' @param d1 A numeric constant indicating the variance parameter from the fully isotropic component associated with variable 1.
+#' @param a2 A numeric constant indicating the anisotropy in latitude parameter associated with variable 2.
+#' @param b2 A numeric constant indicating the anisotropy in longitude parameter associated with variable 2.
+#' @param c2 A numeric vector indicating the nonstationary parameters with depth associated with variable 2.
+#' @param d2 A numeric constant indicating the variance parameter from the fully isotropic component associated with variable 2.
+#' @param radius A numeric constant indicating the radius of the sphere.
+#' @param num_processors A numeric constant indicating the number of available processors; must be a perfect square.
+#'
+#' @import pbdBASE
+#'
+#' @return A cross-covariance matrix of dimension \eqn{2 n \times 2n}.
+#'
+#' @author Mary Lai Salvana \email{yourlainess@gmail.com}
+#'
+#' @references Salvana, M. L., & Jun, M. (2022). 3D Bivariate Spatial Modelling of Argo Ocean Temperature and Salinity Profiles. \emph{arXiv preprint arXiv:2210.11611}.
+#'
+#' @examples
+#'
+#' library(dplyr)
+#'
+#' x <- seq(0, 1, length.out = 10)
+#' y <- seq(0, 1, length.out = 10)
+#'
+#' loc2d <- expand.grid(x, y) %>% as.matrix()
+#' depth <- seq(0, 1, length.out = 10)
+#' loc3d <- cbind(rep(loc2d[, 1], each = length(depth)), rep(loc2d[, 2], each = length(depth)), depth)
+#'
+#' earthRadiusKm = 6371
+#'
+#' BETA = 0.5
+#' SCALE_HORIZONTAL = 0.03
+#' SCALE_VERTICAL = 0.3
+#' A1 = A2 = 0.00001
+#' B1 = B2 = 0.00001
+#' C1 = sin((loc3d[1:10, 3] + 0.1) * pi / 0.5)
+#' C2 = cos((loc3d[1:10, 3] + 0.1) * pi / 0.5)
+#' D1 = D2 = 0
+#'
+#' cov_mat <- cov_bi_differential_parallel(location = loc3d, beta = BETA,
+#'                                scale_horizontal = SCALE_HORIZONTAL,
+#'                                scale_vertical = SCALE_VERTICAL,
+#'                                a1 = A1, b1 = B1, c1 = C1, d1 = D1,
+#'                                a2 = A2, b2 = B2, c2 = C2, d2 = D2,
+#'                                radius = earthRadiusKm,
+#'                                num_processors = 4)
+#'
+#'
+#' @export
+cov_bi_differential_parallel <- function(location, beta, scale_horizontal, scale_vertical, a1, b1, c1, d1, a2, b2, c2, d2, radius, num_processors){
+
+  init.grid(NPROW = sqrt(num_processors), NPCOL = sqrt(num_processors))
+  bldim <- c(sqrt(num_processors), sqrt(num_processors))
+
+  LAT1D <- matrix(location[, 2], nrow(location), nrow(location), byrow = F)
+  LON1D <- matrix(location[, 1], nrow(location), nrow(location), byrow = F)
+  PRES1 <- matrix(location[, 3], nrow(location), nrow(location), byrow = F)
+  LAT2D <- matrix(location[, 2], nrow(location), nrow(location), byrow = T)
+  LON2D <- matrix(location[, 1], nrow(location), nrow(location), byrow = T)
+  PRES2 <- matrix(location[, 3], nrow(location), nrow(location), byrow = T)
+
+  fd_eval_mat_loc1 <- matrix(c1, nrow(location), nrow(location), byrow = F)
+  fd_eval_mat_loc2 <- matrix(c1, nrow(location), nrow(location), byrow = T)
+
+  fd_eval2_mat_loc1 <- matrix(c2, nrow(location), nrow(location), byrow = F)
+  fd_eval2_mat_loc2 <- matrix(c2, nrow(location), nrow(location), byrow = T)
+
+  PARAM <- c(1, scale_horizontal, scale_vertical, 2, a1, b1, d1, a1, b1, d1)
+
+  cov_val <- uni_differential(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius)
+
+  PARAM <- c(1, scale_horizontal, scale_vertical, 2, a2, b2, d2, a2, b2, d2)
+
+  cov_val2 <- uni_differential(PARAM, fd_eval2_mat_loc1, fd_eval2_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius)
+
+  PARAM <- c(beta, scale_horizontal, scale_vertical, 2, a1, b1, d1, a2, b2, d2)
+
+  cov_val3 <- uni_differential(PARAM, fd_eval_mat_loc1, fd_eval2_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius)
+
+  Sigma <- rbind(cbind(cov_val, cov_val3), cbind(t(cov_val3), cov_val2))
+
+  return(Sigma)
+
+  finalize()
+
+}
+
 #' Step 1: WLS estimation of the parameters of the bivariate differential operator cross-covariance function
 #' @param empirical_values A matrix of empirical values
 #' @param location An nx3 matrix of coordinates.
@@ -667,8 +781,12 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
 #' \deqn{l(\boldsymbol{\theta}) = -\frac{q n}{2} \log (2 \pi) - \frac{1}{2} \log |\boldsymbol{\Sigma}(\boldsymbol{\theta})| - \frac{1}{2} \mathbf{Z}^{\top} \boldsymbol{\Sigma}(\boldsymbol{\theta})^{-1} \mathbf{Z},}
 #' Here \eqn{q} is the number of parameters and \eqn{\boldsymbol{\Sigma}}.
 #'
-#' @usage est_bi_differential(location, beta, scale_horizontal, scale_vertical,
-#' a1, b1, c1, d1, a2, b2, c2, d2, radius)
+#' @usage est_bi_differential(residuals, location, init_beta, init_scale_horizontal, 
+#' init_scale_vertical, init_scale_horizontal_fix, init_scale_vertical_fix,
+#' init_a1, init_b1, init_c1, init_d1, init_a1_fix, init_b1_fix, 
+#' init_a2, init_b2, init_c2, init_d2, init_a2_fix, init_b2_fix, 
+#' init_beta_fix, radius, basis1, nb1, basis2, nb2, splines_degree,
+#' knots1, knots2, MAXIT, RERUNS, STEPMAX)
 #'
 #' @param residuals A vector of residuals
 #' @param location An nx3 matrix of coordinates.
