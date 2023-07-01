@@ -42,7 +42,7 @@ A copy of the GNU General Public License, version 3, is available at
         ```
         brew install openmpi
         ```
-        * In UH Carya cluster, loading the `R` module automatically loads `OpenMPI`. No need to run any additional commands.
+        * In UH Carya cluster, loading the `R` module above automatically loads `OpenMPI`. No need to run any additional commands.
 
 2. Download the github repository:
      ```
