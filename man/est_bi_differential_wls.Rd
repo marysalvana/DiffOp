@@ -135,7 +135,8 @@ INIT_C1 <- runif(length(KNOTS1) + SPLINES_DEGREE + 1, -5, 5)
 set.seed(1236)
 INIT_C2 <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
 
-\dontrun{est_params <- est_bi_differential_wls(empirical_values = emp_cov, location = loc3d, init_beta = INIT_BETA,
+\dontrun{est_params <- est_bi_differential_wls(empirical_values = emp_cov, location = loc3d, 
+                                 init_beta = INIT_BETA,
                                  init_scale_horizontal = INIT_SCALE_HORIZONTAL,
                                  init_scale_vertical = INIT_SCALE_VERTICAL,
                                  init_a1 = INIT_A1, init_b1 = INIT_B1,
