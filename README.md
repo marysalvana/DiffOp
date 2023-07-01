@@ -30,8 +30,18 @@ A copy of the GNU General Public License, version 3, is available at
 ---
 
 ## How to install the DiffOp package
-1. For Apple silicon (M1/M2) Macs, make sure you installed the R binary for Apple silicon arm64. You can download [R-4.3.1-arm64.pkg](https://cran.r-project.org/bin/macosx/) from CRAN.
-
+1. Install the necessary software:
+    - `R`:
+        * For Apple silicon (M1/M2) Macs, make sure you installed the R binary for Apple silicon arm64. You can download [R-4.3.1-arm64.pkg](https://cran.r-project.org/bin/macosx/) from CRAN.
+        * In University of Houston (UH) Carya cluster, simply load the R module by running the following command on the terminal:
+        ```
+        module load R/4.2.0-foss-2021b
+        ```
+    - `OpenMPI`:
+        * For Apple silicon (M1/M2) Macs, `OpenMPI` can be installed using `brew` by running the following command on the terminal: 
+        ```
+        brew install openmpi
+        ```
 2. Download the github repository:
      ```
      git clone https://github.com/marysalvana/DiffOp.git
