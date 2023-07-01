@@ -49,19 +49,13 @@ A copy of the GNU General Public License, version 3, is available at
      git clone https://github.com/marysalvana/DiffOp.git
      ```
 
-3. Load the necessary modules:
-   + In University of Houston (UH) Carya cluster:
-     ```
-     module load R/4.2.0-foss-2021b
-     ```
-
-4. Build the R package:
+3. Build the R package:
      ```
      R CMD build DiffOp
      ```
 This will create the `DiffOp_1.0.0.tar.gz` file.
 
-5. Install the R package:
+4. Install the R package:
      ```
      R CMD INSTALL DiffOp_1.0.0.tar.gz
      ```
