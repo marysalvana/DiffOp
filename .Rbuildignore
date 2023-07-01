@@ -11,3 +11,4 @@
 ^testing_diffop_package\.R$
 ^Z\.RData$
 ^testing\.R$
+^README\.md$

@@ -2,62 +2,54 @@
 % Please edit documentation in R/cov_auxilliary.R
 \name{predict_bi_differential}
 \alias{predict_bi_differential}
-\title{Prediction function}
+\title{Predict values at unsampled locations}
 \usage{
-predict_bi_differential(
-  residuals,
-  location,
-  location_new,
-  masked_residuals = NULL,
-  est_beta,
-  est_scale_horizontal,
-  est_scale_vertical,
-  est_a1,
-  est_b1,
-  est_c1,
-  est_d1 = NULL,
-  est_a2,
-  est_b2,
-  est_c2,
-  est_d2 = NULL,
-  radius,
-  splines_degree = 4,
-  knots1,
-  knots2
-)
+predict_bi_differential(residuals, location, location_new, est_beta,
+est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1, est_d1,
+est_a2, est_b2, est_c2, est_d2, radius, splines_degree, knots1, knots2)
 }
 \arguments{
-\item{residuals}{A vector of residuals}
+\item{residuals}{A \eqn{2 n} vector of residuals with
+variable 1 and 2 residuals appended next to each other.}
 
-\item{location}{An nx3 matrix of coordinates.}
+\item{location}{An \eqn{n \times 3} matrix of coordinates.}
 
-\item{location_new}{An nx3 matrix of coordinates where prediction is required.}
+\item{location_new}{An \eqn{n \times 3} matrix of coordinates where prediction is required.}
 
-\item{masked_residuals}{A vector of residuals removed to test prediction performance.}
+\item{est_beta}{A numeric constant indicating the value for the
+colocated correlation parameter.}
 
-\item{est_beta}{A number for colocated correlation parameter.}
+\item{est_scale_horizontal}{A numeric constant indicating the value for the
+horizontal scale parameter.}
 
-\item{est_scale_horizontal}{A number for the horizontal scale parameter.}
+\item{est_scale_vertical}{A numeric constant indicating the value for the
+vertical scale parameter.}
 
-\item{est_scale_vertical}{A number for the vertical scale parameter.}
+\item{est_a1}{A numeric constant indicating the value for the
+anisotropy in latitude parameter associated with variable 1.}
 
-\item{est_a1}{A number for the anisotropy parameter in Latitude associated with variable 1.}
+\item{est_b1}{A numeric constant indicating the value for the
+anisotropy in longitude parameter associated with variable 1.}
 
-\item{est_b1}{A number for the anisotropy parameter in longitude associated with variable 1.}
+\item{est_c1}{A numeric vector indicating the values for the
+nonstationary parameters with depth associated with variable 1.}
 
-\item{est_c1}{A number for vector for the nonstationarity parameter in depth associated with variable 1.}
+\item{est_d1}{A numeric constant indicating the value for the
+variance parameter from the fully isotropic component associated with variable 1.}
 
-\item{est_d1}{A number for the variance parameter of the fully isotropic associated with variable 1.}
+\item{est_a2}{A numeric constant indicating the value for the
+anisotropy in latitude parameter associated with variable 2.}
 
-\item{est_a2}{A number for the anisotropy parameter in Latitude associated with variable 2.}
+\item{est_b2}{A numeric constant indicating the value for the
+anisotropy in longitude parameter associated with variable 2.}
 
-\item{est_b2}{A number for the anisotropy parameter in longitude associated with variable 2.}
+\item{est_c2}{A numeric vector indicating the values for the
+nonstationary parameters with depth associated with variable 2.}
 
-\item{est_c2}{A number for vector for the nonstationarity parameter in depth associated with variable 2.}
+\item{est_d2}{A numeric constant indicating the value for the
+variance parameter from the fully isotropic component associated with variable 2.}
 
-\item{est_d2}{A number for the variance parameter of the fully isotropic associated with variable 2.}
-
-\item{radius}{A number for the radius of the sphere.}
+\item{radius}{A numeric constant indicating the radius of the sphere.}
 
 \item{splines_degree}{A number indicating the degree of the splines.}
 
@@ -66,8 +58,11 @@ predict_bi_differential(
 \item{knots2}{A vector of knot locations for variable 2.}
 }
 \value{
-A vector of prediction values.
+A vector of predictions.
 }
 \description{
-Prediction function
+Predict values at unsampled locations
+}
+\author{
+Mary Lai Salvana \email{yourlainess@gmail.com}
 }

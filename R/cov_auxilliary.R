@@ -206,11 +206,12 @@ uni_differential <- function(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, L
 #'
 #' earthRadiusKm = 6371
 #'
-#' \donttest{emp_cov <- compute_emp_cov(location = loc3d,
+#' \dontrun{emp_cov <- compute_emp_cov(location = loc3d,
 #' variable1_residuals = argo_ref_loc1$TemperatureResiduals,
 #' variable2_residuals = argo_ref_loc1$SalinityResiduals,
 #' bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03,
 #' radius = earthRadiusKm)}
+#'
 #'
 #' @export
 compute_emp_cov <- function(location, variable1_residuals, variable2_residuals, bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03, radius){
@@ -432,7 +433,7 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #'
 #' earthRadiusKm = 6371
 #'
-#' \donttest{emp_cov <- compute_emp_cov(location = loc3d,
+#' \dontrun{emp_cov <- compute_emp_cov(location = loc3d,
 #' variable1_residuals = argo_ref_loc1$TemperatureResiduals,
 #' variable2_residuals = argo_ref_loc1$SalinityResiduals,
 #' bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03,
@@ -456,7 +457,7 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' set.seed(1236)
 #' INIT_C2 <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
 #'
-#' \donttest{est_params <- est_bi_differential_wls(empirical_values = emp_cov, location = loc3d, init_beta = INIT_BETA,
+#' \dontrun{est_params <- est_bi_differential_wls(empirical_values = emp_cov, location = loc3d, init_beta = INIT_BETA,
 #'                                  init_scale_horizontal = INIT_SCALE_HORIZONTAL,
 #'                                  init_scale_vertical = INIT_SCALE_VERTICAL,
 #'                                  init_a1 = INIT_A1, init_b1 = INIT_B1,
@@ -1069,7 +1070,7 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
 #' set.seed(1236)
 #' INIT_C2 <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
 #'
-#' \donttest{est_params <- est_bi_differential_mle(residuals = Z, location = loc3d, init_beta = INIT_BETA,
+#' \dontrun{est_params <- est_bi_differential_mle(residuals = Z, location = loc3d, init_beta = INIT_BETA,
 #'                                  init_scale_horizontal = INIT_SCALE_HORIZONTAL,
 #'                                  init_scale_vertical = INIT_SCALE_VERTICAL,
 #'                                  init_a1 = INIT_A1, init_b1 = INIT_B1,

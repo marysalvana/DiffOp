@@ -35,7 +35,7 @@ a1, b1, c1, d1, a2, b2, c2, d2, radius)
 \item{radius}{A numeric constant indicating the radius of the sphere.}
 }
 \value{
-A cross-covariance matrix of dimension \eqn{2 n \times 2n}.
+A matrix of dimension \eqn{2 n \times 2 n}.
 }
 \description{
 \code{cov_bi_differential} evaluates the nonstationary spatial cross-covariance
@@ -71,8 +71,8 @@ SCALE_HORIZONTAL = 0.03
 SCALE_VERTICAL = 0.3
 A1 = A2 = 0.00001
 B1 = B2 = 0.00001
-C1 = sin((loc3d[1:10, 3] + 0.1) * pi / 0.5)
-C2 = cos((loc3d[1:10, 3] + 0.1) * pi / 0.5)
+C1 = sin((loc3d[, 3] + 0.1) * pi / 0.5)
+C2 = cos((loc3d[, 3] + 0.1) * pi / 0.5)
 D1 = D2 = 0
 
 cov_mat <- cov_bi_differential(location = loc3d, beta = BETA,
