@@ -166,6 +166,84 @@ uni_differential <- function(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, L
 
 }
 
+#' Compute the kernel smooth empirical cross-covariance values
+#'
+#' @description
+#' \code{compute_emp_cov} computes the kernel smoothed empirical cross-covariance,
+#' \eqn{\hat{C}_{ij}(\mathbf{s}_1, \mathbf{s}_2)} between any two locations
+#' \eqn{\mathbf{s}_1} and \eqn{\mathbf{s}_2}, which is required by the
+#' weighted least squares estimation routine.
+#' The formula used to compute \eqn{\hat{C}_{ij}(\mathbf{s}_1, \mathbf{s}_2)}
+#' was proposed by Kleiber, W., & Nychka, D. (2012) and has the following form:
+#' \deqn{\hat{C}_{ij}(\mathbf{s}_1, \mathbf{s}_2) = \frac{\sum_{\tilde{\mathbf{s}} \in \tilde{\mathcal{D}}} K_{\lambda_{h}, \lambda_{v}}(\mathbf{s}_1, \tilde{\mathbf{s}})^{1/2} K_{\lambda_{h}, \lambda_{v}}(\mathbf{s}_2, \tilde{\mathbf{s}})^{1/2} Z_i (\tilde{\mathbf{s}}) Z_j (\tilde{\mathbf{s}})}{ \{\sum_{\tilde{\mathbf{s}} \in \tilde{\mathcal{D}}} K_{\lambda_{h}, \lambda_{v}}(\mathbf{s}_1, \tilde{\mathbf{s}})\}^{1/2} \{\sum_{\tilde{\mathbf{s}} \in \tilde{\mathcal{D}}} K_{\lambda_{h}, \lambda_{v}}(\mathbf{s}_2, \tilde{\mathbf{s}})\}^{1/2}},}
+#' where \eqn{K_{\lambda_{h}, \lambda_{v}}} is a nonnegative kernel function
+#' with horizontal and vertical bandwidths, \eqn{\lambda_{h}} and
+#' \eqn{\lambda_{v}}, respectively, which control the degree of smoothing.
+#'
+#' @usage compute_emp_cov(location, variable1_residuals, variable2_residuals,
+#' bandwidth_horizontal, bandwidth_vertical, radius)
+#'
+#' @param location An \eqn{n \times 3} matrix of coordinates.
+#' @param variable1_residuals A numeric vector of variable 1 residuals.
+#' @param variable2_residuals A numeric vector of variable 2 residuals.
+#' @param bandwidth_horizontal A numeric constant parameter for the bandwidth
+#' in the horizontal direction.
+#' @param bandwidth_vertical A numeric constant parameter for the bandwidth
+#' in the vertical direction.
+#' @param radius A numeric constant indicating the radius of the sphere.
+#'
+#' @return A matrix of dimension \eqn{2 n \times 2 n}.
+#'
+#' @author Mary Lai Salvana \email{yourlainess@gmail.com}
+#'
+#' @references Kleiber, W., & Nychka, D. (2012). Nonstationary modeling for multivariate spatial processes. \emph{Journal of Multivariate Analysis, 112}, 76-91.
+#'
+#' @examples
+#'
+#' data(argo_ref_loc1)
+#'
+#' loc3d <- cbind(argo_ref_loc1$Longitude, argo_ref_loc1$Latitude, argo_ref_loc1$Pressure)
+#'
+#' earthRadiusKm = 6371
+#'
+#' \donttest{emp_cov <- compute_emp_cov(location = loc3d,
+#' variable1_residuals = argo_ref_loc1$TemperatureResiduals,
+#' variable2_residuals = argo_ref_loc1$SalinityResiduals,
+#' bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03,
+#' radius = earthRadiusKm)}
+#'
+#' @export
+compute_emp_cov <- function(location, variable1_residuals, variable2_residuals, bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03, radius){
+  LAT1D <- matrix(location[, 2], nrow(location), nrow(location), byrow = F)
+  LON1D <- matrix(location[, 1], nrow(location), nrow(location), byrow = F)
+  PRES1 <- matrix(location[, 3], nrow(location), nrow(location), byrow = F)
+  LAT2D <- matrix(location[, 2], nrow(location), nrow(location), byrow = T)
+  LON2D <- matrix(location[, 1], nrow(location), nrow(location), byrow = T)
+  PRES2 <- matrix(location[, 3], nrow(location), nrow(location), byrow = T)
+
+  dist0 <- sqrt(h_new(bandwidth_horizontal, bandwidth_vertical, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius))
+  kernel <- exp(-dist0)
+  kernel_sum <- rowSums(kernel)
+
+  denominator <- outer(sqrt(kernel_sum), sqrt(kernel_sum), '*')
+
+  variable1_residuals_matrix <- matrix(variable1_residuals, length(variable1_residuals), length(variable1_residuals), byrow = T)
+
+  emp_covariance1_temp <- sqrt(kernel) * variable1_residuals_matrix
+  emp_covariance1 <- emp_covariance1_temp %*% t(emp_covariance1_temp) / denominator
+
+  variable2_residuals_matrix <- matrix(variable2_residuals, length(variable2_residuals), length(variable2_residuals), byrow = T)
+
+  emp_covariance2_temp <- sqrt(kernel) * variable2_residuals_matrix
+  emp_covariance2 <- emp_covariance2_temp %*% t(emp_covariance2_temp) / denominator
+
+  emp_crosscovariance <- emp_covariance1_temp %*% t(emp_covariance2_temp) / denominator
+
+  emp_covariance <- rbind(cbind(emp_covariance1, emp_crosscovariance), cbind(t(emp_crosscovariance), emp_covariance2))
+
+  return(emp_covariance)
+}
+
 #' Compute the bivariate differential operator cross-covariance function
 #'
 #' @description
@@ -201,7 +279,7 @@ uni_differential <- function(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, L
 #' @param d2 A numeric constant indicating the variance parameter from the fully isotropic component associated with variable 2.
 #' @param radius A numeric constant indicating the radius of the sphere.
 #'
-#' @return A cross-covariance matrix of dimension \eqn{2 n \times 2n}.
+#' @return A matrix of dimension \eqn{2 n \times 2 n}.
 #'
 #' @author Mary Lai Salvana \email{yourlainess@gmail.com}
 #'
@@ -225,8 +303,8 @@ uni_differential <- function(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, L
 #' SCALE_VERTICAL = 0.3
 #' A1 = A2 = 0.00001
 #' B1 = B2 = 0.00001
-#' C1 = sin((loc3d[1:10, 3] + 0.1) * pi / 0.5)
-#' C2 = cos((loc3d[1:10, 3] + 0.1) * pi / 0.5)
+#' C1 = sin((loc3d[, 3] + 0.1) * pi / 0.5)
+#' C2 = cos((loc3d[, 3] + 0.1) * pi / 0.5)
 #' D1 = D2 = 0
 #'
 #' cov_mat <- cov_bi_differential(location = loc3d, beta = BETA,
@@ -271,892 +349,483 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 
 }
 
-#' Compute the bivariate differential operator cross-covariance function in parallel
+#' Weighted Least Squares Estimation of the parameters of the bivariate differential operator cross-covariance function
 #'
 #' @description
-#' \code{cov_bi_differential_parallel} evaluates the nonstationary spatial cross-covariance
-#' function model based on the differential operators approach in 3D of the form:
-#' \deqn{C_{ij}(L_1, L_2, l_1 - l_2, p_1, p_2) = K_{ij}^{1} \mathcal{M}_{\nu_{ij} - 1} \{ {h(L_1, L_2, l_1 - l_2, p_1 - p_2)}^{1/2} \}}
-#' \deqn{\quad \quad \quad \quad \quad \quad + K_{ij}^{2} \mathcal{M}_{\nu_{ij}} \{ {h(L_1, L_2, l_1 - l_2, p_1 - p_2)}^{1/2} \},}
-#' for different pairs of locations \eqn{(L_1, l_1, p_1)} and \eqn{(L_2, l_2, p_2)},
-#' where \eqn{L} represents the latitude, \eqn{l} the longitude, and \eqn{p} the pressure coordinates, respectively.
-#' The forms of \eqn{K_{ij}^{1}} and \eqn{K_{ij}^{2}} can be found in Appendix of Salvana, M. L., & Jun, M. (2022)
-#' and \eqn{h(L_1, L_2, l_1 - l_2, p_1 - p_2)} is a distance function of the form:
-#' \deqn{h(L_1, L_2, l_1 - l_2, p_1 - p_2) = {a_{h}^2 ch^2(L_1, L_2, l_1 - l_2) + a_{v}^2 (p_1 - p_2)^2},}
-#' where \eqn{a_{h}} and \eqn{a_{v}} are the scale parameters in the horizontal and vertical directions,
-#' respectively, and \eqn{ch(L_1, L_2, l_1 - l_2)} is the chordal distance with the following formula:
-#' \deqn{ch(L_1, L_2, l_1 - l_2) = 2 R \left\{ \sin^2 \left( \frac{L_1 - L_2}{2} \right) + \cos L_1 \cos L_2 \sin^2 \left( \frac{l_1 - l_2}{2} \right) \right\}^{1/2}.}
-#' Here \eqn{R} is the radius of the sphere. Note that for global processes,
-#' the relevant sphere is the Earth with \eqn{R=6,371} km.
+#' \code{est_bi_differential_wls} performs weighted least squares estimation using a
+#' Newton-type algorithm to carry out a minimization of the objective function:
+#' \deqn{\mathcal{Q}(\boldsymbol{\theta}) = \sum_{i, j = 1}^{q} \sum_{a = 1}^{n} \sum_{b = 1}^{n} w_{ij} \left\{ \hat{C}_{ij}(\mathbf{s}_a, \mathbf{s}_b) - C_{ij}(\mathbf{s}_a, \mathbf{s}_b | \boldsymbol{\theta})\right\}^2,}
+#' where \eqn{\boldsymbol{\theta}} is a vector parameters,
+#' \eqn{q} is the number of parameters,
+#' \eqn{\hat{C}_{ij}(\mathbf{s}_a, \mathbf{s}_b)} is the kernel smoothed
+#' empirical cross-covariance computed from the data, and \eqn{w_{ij}} is the
+#' weight assigned to component \eqn{(i,j)} of this least squares problem.
 #'
-#' @usage cov_bi_differential_parallel(location, beta, scale_horizontal, scale_vertical,
-#' a1, b1, c1, d1, a2, b2, c2, d2, radius, num_processors)
+#' @usage est_bi_differential_wls(empirical_values, location, init_beta, init_scale_horizontal,
+#' init_scale_vertical, init_a1, init_b1, init_c1, init_d1,
+#' init_a2, init_b2, init_c2, init_d2,
+#' beta_fix, scale_horizontal_fix, scale_vertical_fix,
+#' a1_fix, b1_fix, c1_fix, d1_fix, a2_fix, b2_fix, c2_fix, d2_fix,
+#' radius, splines_degree, knots1, knots2, iterlim, stepmax, hessian)
 #'
+#' @param empirical_values A matrix of dimension \eqn{2 n \times 2 n} containing
+#' the empirical marginal and cross-covariance values.
 #' @param location An \eqn{n \times 3} matrix of coordinates.
-#' @param beta A numeric constant indicating the colocated correlation parameter.
-#' @param scale_horizontal A numeric constant indicating the horizontal scale parameter.
-#' @param scale_vertical A numeric constant indicating the vertical scale parameter.
-#' @param a1 A numeric constant indicating the anisotropy in latitude parameter associated with variable 1.
-#' @param b1 A numeric constant indicating the anisotropy in longitude parameter associated with variable 1.
-#' @param c1 A numeric vector indicating the nonstationary parameters with depth associated with variable 1.
-#' @param d1 A numeric constant indicating the variance parameter from the fully isotropic component associated with variable 1.
-#' @param a2 A numeric constant indicating the anisotropy in latitude parameter associated with variable 2.
-#' @param b2 A numeric constant indicating the anisotropy in longitude parameter associated with variable 2.
-#' @param c2 A numeric vector indicating the nonstationary parameters with depth associated with variable 2.
-#' @param d2 A numeric constant indicating the variance parameter from the fully isotropic component associated with variable 2.
+#' @param init_beta A numeric constant indicating the initial value for the
+#' colocated correlation parameter.
+#' @param init_scale_horizontal A numeric constant indicating the initial value for the
+#' horizontal scale parameter.
+#' @param init_scale_vertical A numeric constant indicating the initial value for the
+#' vertical scale parameter.
+#' @param init_a1 A numeric constant indicating the initial value for the
+#' anisotropy in latitude parameter associated with variable 1.
+#' @param init_b1 A numeric constant indicating the initial value for the
+#' anisotropy in longitude parameter associated with variable 1.
+#' @param init_c1 A numeric vector indicating the initial value for the
+#' nonstationary parameters with depth associated with variable 1.
+#' @param init_d1 A numeric constant indicating the initial value for the
+#' variance parameter from the fully isotropic component associated with variable 1.
+#' @param init_a2 A numeric constant indicating the initial value for the
+#' anisotropy in latitude parameter associated with variable 2.
+#' @param init_b2 A numeric constant indicating the initial value for the
+#' anisotropy in longitude parameter associated with variable 2.
+#' @param init_c2 A numeric vector indicating the initial value for the
+#' nonstationary parameters with depth associated with variable 2.
+#' @param init_d2 A numeric constant indicating the initial value for the
+#' variance parameter from the fully isotropic component associated with variable 2.
+#' @param beta_fix An indicator that takes in the values \code{TRUE} or \code{FALSE} whether the
+#' colocated correlation parameter should not be estimated.
+#' @param scale_horizontal_fix An indicator that takes in the values \code{TRUE} or \code{FALSE} whether the
+#' horizontal scale parameter should not be estimated.
+#' @param scale_vertical_fix An indicator that takes in the values \code{TRUE} or \code{FALSE} whether the
+#' vertical scale parameter should not be estimated.
+#' @param a1_fix If \code{TRUE}, the a1 parameter is not be estimated.
+#' @param b1_fix If \code{TRUE}, the b1 parameter is not be estimated.
+#' @param c1_fix If \code{TRUE}, the c1 parameters are not be estimated.
+#' @param d1_fix If \code{TRUE}, the d1 parameter is not be estimated.
+#' @param a2_fix If \code{TRUE}, the a2 parameter is not be estimated.
+#' @param b2_fix If \code{TRUE}, the b2 parameter is not be estimated.
+#' @param c2_fix If \code{TRUE}, the c2 parameters are not be estimated.
+#' @param d2_fix If \code{TRUE}, the d2 parameter is not be estimated.
 #' @param radius A numeric constant indicating the radius of the sphere.
-#' @param num_processors A numeric constant indicating the number of available processors; must be a perfect square.
+#' @param splines_degree A number indicating the degree of the splines.
+#' @param knots1 A vector of knot locations for variable 1.
+#' @param knots2 A vector of knot locations for variable 2.
+#' @param iterlim A number indicating the maximum number of iterations for \code{nlm}.
+#' @param stepmax A number indicating the stepmax of nlm.
+#' @param hessian If \code{TRUE}, the hessian is not returned.
 #'
-#' @import pbdBASE
+#' @import stats
 #'
-#' @return A cross-covariance matrix of dimension \eqn{2 n \times 2n}.
+#' @useDynLib DiffOp, .registration=TRUE
+#'
+#' @return A list containing the values of the minimum of the objective function
+#' and estimated parameters.
 #'
 #' @author Mary Lai Salvana \email{yourlainess@gmail.com}
 #'
-#' @references Salvana, M. L., & Jun, M. (2022). 3D Bivariate Spatial Modelling of Argo Ocean Temperature and Salinity Profiles. \emph{arXiv preprint arXiv:2210.11611}.
-#'
 #' @examples
 #'
-#' library(dplyr)
+#' data(argo_ref_loc1)
 #'
-#' x <- seq(0, 1, length.out = 10)
-#' y <- seq(0, 1, length.out = 10)
-#'
-#' loc2d <- expand.grid(x, y) %>% as.matrix()
-#' depth <- seq(0, 1, length.out = 10)
-#' loc3d <- cbind(rep(loc2d[, 1], each = length(depth)), rep(loc2d[, 2], each = length(depth)), depth)
+#' loc3d <- cbind(argo_ref_loc1$Longitude, argo_ref_loc1$Latitude, argo_ref_loc1$Pressure)
 #'
 #' earthRadiusKm = 6371
 #'
-#' BETA = 0.5
-#' SCALE_HORIZONTAL = 0.03
-#' SCALE_VERTICAL = 0.3
-#' A1 = A2 = 0.00001
-#' B1 = B2 = 0.00001
-#' C1 = sin((loc3d[1:10, 3] + 0.1) * pi / 0.5)
-#' C2 = cos((loc3d[1:10, 3] + 0.1) * pi / 0.5)
-#' D1 = D2 = 0
+#' \donttest{emp_cov <- compute_emp_cov(location = loc3d,
+#' variable1_residuals = argo_ref_loc1$TemperatureResiduals,
+#' variable2_residuals = argo_ref_loc1$SalinityResiduals,
+#' bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03,
+#' radius = earthRadiusKm)}
 #'
-#' cov_mat <- cov_bi_differential_parallel(location = loc3d, beta = BETA,
-#'                                scale_horizontal = SCALE_HORIZONTAL,
-#'                                scale_vertical = SCALE_VERTICAL,
-#'                                a1 = A1, b1 = B1, c1 = C1, d1 = D1,
-#'                                a2 = A2, b2 = B2, c2 = C2, d2 = D2,
-#'                                radius = earthRadiusKm,
-#'                                num_processors = 4)
+#' KNOTS1 <- c(0.1, 0.5, 0.9)
+#' KNOTS2 <- c(0.1, 0.5, 0.9)
 #'
+#' INIT_BETA = 0.6
+#' INIT_SCALE_HORIZONTAL = log(0.02)
+#' INIT_SCALE_VERTICAL = log(0.4)
+#' INIT_A1 = INIT_A2 = 0.005
+#' INIT_B1 = INIT_B2 = 0.005
+#' INIT_D1 = INIT_D2 = 0
+#'
+#' SPLINES_DEGREE = 2
+#'
+#' set.seed(1235)
+#' INIT_C1 <- runif(length(KNOTS1) + SPLINES_DEGREE + 1, -5, 5)
+#'
+#' set.seed(1236)
+#' INIT_C2 <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
+#'
+#' \donttest{est_params <- est_bi_differential_wls(empirical_values = emp_cov, location = loc3d, init_beta = INIT_BETA,
+#'                                  init_scale_horizontal = INIT_SCALE_HORIZONTAL,
+#'                                  init_scale_vertical = INIT_SCALE_VERTICAL,
+#'                                  init_a1 = INIT_A1, init_b1 = INIT_B1,
+#'                                  init_c1 = INIT_C1, init_d1 = INIT_D1,
+#'                                  init_a2 = INIT_A2, init_b2 = INIT_B2,
+#'                                  init_c2 = INIT_C2, init_d2 = INIT_D2,
+#'                                  d1_fix = TRUE, d2_fix = TRUE,
+#'                                  radius = earthRadiusKm,
+#'                                  splines_degree = SPLINES_DEGREE,
+#'                                  knots1 = KNOTS1, knots2 = KNOTS2,
+#'                                  iterlim = 1, hessian = FALSE)}
 #'
 #' @export
-cov_bi_differential_parallel <- function(location, beta, scale_horizontal, scale_vertical, a1, b1, c1, d1, a2, b2, c2, d2, radius, num_processors){
+est_bi_differential_wls <- function(empirical_values, location, init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2, beta_fix = F, scale_horizontal_fix = F, scale_vertical_fix = F, a1_fix = F, b1_fix = F, c1_fix = F, d1_fix = F, a2_fix = F, b2_fix = F, c2_fix = F, d2_fix = F, radius, splines_degree = 2, knots1, knots2, iterlim = 2000, stepmax = 1, hessian = TRUE){
 
-  init.grid(NPROW = sqrt(num_processors), NPCOL = sqrt(num_processors))
-  bldim <- c(sqrt(num_processors), sqrt(num_processors))
+  basis1 <- bsplineBasis(location[, 3], splines_degree, knots1)
+  nb1 <- ncol(basis1)
+  basis2 <- bsplineBasis(location[, 3], splines_degree, knots2)
+  nb2 <- ncol(basis2)
 
-  LAT1D <- matrix(location[, 2], nrow(location), nrow(location), byrow = F)
-  LON1D <- matrix(location[, 1], nrow(location), nrow(location), byrow = F)
-  PRES1 <- matrix(location[, 3], nrow(location), nrow(location), byrow = F)
-  LAT2D <- matrix(location[, 2], nrow(location), nrow(location), byrow = T)
-  LON2D <- matrix(location[, 1], nrow(location), nrow(location), byrow = T)
-  PRES2 <- matrix(location[, 3], nrow(location), nrow(location), byrow = T)
-
-  fd_eval_mat_loc1 <- matrix(c1, nrow(location), nrow(location), byrow = F)
-  fd_eval_mat_loc2 <- matrix(c1, nrow(location), nrow(location), byrow = T)
-
-  fd_eval2_mat_loc1 <- matrix(c2, nrow(location), nrow(location), byrow = F)
-  fd_eval2_mat_loc2 <- matrix(c2, nrow(location), nrow(location), byrow = T)
-
-  PARAM <- c(1, scale_horizontal, scale_vertical, 2, a1, b1, d1, a1, b1, d1)
-
-  cov_val <- uni_differential(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius)
-
-  PARAM <- c(1, scale_horizontal, scale_vertical, 2, a2, b2, d2, a2, b2, d2)
-
-  cov_val2 <- uni_differential(PARAM, fd_eval2_mat_loc1, fd_eval2_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius)
-
-  PARAM <- c(beta, scale_horizontal, scale_vertical, 2, a1, b1, d1, a2, b2, d2)
-
-  cov_val3 <- uni_differential(PARAM, fd_eval_mat_loc1, fd_eval2_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius)
-
-  Sigma <- rbind(cbind(cov_val, cov_val3), cbind(t(cov_val3), cov_val2))
-
-  return(Sigma)
-
-  finalize()
-
-}
-
-#' Step 1: WLS estimation of the parameters of the bivariate differential operator cross-covariance function
-#' @param empirical_values A matrix of empirical values
-#' @param location An nx3 matrix of coordinates.
-#' @param init_beta A number for colocated correlation parameter.
-#' @param init_beta_fix An indicator whether colocated correlation parameter should be estimated.
-#' @param init_scale_horizontal A number for the horizontal scale parameter.
-#' @param init_scale_vertical A number for the vertical scale parameter.
-#' @param init_scale_horizontal_fix An indicator whether horizontal scale parameter should be estimated.
-#' @param init_scale_vertical_fix An indicator whether vertical scale parameter should be estimated.
-#' @param init_a1 A number for the anisotropy parameter in Latitude associated with variable 1.
-#' @param init_b1 A number for the anisotropy parameter in longitude associated with variable 1.
-#' @param init_c1 A number for vector for the nonstationarity parameter in depth associated with variable 1.
-#' @param init_d1 A number for the variance parameter of the fully isotropic associated with variable 1.
-#' @param init_a1_fix An indicator whether a1 parameter should be estimated.
-#' @param init_b1_fix An indicator whether b1 parameter should be estimated.
-#' @param init_a2 A number for the anisotropy parameter in Latitude associated with variable 2.
-#' @param init_b2 A number for the anisotropy parameter in longitude associated with variable 2.
-#' @param init_c2 A number for vector for the nonstationarity parameter in depth associated with variable 2.
-#' @param init_d2 A number for the variance parameter of the fully isotropic associated with variable 2.
-#' @param init_a2_fix An indicator whether a2 parameter should be estimated.
-#' @param init_b2_fix An indicator whether b2 parameter should be estimated.
-#' @param radius A number for the radius of the sphere.
-#' @param basis1 A matrix of basis function values for variable 1.
-#' @param basis2 A matrix of basis function values for variable 2.
-#' @param splines_degree A number indicating the degree of the splines.
-#' @param knots1 A vector of knot locations for variable 1.
-#' @param knots2 A vector of knot locations for variable 2.
-#' @import stats
-#' @import mvtnorm
-#' @return A vector of estimated parameter values.
-#' @export
-est_bi_differential_wls <- function(empirical_values, location, init_beta, init_scale_horizontal, init_scale_vertical, init_scale_horizontal_fix = F, init_scale_vertical_fix = F, init_a1, init_b1, init_c1, init_d1 = NULL, init_a1_fix = F, init_b1_fix = F, init_a2, init_b2, init_c2, init_d2 = NULL, init_a2_fix = F, init_b2_fix = F, init_beta_fix = F, radius, basis1, basis2, splines_degree = 4, knots1, knots2){
-
-  NEGLOGLIK <- function(theta, empirical_values, basis1, basis2){
+  NEGLOGLIK <- function(theta){
 
     print(paste("theta = c(", paste(round(theta, 8), collapse=","), ")", sep = ''))
 
-    nb1 <- ncol(basis1)
-    nb2 <- ncol(basis2)
+    if(c1_fix){
+      #if(theta[1] < 0 | theta[1] > 1){
+      #  return(Inf)
+      #}
 
-    if(!init_beta_fix){
-      BETA <- theta[1]
-
-      if(init_a1_fix){
-        if(init_scale_horizontal_fix & init_scale_vertical_fix){
-
-          if(theta[1] < 0 | theta[1] > 1){
-            return(Inf)
-          }
-
-          SCALE_HORIZONTAL <- init_scale_horizontal
-          SCALE_VERTICAL <- init_scale_vertical
-          A1 <- init_a1
-          B1 <- init_b1
-          C1_coef <- theta[1 + 1:nb1]
-
-          if(is.null(init_d1) | is.null(init_d2)){
-            D1 <- 0
-            A2 <- init_a2
-            B2 <- init_b2
-            C2_coef <- theta[nb1 + 1 + 1:nb2]
-            D2 <- 0
-          }else{
-            D1 <- theta[nb1 + 2]
-            A2 <- init_a2
-            B2 <- init_b2
-            C2_coef <- theta[nb1 + 2 + 1:nb2]
-            D2 <- theta[nb1 + nb2 + 3]
-          }
-        }else{
-
-          if(theta[1] < 0 | theta[1] > 1){
-            return(Inf)
-          }
-
-          SCALE_HORIZONTAL <- exp(theta[2])
-          SCALE_VERTICAL <- exp(theta[3])
-          A1 <- init_a1
-          B1 <- init_b1
-          C1_coef <- theta[3 + 1:nb1]
-
-          if(is.null(init_d1) | is.null(init_d2)){
-            D1 <- 0
-            A2 <- init_a2
-            B2 <- init_b2
-            C2_coef <- theta[nb1 + 3 + 1:nb2]
-            D2 <- 0
-          }else{
-            D1 <- theta[nb1 + 4]
-            A2 <- init_a2
-            B2 <- init_b2
-            C2_coef <- theta[nb1 + 4 + 1:nb2]
-            D2 <- theta[nb1 + nb2 + 5]
-          }
-        }
-      }else{
-        if(init_scale_horizontal_fix & init_scale_vertical_fix){
-
-          if(theta[1] < 0 | theta[1] > 1 | theta[2] < 0){
-            return(Inf)
-          }
-
-          SCALE_HORIZONTAL <- init_scale_horizontal
-          SCALE_VERTICAL <- init_scale_vertical
-          A1 <- theta[2]
-          B1 <- theta[3]
-          C1_coef <- theta[3 + 1:nb1]
-
-          if(is.null(init_d1) | is.null(init_d2)){
-            D1 <- 0
-            A2 <- theta[nb1 + 4]
-            B2 <- theta[nb1 + 5]
-            C2_coef <- theta[nb1 + 5 + 1:nb2]
-            D2 <- 0
-          }else{
-            D1 <- theta[nb1 + 4]
-            A2 <- theta[nb1 + 5]
-            B2 <- theta[nb1 + 6]
-            C2_coef <- theta[nb1 + 6 + 1:nb2]
-            D2 <- theta[nb1 + nb2 + 7]
-          }
-        }else{
-
-          if(theta[1] < 0 | theta[1] > 1 | theta[4] < 0){
-            return(Inf)
-          }
-
-          SCALE_HORIZONTAL <- exp(theta[2])
-          SCALE_VERTICAL <- exp(theta[3])
-          A1 <- theta[4]
-          B1 <- theta[5]
-          C1_coef <- theta[5 + 1:nb1]
-
-          if(is.null(init_d1) | is.null(init_d2)){
-            D1 <- 0
-            A2 <- theta[nb1 + 6]
-            B2 <- theta[nb1 + 7]
-            C2_coef <- theta[nb1 + 7 + 1:nb2]
-            D2 <- 0
-          }else{
-            D1 <- theta[nb1 + 6]
-            A2 <- theta[nb1 + 7]
-            B2 <- theta[nb1 + 8]
-            C2_coef <- theta[nb1 + 8 + 1:nb2]
-            D2 <- theta[nb1 + nb2 + 9]
-          }
-        }
-      }
+      BETA <- init_beta#theta[1]
+      SCALE_HORIZONTAL <- exp(init_scale_horizontal)#exp(theta[2])
+      SCALE_VERTICAL <- exp(init_scale_vertical)#exp(theta[3])
+      A1 <- init_a1#theta[4]
+      B1 <- init_b1#theta[5]
+      C1_coef <- theta[1:nb1]
+      D1 <- init_d1
+      A2 <- init_a2#theta[6]
+      B2 <- init_b2#theta[7]
+      C2_coef <- theta[nb1 + 1:nb2]
+      D2 <- init_d2
 
     }else{
+      if(!beta_fix){
 
-      BETA <- init_beta
+        if(theta[1] < 0 | theta[1] > 1){
+          return(Inf)
+        }
 
-      if(init_a1_fix){
-        if(init_scale_horizontal_fix & init_scale_vertical_fix){
+        BETA <- theta[1]
 
-          SCALE_HORIZONTAL <- init_scale_horizontal
-          SCALE_VERTICAL <- init_scale_vertical
+        if(a1_fix){
+
           A1 <- init_a1
           B1 <- init_b1
-          C1_coef <- theta[1:nb1]
+          A2 <- init_a2
+          B2 <- init_b2
 
-          if(is.null(init_d1) | is.null(init_d2)){
-            D1 <- 0
-            A2 <- init_a2
-            B2 <- init_b2
-            C2_coef <- theta[nb1 + 1:nb2]
-            D2 <- 0
-          }else{
-            D1 <- theta[nb1 + 1]
-            A2 <- init_a2
-            B2 <- init_b2
-            C2_coef <- theta[nb1 + 1 + 1:nb2]
-            D2 <- theta[nb1 + nb2 + 2]
+          if(scale_horizontal_fix & scale_vertical_fix){
+
+            SCALE_HORIZONTAL <- init_scale_horizontal
+            SCALE_VERTICAL <- init_scale_vertical
+
+            if(splines_degree == 0){
+              C1_coef <- theta[2]
+              if(is.null(init_d1) | is.null(init_d2)){
+                D1 <- 0
+                C2_coef <- theta[3]
+                D2 <- 0
+              }else{
+                D1 <- theta[3]
+                C2_coef <- theta[4]
+                D2 <- theta[5]
+              }
+            }else if(splines_degree > 0){
+              C1_coef <- theta[1 + 1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[nb1 + 1 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 2]
+                C2_coef <- theta[nb1 + 2 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 3]
+              }
+            }
+          }else if(!scale_horizontal_fix & !scale_vertical_fix){
+
+            SCALE_HORIZONTAL <- exp(theta[2])
+            SCALE_VERTICAL <- exp(theta[3])
+
+            if(splines_degree == 0){
+
+              C1_coef <- theta[4]
+
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[5]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[5]
+                C2_coef <- theta[6]
+                D2 <- theta[7]
+              }
+            }else if(splines_degree > 0){
+
+              C1_coef <- theta[3 + 1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[nb1 + 3 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 4]
+                C2_coef <- theta[nb1 + 4 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 5]
+              }
+            }
           }
-        }else{
+        }else if(!a1_fix){
+          if(scale_horizontal_fix & scale_vertical_fix){
+            if(theta[2] < 0){
+              return(Inf)
+            }
 
-          SCALE_HORIZONTAL <- exp(theta[1])
-          SCALE_VERTICAL <- exp(theta[2])
+            SCALE_HORIZONTAL <- init_scale_horizontal
+            SCALE_VERTICAL <- init_scale_vertical
+            A1 <- theta[2]
+            B1 <- theta[3]
+
+            if(splines_degree == 0){
+              C1_coef <- theta[4]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[5]
+                B2 <- theta[6]
+                C2_coef <- theta[7]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[5]
+                A2 <- theta[6]
+                B2 <- theta[7]
+                C2_coef <- theta[8]
+                D2 <- theta[9]
+              }
+            }else if(splines_degree > 0){
+              C1_coef <- theta[3 + 1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[nb1 + 4]
+                B2 <- theta[nb1 + 5]
+                C2_coef <- theta[nb1 + 5 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 4]
+                A2 <- theta[nb1 + 5]
+                B2 <- theta[nb1 + 6]
+                C2_coef <- theta[nb1 + 6 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 7]
+              }
+            }
+          }else if(!scale_horizontal_fix & !scale_vertical_fix){
+
+            if(theta[4] < 0){
+              return(Inf)
+            }
+
+            SCALE_HORIZONTAL <- exp(theta[2])
+            SCALE_VERTICAL <- exp(theta[3])
+            A1 <- 0.01 * (1 / (1 + exp(-theta[4]))) #theta[4]
+            B1 <- 0.02 * (1 / (1 + exp(-theta[5]))) - 0.02 / 2 #theta[5]
+
+            if(splines_degree == 0){
+              C1_coef <- theta[6]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[7]
+                B2 <- theta[8]
+                C2_coef <- theta[9]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[7]
+                A2 <- theta[8]
+                B2 <- theta[9]
+                C2_coef <- theta[10]
+                D2 <- theta[11]
+              }
+            }else if(splines_degree > 0){
+              C1_coef <- theta[5 + 1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- 0.02 * (1 / (1 + exp(-theta[5 + nb1 + 1]))) - 0.02 / 2 #theta[nb1 + 6]
+                B2 <- 0.02 * (1 / (1 + exp(-theta[5 + nb1 + 2]))) - 0.02 / 2 #theta[nb1 + 7]
+                C2_coef <- theta[nb1 + 7 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 6]
+                A2 <- theta[nb1 + 7]
+                B2 <- theta[nb1 + 8]
+                C2_coef <- theta[nb1 + 8 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 9]
+              }
+            }
+          }
+        }
+      }else if(beta_fix){
+
+        BETA <- init_beta
+
+        if(a1_fix){
+
           A1 <- init_a1
           B1 <- init_b1
-          C1_coef <- theta[2 + 1:nb1]
+          A2 <- init_a2
+          B2 <- init_b2
 
-          if(is.null(init_d1) | is.null(init_d2)){
-            D1 <- 0
-            A2 <- init_a2
-            B2 <- init_b2
-            C2_coef <- theta[nb1 + 2 + 1:nb2]
-            D2 <- 0
-          }else{
-            D1 <- theta[nb1 + 3]
-            A2 <- init_a2
-            B2 <- init_b2
-            C2_coef <- theta[nb1 + 3 + 1:nb2]
-            D2 <- theta[nb1 + nb2 + 4]
-          }
-        }
-      }else{
-        if(init_scale_horizontal_fix & init_scale_vertical_fix){
+          if(scale_horizontal_fix & scale_vertical_fix){
 
-          if(theta[1] < 0){
-            return(Inf)
-          }
+            SCALE_HORIZONTAL <- init_scale_horizontal
+            SCALE_VERTICAL <- init_scale_vertical
 
-          SCALE_HORIZONTAL <- init_scale_horizontal
-          SCALE_VERTICAL <- init_scale_vertical
-          A1 <- theta[1]
-          B1 <- theta[2]
-          C1_coef <- theta[2 + 1:nb1]
+            if(splines_degree == 0){
+              C1_coef <- theta[1]
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[2]
+                C2_coef <- theta[3]
+                D2 <- theta[4]
+              }
+            }else if(splines_degree > 0){
+              C1_coef <- theta[1:nb1]
 
-          if(is.null(init_d1) | is.null(init_d2)){
-            D1 <- 0
-            A2 <- theta[nb1 + 3]
-            B2 <- theta[nb1 + 4]
-            C2_coef <- theta[nb1 + 4 + 1:nb2]
-            D2 <- 0
-          }else{
-            D1 <- theta[nb1 + 3]
-            A2 <- theta[nb1 + 4]
-            B2 <- theta[nb1 + 5]
-            C2_coef <- theta[nb1 + 5 + 1:nb2]
-            D2 <- theta[nb1 + nb2 + 6]
-          }
-        }else{
-
-          if(theta[3] < 0){
-            return(Inf)
-          }
-
-          SCALE_HORIZONTAL <- exp(theta[1])
-          SCALE_VERTICAL <- exp(theta[2])
-          A1 <- theta[3]
-          B1 <- theta[4]
-          C1_coef <- theta[4 + 1:nb1]
-
-          if(is.null(init_d1) | is.null(init_d2)){
-            D1 <- 0
-            A2 <- theta[nb1 + 5]
-            B2 <- theta[nb1 + 6]
-            C2_coef <- theta[nb1 + 6 + 1:nb2]
-            D2 <- 0
-          }else{
-            D1 <- theta[nb1 + 5]
-            A2 <- theta[nb1 + 6]
-            B2 <- theta[nb1 + 7]
-            C2_coef <- theta[nb1 + 7 + 1:nb2]
-            D2 <- theta[nb1 + nb2 + 8]
-          }
-        }
-      }
-    }
-
-    C1 <- basis1 %*% matrix(C1_coef, ncol = 1)
-    C2 <- basis2 %*% matrix(C2_coef, ncol = 1)
-
-    cov_mat <- cov_bi_differential(location = location, beta = BETA,
-                        scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL,
-                        a1 = A1, b1 = B1, c1 = C1, d1 = D1, a2 = A2, b2 = B2, c2 = C2, d2 = D2,
-                        radius = radius)
-    #cor_mat <- cov2cor(cov_mat)
-
-    #print(cor_mat[1, 1:55])
-
-    variance1 <- diag(cov_mat[1:nrow(location), 1:nrow(location)])
-    variance2 <- diag(cov_mat[nrow(location) + 1:nrow(location), nrow(location) + 1:nrow(location)])
-
-    emp_variance1 <- diag(empirical_values[1:nrow(location), 1:nrow(location)])
-    emp_variance2 <- diag(empirical_values[nrow(location) + 1:nrow(location), nrow(location) + 1:nrow(location)])
-
-    covariance1 <- cov_mat[1:nrow(location), 1:nrow(location)]
-    covariance2 <- cov_mat[nrow(location) + 1:nrow(location), nrow(location) + 1:nrow(location)]
-    covariance12 <- diag(cov_mat[1:nrow(location), nrow(location) + 1:nrow(location)])
-    correlation12 <- covariance12 / outer(sqrt(variance1), sqrt(variance2), '*')
-
-    emp_covariance1 <- empirical_values[1:nrow(location), 1:nrow(location)]
-    emp_covariance2 <- empirical_values[nrow(location) + 1:nrow(location), nrow(location) + 1:nrow(location)]
-    emp_covariance12 <- empirical_values[1:nrow(location), nrow(location) + 1:nrow(location)]
-    emp_correlation12 <- emp_covariance12 / outer(sqrt(emp_variance1), sqrt(emp_variance2), '*')
-
-    #cholmat <- tryCatch(chol(cov_mat), error = function(a) numeric(0))
-
-    #if(cor_mat[1, 5] < 0.9 | cor_mat[nrow(location) + 1, nrow(location) + 5] < 0.9 | D1 < 0 | D2 < 0){
-    #if(cor_mat[1, 2] < 0.95 | cor_mat[1, 5] > 0.6 | cor_mat[1, 51] > 1e-15 | cor_mat[nrow(location) + 1, nrow(location) + 2] < 0.95 | cor_mat[nrow(location) + 1, nrow(location) + 5] > 0.6 | cor_mat[nrow(location) + 1, nrow(location) + 51] > 1e-15 | D1 < 0 | D2 < 0){
-    #if(cor_mat[1, 2] < 0.95 | cor_mat[1, 3] > 0.75 | cor_mat[1, 5] > 0.6 | cor_mat[1, 6] < 0.4 | cor_mat[1, 51] > 1e-15 | D1 < 0 | D2 < 0){
-    #if(D1 < 0 | D2 < 0){
-    #if(length(cholmat) == 0 | D1 < 0 | D2 < 0){
-      #return(Inf)
-    #}else{
-
-      plot_bi_differential(location = location[1:50, ], est_beta = BETA,
-                           est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL,
-                           est_a1 = A1, est_b1 = B1, est_c1 = C1_coef, est_d1 = D1, est_a2 = A2, est_b2 = B2, est_c2 = C2_coef, est_d2 = D2,
-                           basis1 = basis1[1:50, ], basis2 = basis2[1:50, ], radius = radius)
-
-      #out <- sum((variance1 - empirical_values[, 1])^2 * 100 + (variance2 - empirical_values[, 2])^2 * 1000 + (correlation12 - empirical_values[, 3])^2 * 50)
-
-
-      #emp_covariance12 <- empirical_values[1:nrow(location), nrow(location) + 1:nrow(location)]
-      #emp_correlation <- emp_covariance12 / outer(sqrt(emp_variance1), sqrt(emp_variance2), '*')
-
-
-      #theo_covariance12 <- cov_mat[1:nrow(location), nrow(location) + 1:nrow(location)]
-      #theo_correlation <- theo_covariance12 / outer(sqrt(theo_variance1), sqrt(theo_variance2), '*')
-
-      #out <- sum((emp_variance1 - theo_variance1)^2 * 100 +
-      #             (emp_variance2 - theo_variance2)^2 * 1000 +
-      #             (emp_correlation - theo_correlation)^2 * 50)
-
-      out <- sum((emp_covariance1 - covariance1)^2 * 10 +
-                   (emp_covariance2 - covariance2)^2 * 10000 +
-                   (emp_correlation12 - correlation12)^2 * 0)
-
-      return(out)
-    #}
-  }
-
-  if(!init_beta_fix){
-    if(init_a1_fix){
-      if(init_scale_horizontal_fix & init_scale_vertical_fix){
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_beta, init_c1, init_c2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }else{
-          fit <- optim(par = c(init_beta, init_c1, init_d1, init_c2, init_d2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }
-      }else{
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_c1, init_c2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }else{
-          fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_c1, init_d1, init_c2, init_d2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }
-      }
-    }else{
-      if(init_scale_horizontal_fix & init_scale_vertical_fix){
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_beta, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }else{
-          fit <- optim(par = c(init_beta, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }
-      }else{
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }else{
-          fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }
-      }
-    }
-  }else{
-    if(init_a1_fix){
-      if(init_scale_horizontal_fix & init_scale_vertical_fix){
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_c1, init_c2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }else{
-          fit <- optim(par = c(init_c1, init_d1, init_c2, init_d2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }
-      }else{
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_c1, init_c2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }else{
-          fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_c1, init_d1, init_c2, init_d2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }
-      }
-    }else{
-      if(init_scale_horizontal_fix & init_scale_vertical_fix){
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }else{
-          fit <- optim(par = c(init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }
-      }else{
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }else{
-          fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-        }
-      }
-    }
-  }
-
-  for(aa in 1:20){
-    fit <- optim(par = fit$par, fn = NEGLOGLIK, empirical_values = empirical_values, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = 500))
-  }
-
-  est_theta <- fit$par
-
-  return(est_theta)
-}
-
-#' Maximum Likelihood Estimation of the parameters of the bivariate differential operator cross-covariance function
-#'
-#' @description
-#' \code{est_bi_differential} performs maximum likelihood estimation using a
-#' Newton-type algorithm to carry out a minimization of the negative of the
-#' Gaussian log-likelihood function:
-#' \deqn{l(\boldsymbol{\theta}) = -\frac{q n}{2} \log (2 \pi) - \frac{1}{2} \log |\boldsymbol{\Sigma}(\boldsymbol{\theta})| - \frac{1}{2} \mathbf{Z}^{\top} \boldsymbol{\Sigma}(\boldsymbol{\theta})^{-1} \mathbf{Z},}
-#' Here \eqn{q} is the number of parameters and \eqn{\boldsymbol{\Sigma}}.
-#'
-#' @usage est_bi_differential(residuals, location, init_beta, init_scale_horizontal, 
-#' init_scale_vertical, init_scale_horizontal_fix, init_scale_vertical_fix,
-#' init_a1, init_b1, init_c1, init_d1, init_a1_fix, init_b1_fix, 
-#' init_a2, init_b2, init_c2, init_d2, init_a2_fix, init_b2_fix, 
-#' init_beta_fix, radius, basis1, nb1, basis2, nb2, splines_degree,
-#' knots1, knots2, MAXIT, RERUNS, STEPMAX)
-#'
-#' @param residuals A vector of residuals
-#' @param location An nx3 matrix of coordinates.
-#' @param init_beta A number for colocated correlation parameter.
-#' @param init_beta_fix An indicator whether colocated correlation parameter should be estimated.
-#' @param init_scale_horizontal A number for the horizontal scale parameter.
-#' @param init_scale_vertical A number for the vertical scale parameter.
-#' @param init_scale_horizontal_fix An indicator whether horizontal scale parameter should be estimated.
-#' @param init_scale_vertical_fix An indicator whether vertical scale parameter should be estimated.
-#' @param init_a1 A number for the anisotropy parameter in Latitude associated with variable 1.
-#' @param init_b1 A number for the anisotropy parameter in longitude associated with variable 1.
-#' @param init_c1 A number for vector for the nonstationarity parameter in depth associated with variable 1.
-#' @param init_d1 A number for the variance parameter of the fully isotropic associated with variable 1.
-#' @param init_a1_fix An indicator whether a1 parameter should be estimated.
-#' @param init_b1_fix An indicator whether b1 parameter should be estimated.
-#' @param init_a2 A number for the anisotropy parameter in Latitude associated with variable 2.
-#' @param init_b2 A number for the anisotropy parameter in longitude associated with variable 2.
-#' @param init_c2 A number for vector for the nonstationarity parameter in depth associated with variable 2.
-#' @param init_d2 A number for the variance parameter of the fully isotropic associated with variable 2.
-#' @param init_a2_fix An indicator whether a1 parameter should be estimated.
-#' @param init_b2_fix An indicator whether b1 parameter should be estimated.
-#' @param radius A number for the radius of the sphere.
-#' @param basis1 A matrix of basis function values for variable 1.
-#' @param nb1 A number indicating the number of bases for variable 1.
-#' @param basis2 A matrix of basis function values for variable 2.
-#' @param nb2 A number indicating the number of bases for variable 2.
-#' @param splines_degree A number indicating the degree of the splines.
-#' @param knots1 A vector of knot locations for variable 1.
-#' @param knots2 A vector of knot locations for variable 2.
-#' @param MAXIT A number indicating the maximum number of iterations for optim.
-#' @param RERUNS A number indicating the number of times optim is re-run from previous MLE.
-#' @param STEPMAX A number indicating the stepmax of nlm.
-#' @import stats
-#' @import mvtnorm
-#' @return A vector of estimated parameter values.
-#' @export
-est_bi_differential <- function(residuals, location, init_beta, init_scale_horizontal, init_scale_vertical, init_scale_horizontal_fix = F, init_scale_vertical_fix = F, init_a1, init_b1, init_c1, init_d1 = NULL, init_a1_fix = F, init_b1_fix = F, init_a2, init_b2, init_c2, init_d2 = NULL, init_a2_fix = F, init_b2_fix = F, init_beta_fix = F, radius, basis1, nb1 = ncol(basis1), basis2, nb2 = ncol(basis2), splines_degree = 4, knots1, knots2, MAXIT = 2000, RERUNS = 20, STEPMAX = 1){
-
-  NEGLOGLIK <- function(theta, residuals, basis1, basis2){
-
-    print(paste("theta = c(", paste(round(theta, 8), collapse=","), ")", sep = ''))
-
-    k <- length(theta)
-
-    if(!init_beta_fix){
-
-      if(theta[1] < 0 | theta[1] > 1){
-        return(Inf)
-      }
-
-      BETA <- theta[1]
-
-      if(init_a1_fix){
-
-        A1 <- init_a1
-        B1 <- init_b1
-        A2 <- init_a2
-        B2 <- init_b2
-
-        if(init_scale_horizontal_fix & init_scale_vertical_fix){
-
-          SCALE_HORIZONTAL <- init_scale_horizontal
-          SCALE_VERTICAL <- init_scale_vertical
-
-          if(splines_degree == 0){
-            C1_coef <- theta[2]
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              C2_coef <- theta[3]
-              D2 <- 0
-            }else{
-              D1 <- theta[3]
-              C2_coef <- theta[4]
-              D2 <- theta[5]
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[nb1 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 1]
+                C2_coef <- theta[nb1 + 1 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 2]
+              }
             }
-          }else if(splines_degree > 0){
-            C1_coef <- theta[1 + 1:nb1]
+          }else if(!scale_horizontal_fix & !scale_vertical_fix){
 
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              C2_coef <- theta[nb1 + 1 + 1:nb2]
-              D2 <- 0
-            }else{
-              D1 <- theta[nb1 + 2]
-              C2_coef <- theta[nb1 + 2 + 1:nb2]
-              D2 <- theta[nb1 + nb2 + 3]
+            SCALE_HORIZONTAL <- exp(theta[1])
+            SCALE_VERTICAL <- exp(theta[2])
+
+            if(splines_degree == 0){
+
+              C1_coef <- theta[3]
+
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[4]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[4]
+                C2_coef <- theta[5]
+                D2 <- theta[6]
+              }
+            }else if(splines_degree > 0){
+
+              C1_coef <- theta[2 + 1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[nb1 + 2 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 3]
+                C2_coef <- theta[nb1 + 3 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 4]
+              }
             }
           }
-        }else if(!init_scale_horizontal_fix & !init_scale_vertical_fix){
-
-          SCALE_HORIZONTAL <- exp(theta[2])
-          SCALE_VERTICAL <- exp(theta[3])
-
-          if(splines_degree == 0){
-
-            C1_coef <- theta[4]
-
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              C2_coef <- theta[5]
-              D2 <- 0
-            }else{
-              D1 <- theta[5]
-              C2_coef <- theta[6]
-              D2 <- theta[7]
+        }else if(!a1_fix){
+          if(scale_horizontal_fix & scale_vertical_fix){
+            if(theta[1] < 0){
+              return(Inf)
             }
-          }else if(splines_degree > 0){
 
-            C1_coef <- theta[3 + 1:nb1]
+            SCALE_HORIZONTAL <- init_scale_horizontal
+            SCALE_VERTICAL <- init_scale_vertical
+            A1 <- theta[1]
+            B1 <- theta[2]
 
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              C2_coef <- theta[nb1 + 3 + 1:nb2]
-              D2 <- 0
-            }else{
-              D1 <- theta[nb1 + 4]
-              C2_coef <- theta[nb1 + 4 + 1:nb2]
-              D2 <- theta[nb1 + nb2 + 5]
+            if(splines_degree == 0){
+              C1_coef <- theta[3]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[4]
+                B2 <- theta[5]
+                C2_coef <- theta[6]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[4]
+                A2 <- theta[5]
+                B2 <- theta[6]
+                C2_coef <- theta[7]
+                D2 <- theta[8]
+              }
+            }else if(splines_degree > 0){
+              C1_coef <- theta[2 + 1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[nb1 + 3]
+                B2 <- theta[nb1 + 4]
+                C2_coef <- theta[nb1 + 4 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 3]
+                A2 <- theta[nb1 + 4]
+                B2 <- theta[nb1 + 5]
+                C2_coef <- theta[nb1 + 5 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 6]
+              }
             }
-          }
-        }
-      }else if(!init_a1_fix){
-        if(init_scale_horizontal_fix & init_scale_vertical_fix){
-          if(theta[2] < 0){
-            return(Inf)
-          }
+          }else if(!scale_horizontal_fix & !scale_vertical_fix){
 
-          SCALE_HORIZONTAL <- init_scale_horizontal
-          SCALE_VERTICAL <- init_scale_vertical
-          A1 <- theta[2]
-          B1 <- theta[3]
-
-          if(splines_degree == 0){
-            C1_coef <- theta[4]
-
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              A2 <- theta[5]
-              B2 <- theta[6]
-              C2_coef <- theta[7]
-              D2 <- 0
-            }else{
-              D1 <- theta[5]
-              A2 <- theta[6]
-              B2 <- theta[7]
-              C2_coef <- theta[8]
-              D2 <- theta[9]
+            if(theta[3] < 0){
+              return(Inf)
             }
-          }else if(splines_degree > 0){
-            C1_coef <- theta[3 + 1:nb1]
 
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              A2 <- theta[nb1 + 4]
-              B2 <- theta[nb1 + 5]
-              C2_coef <- theta[nb1 + 5 + 1:nb2]
-              D2 <- 0
-            }else{
-              D1 <- theta[nb1 + 4]
-              A2 <- theta[nb1 + 5]
-              B2 <- theta[nb1 + 6]
-              C2_coef <- theta[nb1 + 6 + 1:nb2]
-              D2 <- theta[nb1 + nb2 + 7]
-            }
-          }
-        }else if(!init_scale_horizontal_fix & !init_scale_vertical_fix){
+            SCALE_HORIZONTAL <- exp(theta[1])
+            SCALE_VERTICAL <- exp(theta[2])
+            A1 <- theta[3]
+            B1 <- theta[4]
 
-          if(theta[4] < 0){
-            return(Inf)
-          }
+            if(splines_degree == 0){
+              C1_coef <- theta[5]
 
-          SCALE_HORIZONTAL <- exp(theta[2])
-          SCALE_VERTICAL <- exp(theta[3])
-          A1 <- theta[4]
-          B1 <- theta[5]
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[6]
+                B2 <- theta[7]
+                C2_coef <- theta[8]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[6]
+                A2 <- theta[7]
+                B2 <- theta[8]
+                C2_coef <- theta[9]
+                D2 <- theta[10]
+              }
+            }else if(splines_degree > 0){
+              C1_coef <- theta[4 + 1:nb1]
 
-          if(splines_degree == 0){
-            C1_coef <- theta[6]
-
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              A2 <- theta[7]
-              B2 <- theta[8]
-              C2_coef <- theta[9]
-              D2 <- 0
-            }else{
-              D1 <- theta[7]
-              A2 <- theta[8]
-              B2 <- theta[9]
-              C2_coef <- theta[10]
-              D2 <- theta[11]
-            }
-          }else if(splines_degree > 0){
-            C1_coef <- theta[5 + 1:nb1]
-
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              A2 <- theta[nb1 + 6]
-              B2 <- theta[nb1 + 7]
-              C2_coef <- theta[nb1 + 7 + 1:nb2]
-              D2 <- 0
-            }else{
-              D1 <- theta[nb1 + 6]
-              A2 <- theta[nb1 + 7]
-              B2 <- theta[nb1 + 8]
-              C2_coef <- theta[nb1 + 8 + 1:nb2]
-              D2 <- theta[nb1 + nb2 + 9]
-            }
-          }
-        }
-      }
-    }else if(init_beta_fix){
-
-      BETA <- init_beta
-
-      if(init_a1_fix){
-
-        A1 <- init_a1
-        B1 <- init_b1
-        A2 <- init_a2
-        B2 <- init_b2
-
-        if(init_scale_horizontal_fix & init_scale_vertical_fix){
-
-          SCALE_HORIZONTAL <- init_scale_horizontal
-          SCALE_VERTICAL <- init_scale_vertical
-
-          if(splines_degree == 0){
-            C1_coef <- theta[1]
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              C2_coef <- theta[2]
-              D2 <- 0
-            }else{
-              D1 <- theta[2]
-              C2_coef <- theta[3]
-              D2 <- theta[4]
-            }
-          }else if(splines_degree > 0){
-            C1_coef <- theta[1:nb1]
-
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              C2_coef <- theta[nb1 + 1:nb2]
-              D2 <- 0
-            }else{
-              D1 <- theta[nb1 + 1]
-              C2_coef <- theta[nb1 + 1 + 1:nb2]
-              D2 <- theta[nb1 + nb2 + 2]
-            }
-          }
-        }else if(!init_scale_horizontal_fix & !init_scale_vertical_fix){
-
-          SCALE_HORIZONTAL <- exp(theta[1])
-          SCALE_VERTICAL <- exp(theta[2])
-
-          if(splines_degree == 0){
-
-            C1_coef <- theta[3]
-
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              C2_coef <- theta[4]
-              D2 <- 0
-            }else{
-              D1 <- theta[4]
-              C2_coef <- theta[5]
-              D2 <- theta[6]
-            }
-          }else if(splines_degree > 0){
-
-            C1_coef <- theta[2 + 1:nb1]
-
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              C2_coef <- theta[nb1 + 2 + 1:nb2]
-              D2 <- 0
-            }else{
-              D1 <- theta[nb1 + 3]
-              C2_coef <- theta[nb1 + 3 + 1:nb2]
-              D2 <- theta[nb1 + nb2 + 4]
-            }
-          }
-        }
-      }else if(!init_a1_fix){
-        if(init_scale_horizontal_fix & init_scale_vertical_fix){
-          if(theta[1] < 0){
-            return(Inf)
-          }
-
-          SCALE_HORIZONTAL <- init_scale_horizontal
-          SCALE_VERTICAL <- init_scale_vertical
-          A1 <- theta[1]
-          B1 <- theta[2]
-
-          if(splines_degree == 0){
-            C1_coef <- theta[3]
-
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              A2 <- theta[4]
-              B2 <- theta[5]
-              C2_coef <- theta[6]
-              D2 <- 0
-            }else{
-              D1 <- theta[4]
-              A2 <- theta[5]
-              B2 <- theta[6]
-              C2_coef <- theta[7]
-              D2 <- theta[8]
-            }
-          }else if(splines_degree > 0){
-            C1_coef <- theta[2 + 1:nb1]
-
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              A2 <- theta[nb1 + 3]
-              B2 <- theta[nb1 + 4]
-              C2_coef <- theta[nb1 + 4 + 1:nb2]
-              D2 <- 0
-            }else{
-              D1 <- theta[nb1 + 3]
-              A2 <- theta[nb1 + 4]
-              B2 <- theta[nb1 + 5]
-              C2_coef <- theta[nb1 + 5 + 1:nb2]
-              D2 <- theta[nb1 + nb2 + 6]
-            }
-          }
-        }else if(!init_scale_horizontal_fix & !init_scale_vertical_fix){
-
-          if(theta[3] < 0){
-            return(Inf)
-          }
-
-          SCALE_HORIZONTAL <- exp(theta[1])
-          SCALE_VERTICAL <- exp(theta[2])
-          A1 <- theta[3]
-          B1 <- theta[4]
-
-          if(splines_degree == 0){
-            C1_coef <- theta[5]
-
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              A2 <- theta[6]
-              B2 <- theta[7]
-              C2_coef <- theta[8]
-              D2 <- 0
-            }else{
-              D1 <- theta[6]
-              A2 <- theta[7]
-              B2 <- theta[8]
-              C2_coef <- theta[9]
-              D2 <- theta[10]
-            }
-          }else if(splines_degree > 0){
-            C1_coef <- theta[4 + 1:nb1]
-
-            if(is.null(init_d1) | is.null(init_d2)){
-              D1 <- 0
-              A2 <- theta[nb1 + 5]
-              B2 <- theta[nb1 + 6]
-              C2_coef <- theta[nb1 + 6 + 1:nb2]
-              D2 <- 0
-            }else{
-              D1 <- theta[nb1 + 5]
-              A2 <- theta[nb1 + 6]
-              B2 <- theta[nb1 + 7]
-              C2_coef <- theta[nb1 + 7 + 1:nb2]
-              D2 <- theta[nb1 + nb2 + 8]
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[nb1 + 5]
+                B2 <- theta[nb1 + 6]
+                C2_coef <- theta[nb1 + 6 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 5]
+                A2 <- theta[nb1 + 6]
+                B2 <- theta[nb1 + 7]
+                C2_coef <- theta[nb1 + 7 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 8]
+              }
             }
           }
         }
@@ -1176,188 +845,775 @@ est_bi_differential <- function(residuals, location, init_beta, init_scale_horiz
                                    a1 = A1, b1 = B1, c1 = C1, d1 = D1, a2 = A2, b2 = B2, c2 = C2, d2 = D2,
                                    radius = radius)
 
-    variance1 <- diag(cov_mat[1:nrow(location), 1:nrow(location)])
-    variance2 <- diag(cov_mat[nrow(location) + 1:nrow(location), nrow(location) + 1:nrow(location)])
+    covariance1 <- cov_mat[1:nrow(location), 1:nrow(location)]
+    covariance2 <- cov_mat[nrow(location) + 1:nrow(location), nrow(location) + 1:nrow(location)]
+    covariance12 <- cov_mat[1:nrow(location), nrow(location) + 1:nrow(location)]
+    correlation12 <- diag(covariance12) / sqrt(diag(covariance1) * diag(covariance2))
 
-    print(range(cov_mat))
+    emp_covariance1 <- empirical_values[1:nrow(location), 1:nrow(location)]
+    emp_covariance2 <- empirical_values[nrow(location) + 1:nrow(location), nrow(location) + 1:nrow(location)]
+    emp_covariance12 <- empirical_values[1:nrow(location), nrow(location) + 1:nrow(location)]
+    emp_correlation12 <- diag(emp_covariance12) / sqrt(diag(emp_covariance1) * diag(emp_covariance2))
 
-    cat(c("variance1: ", round(max(variance1), 4), " -- variance2: ", round(max(variance2), 4)), '\n')
+    out <- sum((diag(emp_covariance1) - diag(covariance1))^2 * 100 + (diag(emp_covariance2) - diag(covariance2))^2 * 50000 + (emp_correlation12 - correlation12)^2 * 100)
 
-    cholmat <- tryCatch(chol(cov_mat), error = function(a) numeric(0))
-    if(length(cholmat) == 0){
-      print("CHOL PROBLEM")
-      #Beig <- eigen(cov_mat)
-      #g <- Beig$vectors
-      #l <- Beig$values
-      #ind2 <- which(l <= 1e-12)
-      #l[ind2] <- 1e-12
-
-      #l_dd_full <- diag(l)
-      #cov_mat <- g %*% l_dd_full %*% t(g)
-      #cholmat <- chol(cov_mat)
-      return(Inf)
-    }
-
-    if(max(variance1) > 2 | max(variance2) > 0.1){
-      return(Inf)
-    }else{
-
-      ref_lat <- c(40, 0, -40, 40, 0, -40)
-      ref_long <- c(-175, -175, -175, -30, -30, -30)
-
-      loc3d_eval <- cbind(ref_long[1], ref_lat[1], seq(0, max(location[, 3]), length.out = 100))
-
-      new_basis1 <- bsplineBasis(loc3d_eval[, 3], splines_degree, knots1)
-      new_basis2 <- bsplineBasis(loc3d_eval[, 3], splines_degree, knots2)
-
-      plot_bi_differential(location = loc3d_eval, est_beta = BETA,
-                           est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL,
-                           est_a1 = A1, est_b1 = B1, est_c1 = C1_coef, est_d1 = D1, est_a2 = A2, est_b2 = B2, est_c2 = C2_coef, est_d2 = D2,
-                           basis1 = new_basis1, basis2 = new_basis2, radius = radius, splines_degree = splines_degree)
-
-      Sigma_inv <- solve(cov_mat)
-      Sigma_log_det <- 2 * sum(log(diag(t(cholmat))))
-
-      out1 <- as.numeric(as.matrix(t(residuals) %*% Sigma_inv %*% residuals))
-      out2 <- .5 * nrow(location) * k * log(2 * pi) + .5 * nrow(location) * Sigma_log_det
-      out <- out1 + out2
-
-      #out <- -sum(dmvnorm(residuals, mean = rep(0, ncol(cov_mat)), sigma = cov_mat, log = T))
-
-      cat(c("negloglik: ", round(out, 4)), '\n')
-
-      return(out)
-    }
+    return(out)
   }
 
-  if(!init_beta_fix){
-    if(init_a1_fix){
-      if(init_scale_horizontal_fix & init_scale_vertical_fix){
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_beta, init_c1, init_c2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
-        }else{
-          fit <- optim(par = c(init_beta, init_c1, init_d1, init_c2, init_d2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
-        }
-      }else{
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
-        }else{
-          fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
-        }
-      }
-    }else{
-      if(init_scale_horizontal_fix & init_scale_vertical_fix){
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_beta, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
-        }else{
-          fit <- optim(par = c(init_beta, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
-        }
-      }else{
-        if(is.null(init_d1) | is.null(init_d2)){
-          print("YOU ARE HERE")
-          #fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
-          fit <- nlm(NEGLOGLIK, c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), residuals = residuals, basis1 = basis1, basis2 = basis2, hessian = T,
-              print.level = 2, iterlim = MAXIT, stepmax = STEPMAX)
-        }else{
-          fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
-        }
-      }
-    }
+  if(c1_fix){
+    #fit <- nlm(NEGLOGLIK, c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_a2, init_b2), hessian = T,
+    #           print.level = 2, iterlim = iterlim, stepmax = stepmax)
+    fit <- nlm(NEGLOGLIK, c(init_c1, init_c2), hessian = T,
+               print.level = 2, iterlim = iterlim, stepmax = stepmax)
   }else{
-    if(init_a1_fix){
-      if(init_scale_horizontal_fix & init_scale_vertical_fix){
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_c1, init_c2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
+    if(!beta_fix){
+      if(a1_fix){
+        if(scale_horizontal_fix & scale_vertical_fix){
+          if(d1_fix){
+            fit <- optim(par = c(init_beta, init_c1, init_c2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }else{
+            fit <- optim(par = c(init_beta, init_c1, init_d1, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
         }else{
-          fit <- optim(par = c(init_c1, init_d1, init_c2, init_d2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
+          if(d1_fix){
+            fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }else{
+            fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
         }
       }else{
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_c1, init_c2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
+        if(scale_horizontal_fix & scale_vertical_fix){
+          if(d1_fix){
+            fit <- optim(par = c(init_beta, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }else{
+            fit <- optim(par = c(init_beta, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
         }else{
-          fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_c1, init_d1, init_c2, init_d2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
+          if(d1_fix){
+            print("YOU ARE HERE")
+            #fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, iterlim = iterlim), hessian = T)
+            fit <- nlm(NEGLOGLIK, c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), hessian = T,
+                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
+          }else{
+            fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
         }
       }
     }else{
-      if(init_scale_horizontal_fix & init_scale_vertical_fix){
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
+      if(a1_fix){
+        if(scale_horizontal_fix & scale_vertical_fix){
+          if(d1_fix){
+            fit <- optim(par = c(init_c1, init_c2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }else{
+            fit <- optim(par = c(init_c1, init_d1, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
         }else{
-          fit <- optim(par = c(init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
+          if(d1_fix){
+            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_c1, init_c2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }else{
+            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_c1, init_d1, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
         }
       }else{
-        if(is.null(init_d1) | is.null(init_d2)){
-          fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
+        if(scale_horizontal_fix & scale_vertical_fix){
+          if(d1_fix){
+            fit <- optim(par = c(init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }else{
+            fit <- optim(par = c(init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
         }else{
-          fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
+          if(d1_fix){
+            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }else{
+            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
         }
       }
     }
   }
-
-  #if(RERUNS > 0){
-    #for(aa in 1:RERUNS){
-      #fit <- optim(par = fit$par, fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, maxit = MAXIT), hessian = T)
-    #}
-  #}
-
-  #est_theta <- fit$par
-  #est_hessian <- fit$hessian
 
   return(fit)
 }
 
-#' Compute the value of the bspline bases
-#' @param x A matrix of basis function values.
-#' @param degree A number indicating the degrees.
-#' @param innerknots A vector of knot locations.
-#' @param lowknot The first knot location.
-#' @param highknot The last knot location.
-#' @return A matrix of basis function values.
-#' @useDynLib DiffOp, .registration=TRUE
-#' @export
-bsplineBasis <- function (x, degree, innerknots, lowknot = min(x,innerknots), highknot = max(x,innerknots)) {
-  innerknots <- unique (sort (innerknots))
-  knots <-
-    c(rep(lowknot, degree + 1), innerknots, rep(highknot, degree + 1))
-  n <- length (x)
-  m <- length (innerknots) + 2 * (degree + 1)
-  nf <- length (innerknots) + degree + 1
-  basis <- rep (0,  n * nf)
-  res <- .C(
-    "splinebasis", d = as.integer(degree),
-    n = as.integer(n), m = as.integer (m), x = as.double (x), knots = as.double (knots), basis = as.double(basis)
-  )
-  basis <- matrix (res$basis, n, nf)
-  #basis <- basis[,which(colSums(basis) > 0)]
-  return (basis)
-}
 
-#' Prediction function
-#' @param residuals A vector of residuals
-#' @param location An nx3 matrix of coordinates.
-#' @param location_new An nx3 matrix of coordinates where prediction is required.
-#' @param masked_residuals A vector of residuals removed to test prediction performance.
-#' @param est_beta A number for colocated correlation parameter.
-#' @param est_scale_horizontal A number for the horizontal scale parameter.
-#' @param est_scale_vertical A number for the vertical scale parameter.
-#' @param est_a1 A number for the anisotropy parameter in Latitude associated with variable 1.
-#' @param est_b1 A number for the anisotropy parameter in longitude associated with variable 1.
-#' @param est_c1 A number for vector for the nonstationarity parameter in depth associated with variable 1.
-#' @param est_d1 A number for the variance parameter of the fully isotropic associated with variable 1.
-#' @param est_a2 A number for the anisotropy parameter in Latitude associated with variable 2.
-#' @param est_b2 A number for the anisotropy parameter in longitude associated with variable 2.
-#' @param est_c2 A number for vector for the nonstationarity parameter in depth associated with variable 2.
-#' @param est_d2 A number for the variance parameter of the fully isotropic associated with variable 2.
-#' @param radius A number for the radius of the sphere.
+#' Maximum Likelihood Estimation of the parameters of the bivariate differential operator cross-covariance function
+#'
+#' @description
+#' \code{est_bi_differential_mle} performs maximum likelihood estimation using a
+#' Newton-type algorithm to carry out a minimization of the negative of the
+#' Gaussian log-likelihood function:
+#' \deqn{l(\boldsymbol{\theta}) = -\frac{q n}{2} \log (2 \pi) - \frac{1}{2} \log |\boldsymbol{\Sigma}(\boldsymbol{\theta})| - \frac{1}{2} \mathbf{Z}^{\top} \boldsymbol{\Sigma}(\boldsymbol{\theta})^{-1} \mathbf{Z},}
+#' Here \eqn{\boldsymbol{\theta}} is a vector parameters,
+#' \eqn{q} is the number of parameters,
+#' \eqn{\boldsymbol{\Sigma}(\boldsymbol{\theta})}
+#' is the \eqn{q n \times q n} cross-covariance matrix for \eqn{\mathbf{Z}}
+#' with determinant \eqn{|\boldsymbol{\Sigma}(\boldsymbol{\theta})|}, and
+#' \eqn{\mathbf{Z} = \{\mathbf{Z}(\mathbf{s}_1)^{\top}, \ldots, \mathbf{Z}(\mathbf{s}_n)^{\top} \}^{\top}}
+#' is the vector of residuals such that \eqn{\mathbf{Z}(\mathbf{s}) = \{ Z_1 (\mathbf{s}), Z_2 (\mathbf{s})\}^{\top}}.
+#'
+#' @usage est_bi_differential_mle(residuals, location, init_beta, init_scale_horizontal,
+#' init_scale_vertical, init_a1, init_b1, init_c1, init_d1,
+#' init_a2, init_b2, init_c2, init_d2,
+#' beta_fix, scale_horizontal_fix, scale_vertical_fix,
+#' a1_fix, b1_fix, c1_fix, d1_fix, a2_fix, b2_fix, c2_fix, d2_fix,
+#' radius, splines_degree, knots1, knots2, iterlim, stepmax, hessian)
+#'
+#' @param residuals A \eqn{2 n} vector of residuals with
+#' variable 1 and 2 residuals appended next to each other.
+#' @param location An \eqn{n \times 3} matrix of coordinates.
+#' @param init_beta A numeric constant indicating the initial value for the
+#' colocated correlation parameter.
+#' @param init_scale_horizontal A numeric constant indicating the initial value for the
+#' horizontal scale parameter.
+#' @param init_scale_vertical A numeric constant indicating the initial value for the
+#' vertical scale parameter.
+#' @param init_a1 A numeric constant indicating the initial value for the
+#' anisotropy in latitude parameter associated with variable 1.
+#' @param init_b1 A numeric constant indicating the initial value for the
+#' anisotropy in longitude parameter associated with variable 1.
+#' @param init_c1 A numeric vector indicating the initial value for the
+#' nonstationary parameters with depth associated with variable 1.
+#' @param init_d1 A numeric constant indicating the initial value for the
+#' variance parameter from the fully isotropic component associated with variable 1.
+#' @param init_a2 A numeric constant indicating the initial value for the
+#' anisotropy in latitude parameter associated with variable 2.
+#' @param init_b2 A numeric constant indicating the initial value for the
+#' anisotropy in longitude parameter associated with variable 2.
+#' @param init_c2 A numeric vector indicating the initial value for the
+#' nonstationary parameters with depth associated with variable 2.
+#' @param init_d2 A numeric constant indicating the initial value for the
+#' variance parameter from the fully isotropic component associated with variable 2.
+#' @param beta_fix An indicator that takes in the values \code{TRUE} or \code{FALSE} whether the
+#' colocated correlation parameter should not be estimated.
+#' @param scale_horizontal_fix An indicator that takes in the values \code{TRUE} or \code{FALSE} whether the
+#' horizontal scale parameter should not be estimated.
+#' @param scale_vertical_fix An indicator that takes in the values \code{TRUE} or \code{FALSE} whether the
+#' vertical scale parameter should not be estimated.
+#' @param a1_fix If \code{TRUE}, the a1 parameter is not be estimated.
+#' @param b1_fix If \code{TRUE}, the b1 parameter is not be estimated.
+#' @param c1_fix If \code{TRUE}, the c1 parameters are not be estimated.
+#' @param d1_fix If \code{TRUE}, the d1 parameter is not be estimated.
+#' @param a2_fix If \code{TRUE}, the a2 parameter is not be estimated.
+#' @param b2_fix If \code{TRUE}, the b2 parameter is not be estimated.
+#' @param c2_fix If \code{TRUE}, the c2 parameters are not be estimated.
+#' @param d2_fix If \code{TRUE}, the d2 parameter is not be estimated.
+#' @param radius A numeric constant indicating the radius of the sphere.
 #' @param splines_degree A number indicating the degree of the splines.
 #' @param knots1 A vector of knot locations for variable 1.
 #' @param knots2 A vector of knot locations for variable 2.
+#' @param iterlim A number indicating the maximum number of iterations for \code{nlm}.
+#' @param stepmax A number indicating the stepmax of nlm.
+#' @param hessian If \code{TRUE}, the hessian is not returned.
+#'
 #' @import stats
-#' @import mvtnorm
-#' @return A vector of prediction values.
+#'
+#' @useDynLib DiffOp, .registration=TRUE
+#'
+#' @return A list containing the values of the log likelihood function,
+#' estimated parameters, and their corresponding standard deviations.
+#'
+#' @author Mary Lai Salvana \email{yourlainess@gmail.com}
+#'
+#' @examples
+#'
+#' library(dplyr)
+#'
+#' x <- seq(0, 1, length.out = 5)
+#' y <- seq(0, 1, length.out = 5)
+#'
+#' loc2d <- expand.grid(x, y) %>% as.matrix()
+#' depth <- seq(0, 1, length.out = 5)
+#' loc3d <- cbind(rep(loc2d[, 1], each = length(depth)), rep(loc2d[, 2], each = length(depth)), depth)
+#'
+#' earthRadiusKm = 6371
+#'
+#' BETA = 0.5
+#' SCALE_HORIZONTAL = 0.03
+#' SCALE_VERTICAL = 0.3
+#' A1 = A2 = 0.00001
+#' B1 = B2 = 0.00001
+#' C1 = sin((loc3d[, 3] + 0.1) * pi / 0.5)
+#' C2 = cos((loc3d[, 3] + 0.1) * pi / 0.5)
+#' D1 = D2 = 0
+#'
+#' cov_mat <- cov_bi_differential(location = loc3d, beta = BETA,
+#'                                scale_horizontal = SCALE_HORIZONTAL,
+#'                                scale_vertical = SCALE_VERTICAL,
+#'                                a1 = A1, b1 = B1, c1 = C1, d1 = D1,
+#'                                a2 = A2, b2 = B2, c2 = C2, d2 = D2,
+#'                                radius = earthRadiusKm)
+#'
+#'
+#' library(MASS)
+#'
+#' set.seed(1235)
+#' Z <- mvrnorm(1, mu = rep(0, ncol(cov_mat)), Sigma = cov_mat)
+#' Z1 <- Z[1:nrow(loc3d)]
+#' Z2 <- Z[nrow(loc3d) + 1:nrow(loc3d)]
+#'
+#' KNOTS1 <- c(0.1, 0.5, 0.9)
+#' KNOTS2 <- c(0.1, 0.5, 0.9)
+#'
+#' INIT_BETA = 0.6
+#' INIT_SCALE_HORIZONTAL = log(0.02)
+#' INIT_SCALE_VERTICAL = log(0.4)
+#' INIT_A1 = INIT_A2 = 0.005
+#' INIT_B1 = INIT_B2 = 0.005
+#' INIT_D1 = INIT_D2 = 0
+#'
+#' SPLINES_DEGREE = 2
+#'
+#' set.seed(1235)
+#' INIT_C1 <- runif(length(KNOTS1) + SPLINES_DEGREE + 1, -5, 5)
+#'
+#' set.seed(1236)
+#' INIT_C2 <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
+#'
+#' \donttest{est_params <- est_bi_differential_mle(residuals = Z, location = loc3d, init_beta = INIT_BETA,
+#'                                  init_scale_horizontal = INIT_SCALE_HORIZONTAL,
+#'                                  init_scale_vertical = INIT_SCALE_VERTICAL,
+#'                                  init_a1 = INIT_A1, init_b1 = INIT_B1,
+#'                                  init_c1 = INIT_C1, init_d1 = INIT_D1,
+#'                                  init_a2 = INIT_A2, init_b2 = INIT_B2,
+#'                                  init_c2 = INIT_C2, init_d2 = INIT_D2,
+#'                                  d1_fix = TRUE, d2_fix = TRUE,
+#'                                  radius = earthRadiusKm,
+#'                                  splines_degree = SPLINES_DEGREE,
+#'                                  knots1 = KNOTS1, knots2 = KNOTS2,
+#'                                  iterlim = 1, hessian = FALSE)}
+#'
+#'
 #' @export
-predict_bi_differential <- function(residuals, location, location_new, masked_residuals = NULL, est_beta, est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1, est_d1 = NULL, est_a2, est_b2, est_c2, est_d2 = NULL, radius, splines_degree = 4, knots1, knots2){
+est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2, beta_fix = F, scale_horizontal_fix = F, scale_vertical_fix = F, a1_fix = F, b1_fix = F, c1_fix = F, d1_fix = F, a2_fix = F, b2_fix = F, c2_fix = F, d2_fix = F, radius, splines_degree = 2, knots1, knots2, iterlim = 2000, stepmax = 1, hessian = TRUE){
+
+  basis1 <- bsplineBasis(location[, 3], splines_degree, knots1)
+  nb1 <- ncol(basis1)
+  basis2 <- bsplineBasis(location[, 3], splines_degree, knots2)
+  nb2 <- ncol(basis2)
+
+  NEGLOGLIK <- function(theta){
+
+    print(paste("theta = c(", paste(round(theta, 8), collapse=","), ")", sep = ''))
+
+    if(c1_fix){
+      #if(theta[1] < 0 | theta[1] > 1){
+      #  return(Inf)
+      #}
+
+      BETA <- init_beta#theta[1]
+      SCALE_HORIZONTAL <- exp(init_scale_horizontal)#exp(theta[2])
+      SCALE_VERTICAL <- exp(init_scale_vertical)#exp(theta[3])
+      A1 <- init_a1#theta[4]
+      B1 <- init_b1#theta[5]
+      C1_coef <- theta[1:nb1]
+      D1 <- init_d1
+      A2 <- init_a2#theta[6]
+      B2 <- init_b2#theta[7]
+      C2_coef <- theta[nb1 + 1:nb2]
+      D2 <- init_d2
+
+    }else{
+      if(!beta_fix){
+
+        if(theta[1] < 0 | theta[1] > 1){
+          return(Inf)
+        }
+
+        BETA <- theta[1]
+
+        if(a1_fix){
+
+          A1 <- init_a1
+          B1 <- init_b1
+          A2 <- init_a2
+          B2 <- init_b2
+
+          if(scale_horizontal_fix & scale_vertical_fix){
+
+            SCALE_HORIZONTAL <- init_scale_horizontal
+            SCALE_VERTICAL <- init_scale_vertical
+
+            if(splines_degree == 0){
+              C1_coef <- theta[2]
+              if(is.null(init_d1) | is.null(init_d2)){
+                D1 <- 0
+                C2_coef <- theta[3]
+                D2 <- 0
+              }else{
+                D1 <- theta[3]
+                C2_coef <- theta[4]
+                D2 <- theta[5]
+              }
+            }else if(splines_degree > 0){
+              C1_coef <- theta[1 + 1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[nb1 + 1 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 2]
+                C2_coef <- theta[nb1 + 2 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 3]
+              }
+            }
+          }else if(!scale_horizontal_fix & !scale_vertical_fix){
+
+            SCALE_HORIZONTAL <- exp(theta[2])
+            SCALE_VERTICAL <- exp(theta[3])
+
+            if(splines_degree == 0){
+
+              C1_coef <- theta[4]
+
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[5]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[5]
+                C2_coef <- theta[6]
+                D2 <- theta[7]
+              }
+            }else if(splines_degree > 0){
+
+              C1_coef <- theta[3 + 1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[nb1 + 3 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 4]
+                C2_coef <- theta[nb1 + 4 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 5]
+              }
+            }
+          }
+        }else if(!a1_fix){
+          if(scale_horizontal_fix & scale_vertical_fix){
+            if(theta[2] < 0){
+              return(Inf)
+            }
+
+            SCALE_HORIZONTAL <- init_scale_horizontal
+            SCALE_VERTICAL <- init_scale_vertical
+            A1 <- theta[2]
+            B1 <- theta[3]
+
+            if(splines_degree == 0){
+              C1_coef <- theta[4]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[5]
+                B2 <- theta[6]
+                C2_coef <- theta[7]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[5]
+                A2 <- theta[6]
+                B2 <- theta[7]
+                C2_coef <- theta[8]
+                D2 <- theta[9]
+              }
+            }else if(splines_degree > 0){
+              C1_coef <- theta[3 + 1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[nb1 + 4]
+                B2 <- theta[nb1 + 5]
+                C2_coef <- theta[nb1 + 5 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 4]
+                A2 <- theta[nb1 + 5]
+                B2 <- theta[nb1 + 6]
+                C2_coef <- theta[nb1 + 6 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 7]
+              }
+            }
+          }else if(!scale_horizontal_fix & !scale_vertical_fix){
+
+            if(theta[4] < 0){
+              return(Inf)
+            }
+
+            SCALE_HORIZONTAL <- exp(theta[2])
+            SCALE_VERTICAL <- exp(theta[3])
+            A1 <- 0.01 * (1 / (1 + exp(-theta[4]))) #theta[4]
+            B1 <- 0.02 * (1 / (1 + exp(-theta[5]))) - 0.02 / 2 #theta[5]
+
+            if(splines_degree == 0){
+              C1_coef <- theta[6]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[7]
+                B2 <- theta[8]
+                C2_coef <- theta[9]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[7]
+                A2 <- theta[8]
+                B2 <- theta[9]
+                C2_coef <- theta[10]
+                D2 <- theta[11]
+              }
+            }else if(splines_degree > 0){
+              C1_coef <- theta[5 + 1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- 0.02 * (1 / (1 + exp(-theta[5 + nb1 + 1]))) - 0.02 / 2 #theta[nb1 + 6]
+                B2 <- 0.02 * (1 / (1 + exp(-theta[5 + nb1 + 2]))) - 0.02 / 2 #theta[nb1 + 7]
+                C2_coef <- theta[nb1 + 7 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 6]
+                A2 <- theta[nb1 + 7]
+                B2 <- theta[nb1 + 8]
+                C2_coef <- theta[nb1 + 8 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 9]
+              }
+            }
+          }
+        }
+      }else if(beta_fix){
+
+        BETA <- init_beta
+
+        if(a1_fix){
+
+          A1 <- init_a1
+          B1 <- init_b1
+          A2 <- init_a2
+          B2 <- init_b2
+
+          if(scale_horizontal_fix & scale_vertical_fix){
+
+            SCALE_HORIZONTAL <- init_scale_horizontal
+            SCALE_VERTICAL <- init_scale_vertical
+
+            if(splines_degree == 0){
+              C1_coef <- theta[1]
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[2]
+                C2_coef <- theta[3]
+                D2 <- theta[4]
+              }
+            }else if(splines_degree > 0){
+              C1_coef <- theta[1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[nb1 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 1]
+                C2_coef <- theta[nb1 + 1 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 2]
+              }
+            }
+          }else if(!scale_horizontal_fix & !scale_vertical_fix){
+
+            SCALE_HORIZONTAL <- exp(theta[1])
+            SCALE_VERTICAL <- exp(theta[2])
+
+            if(splines_degree == 0){
+
+              C1_coef <- theta[3]
+
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[4]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[4]
+                C2_coef <- theta[5]
+                D2 <- theta[6]
+              }
+            }else if(splines_degree > 0){
+
+              C1_coef <- theta[2 + 1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[nb1 + 2 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 3]
+                C2_coef <- theta[nb1 + 3 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 4]
+              }
+            }
+          }
+        }else if(!a1_fix){
+          if(scale_horizontal_fix & scale_vertical_fix){
+            if(theta[1] < 0){
+              return(Inf)
+            }
+
+            SCALE_HORIZONTAL <- init_scale_horizontal
+            SCALE_VERTICAL <- init_scale_vertical
+            A1 <- theta[1]
+            B1 <- theta[2]
+
+            if(splines_degree == 0){
+              C1_coef <- theta[3]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[4]
+                B2 <- theta[5]
+                C2_coef <- theta[6]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[4]
+                A2 <- theta[5]
+                B2 <- theta[6]
+                C2_coef <- theta[7]
+                D2 <- theta[8]
+              }
+            }else if(splines_degree > 0){
+              C1_coef <- theta[2 + 1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[nb1 + 3]
+                B2 <- theta[nb1 + 4]
+                C2_coef <- theta[nb1 + 4 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 3]
+                A2 <- theta[nb1 + 4]
+                B2 <- theta[nb1 + 5]
+                C2_coef <- theta[nb1 + 5 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 6]
+              }
+            }
+          }else if(!scale_horizontal_fix & !scale_vertical_fix){
+
+            if(theta[3] < 0){
+              return(Inf)
+            }
+
+            SCALE_HORIZONTAL <- exp(theta[1])
+            SCALE_VERTICAL <- exp(theta[2])
+            A1 <- theta[3]
+            B1 <- theta[4]
+
+            if(splines_degree == 0){
+              C1_coef <- theta[5]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[6]
+                B2 <- theta[7]
+                C2_coef <- theta[8]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[6]
+                A2 <- theta[7]
+                B2 <- theta[8]
+                C2_coef <- theta[9]
+                D2 <- theta[10]
+              }
+            }else if(splines_degree > 0){
+              C1_coef <- theta[4 + 1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[nb1 + 5]
+                B2 <- theta[nb1 + 6]
+                C2_coef <- theta[nb1 + 6 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 5]
+                A2 <- theta[nb1 + 6]
+                B2 <- theta[nb1 + 7]
+                C2_coef <- theta[nb1 + 7 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 8]
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if(splines_degree == 0){
+      C1 <- C1_coef
+      C2 <- C2_coef
+    }else if(splines_degree > 0){
+      C1 <- basis1 %*% matrix(C1_coef, ncol = 1)
+      C2 <- basis2 %*% matrix(C2_coef, ncol = 1)
+    }
+
+    cov_mat <- cov_bi_differential(location = location, beta = BETA,
+                                   scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL,
+                                   a1 = A1, b1 = B1, c1 = C1, d1 = D1, a2 = A2, b2 = B2, c2 = C2, d2 = D2,
+                                   radius = radius)
+
+    cholmat <- tryCatch(chol(cov_mat), error = function(a) numeric(0))
+    if(length(cholmat) == 0){
+      return(Inf)
+    }
+
+    Sigma_inv <- solve(cov_mat)
+    Sigma_log_det <- 2 * sum(log(diag(t(cholmat))))
+
+    out1 <- .5 * as.numeric(as.matrix(t(residuals) %*% Sigma_inv %*% residuals))
+    out2 <- .5 * nrow(location) * 2 * log(2 * pi) + .5 * Sigma_log_det
+    out <- out1 + out2
+
+    cat(c("negloglik: ", round(out, 4)), '\n')
+
+    return(out)
+  }
+
+  if(c1_fix){
+    #fit <- nlm(NEGLOGLIK, c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_a2, init_b2), hessian = T,
+    #           print.level = 2, iterlim = iterlim, stepmax = stepmax)
+    fit <- nlm(NEGLOGLIK, c(init_c1, init_c2), hessian = T,
+               print.level = 2, iterlim = iterlim, stepmax = stepmax)
+  }else{
+    if(!beta_fix){
+      if(a1_fix){
+        if(scale_horizontal_fix & scale_vertical_fix){
+          if(d1_fix){
+            fit <- optim(par = c(init_beta, init_c1, init_c2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }else{
+            fit <- optim(par = c(init_beta, init_c1, init_d1, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
+        }else{
+          if(d1_fix){
+            fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }else{
+            fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
+        }
+      }else{
+        if(scale_horizontal_fix & scale_vertical_fix){
+          if(d1_fix){
+            fit <- optim(par = c(init_beta, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }else{
+            fit <- optim(par = c(init_beta, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
+        }else{
+          if(d1_fix){
+            print("YOU ARE HERE")
+            #fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, residuals = residuals, basis1 = basis1, basis2 = basis2, control = list(trace = 5, iterlim = iterlim), hessian = T)
+            fit <- nlm(NEGLOGLIK, c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), hessian = T,
+                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
+          }else{
+            fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
+        }
+      }
+    }else{
+      if(a1_fix){
+        if(scale_horizontal_fix & scale_vertical_fix){
+          if(d1_fix){
+            fit <- optim(par = c(init_c1, init_c2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }else{
+            fit <- optim(par = c(init_c1, init_d1, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
+        }else{
+          if(d1_fix){
+            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_c1, init_c2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }else{
+            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_c1, init_d1, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
+        }
+      }else{
+        if(scale_horizontal_fix & scale_vertical_fix){
+          if(d1_fix){
+            fit <- optim(par = c(init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }else{
+            fit <- optim(par = c(init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
+        }else{
+          if(d1_fix){
+            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_a2, init_b2, init_c2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }else{
+            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1, init_d1, init_a2, init_b2, init_c2, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
+          }
+        }
+      }
+    }
+  }
+
+  #est_loglikelihood <- -fit$value
+  #est_theta <- fit$par
+  #nlm_code <- fit$code
+  #est_gradient <- fit$gradient
+  #est_hessian <- fit$hessian
+  #diag(c(exp(est_theta[1:2]), 0.01 * exp(-est_theta[3]) / (1 + exp(-est_theta[3]))^2, 0.02 * exp(-est_theta[4:6]) / (1 + exp(-fit1$estimate[4:6]))^2, 2 * exp(-fit1$estimate[7]) / (1 + exp(-fit1$estimate[7]))^2), nrow = 7, ncol = 7)
+  #fisher_info<-solve(est_hessian)
+  #variance <- j %*% fisher_info %*% t(j)
+  #est_sd <- sqrt(diag(variance))
+
+  #results <- list("loglikelihood_value" = est_loglikelihood, "est_gradient" = est_gradient, "nlm_code" = nlm_code,
+  #  "est_beta" = est_theta[1], "est_scale_horizontal" = est_theta[2], "est_scale_vertical" = est_theta[3],
+  #  "est_a1" = est_theta[4], "est_b1" = est_theta[5], "est_c1" = est_theta[5 + 1:nb1], "est_d1" = 0,
+  #  "est_a2" = est_theta[5 + nb1 + 1], "est_b2" = est_theta[5 + nb1 + 2], "est_c2" = est_theta[5 + nb1 + 2 + 1:nb2], "est_d2" = 0,
+  #  "est_beta_sd" = est_sd[1], "est_scale_horizontal_sd" = est_sd[2], "est_scale_vertical_sd" = est_sd[3],
+  #  "est_a1_sd" = est_sd[4], "est_b1_sd" = est_sd[5], "est_c1_sd" = est_sd[5 + 1:nb1], "est_d1_sd" = NA,
+  #  "est_a2_sd" = est_sd[5 + nb1 + 1], "est_b2_sd" = est_sd[5 + nb1 + 2], "est_c2_sd" = est_sd[5 + nb1 + 2 + 1:nb2], "est_d2" = NA))
+
+  return(fit)
+}
+
+#' Predict values at unsampled locations
+#'
+#' @usage predict_bi_differential(residuals, location, location_new, est_beta,
+#' est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1, est_d1,
+#' est_a2, est_b2, est_c2, est_d2, radius, splines_degree, knots1, knots2)
+#'
+#' @param residuals A \eqn{2 n} vector of residuals with
+#' variable 1 and 2 residuals appended next to each other.
+#' @param location An \eqn{n \times 3} matrix of coordinates.
+#' @param location_new An \eqn{n \times 3} matrix of coordinates where prediction is required.
+#' @param est_beta A numeric constant indicating the value for the
+#' colocated correlation parameter.
+#' @param est_scale_horizontal A numeric constant indicating the value for the
+#' horizontal scale parameter.
+#' @param est_scale_vertical A numeric constant indicating the value for the
+#' vertical scale parameter.
+#' @param est_a1 A numeric constant indicating the value for the
+#' anisotropy in latitude parameter associated with variable 1.
+#' @param est_b1 A numeric constant indicating the value for the
+#' anisotropy in longitude parameter associated with variable 1.
+#' @param est_c1 A numeric vector indicating the values for the
+#' nonstationary parameters with depth associated with variable 1.
+#' @param est_d1 A numeric constant indicating the value for the
+#' variance parameter from the fully isotropic component associated with variable 1.
+#' @param est_a2 A numeric constant indicating the value for the
+#' anisotropy in latitude parameter associated with variable 2.
+#' @param est_b2 A numeric constant indicating the value for the
+#' anisotropy in longitude parameter associated with variable 2.
+#' @param est_c2 A numeric vector indicating the values for the
+#' nonstationary parameters with depth associated with variable 2.
+#' @param est_d2 A numeric constant indicating the value for the
+#' variance parameter from the fully isotropic component associated with variable 2.
+#' @param radius A numeric constant indicating the radius of the sphere.
+#' @param splines_degree A number indicating the degree of the splines.
+#' @param knots1 A vector of knot locations for variable 1.
+#' @param knots2 A vector of knot locations for variable 2.
+#'
+#' @return A vector of predictions.
+#'
+#' @useDynLib DiffOp, .registration=TRUE
+#'
+#' @author Mary Lai Salvana \email{yourlainess@gmail.com}
+#'
+#' @export
+predict_bi_differential <- function(residuals, location, location_new, est_beta, est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1, est_d1, est_a2, est_b2, est_c2, est_d2, radius, splines_degree = 2, knots1, knots2){
 
   BETA <- est_beta
   SCALE_HORIZONTAL <- est_scale_horizontal
@@ -1368,14 +1624,8 @@ predict_bi_differential <- function(residuals, location, location_new, masked_re
   B2 <- est_b2
   C1_coef <- est_c1
   C2_coef <- est_c2
-
-  if(is.null(est_d1) | is.null(est_d2)){
-    D1 <- 0
-    D2 <- 0
-  }else{
-    D1 <- est_d1
-    D2 <- est_d2
-  }
+  D1 <- est_d1
+  D2 <- est_d2
 
   location_full <- rbind(location, location_new)
 
@@ -1392,93 +1642,17 @@ predict_bi_differential <- function(residuals, location, location_new, masked_re
                                  a1 = A1, b1 = B1, c1 = C1, d1 = D1, a2 = A2, b2 = B2, c2 = C2, d2 = D2,
                                  radius = radius)
 
-  if(!is.null(masked_residuals)){
+  INDEX_OUT = c(nrow(location) + 1:nrow(location_new), nrow(location) + nrow(location_new) + nrow(location) + 1:nrow(location_new))
 
-    INDEX_OUT = c(nrow(location) + 1:nrow(location_new), nrow(location) + nrow(location_new) + nrow(location) + 1:nrow(location_new))
+  Sigma_insample_dd <- cov_mat[-INDEX_OUT, -INDEX_OUT]
+  Sigma_outsample_dd <- cov_mat[INDEX_OUT, INDEX_OUT]
+  Sigma_inoutsample_dd <- cov_mat[-INDEX_OUT, INDEX_OUT]
 
-    Sigma_insample_dd <- cov_mat[-INDEX_OUT, -INDEX_OUT]
-    Sigma_outsample_dd <- cov_mat[INDEX_OUT, INDEX_OUT]
-    Sigma_inoutsample_dd <- cov_mat[-INDEX_OUT, INDEX_OUT]
+  Sigma_inv <- solve(Sigma_insample_dd)
 
-    Sigma_inv <- solve(Sigma_insample_dd)
+  predictions <- t(Sigma_inoutsample_dd) %*% Sigma_inv %*% matrix(residuals, ncol = 1)
 
-    print(dim(Sigma_inoutsample_dd))
-    print(dim(Sigma_inv))
-    print(length(residuals))
-
-    pred_dd <- t(Sigma_inoutsample_dd) %*% Sigma_inv %*% matrix(residuals, ncol = 1)
-
-    PREDICTIONS <- cbind(pred_dd, masked_residuals)
-    error <- pred_dd - masked_residuals
-    MSE <- as.numeric(as.matrix(t(error) %*% error)) / length(INDEX_OUT)
-
-    print(MSE)
-  }
+  return(predictions)
 }
 
 
-#' Plotting the bivariate differential operator cross-covariance function
-#'
-#' @param location An nx3 matrix of coordinates with latitude and longitude of the reference location and the pressure coordinate is ordered from surface to bottom.
-#' @param est_beta A number for colocated correlation parameter.
-#' @param est_scale_horizontal A number for the horizontal scale parameter.
-#' @param est_scale_vertical A number for the vertical scale parameter.
-#' @param est_a1 A number for the anisotropy parameter in Latitude associated with variable 1.
-#' @param est_b1 A number for the anisotropy parameter in longitude associated with variable 1.
-#' @param est_c1 A number for vector for the nonstationarity parameter in depth associated with variable 1.
-#' @param est_d1 A number for the variance parameter of the fully isotropic associated with variable 1.
-#' @param est_a2 A number for the anisotropy parameter in Latitude associated with variable 2.
-#' @param est_b2 A number for the anisotropy parameter in longitude associated with variable 2.
-#' @param est_c2 A number for vector for the nonstationarity parameter in depth associated with variable 2.
-#' @param est_d2 A number for the variance parameter of the fully isotropic associated with variable 2.
-#' @param radius A number for the radius of the sphere.
-#' @param basis1 A matrix of basis function values for variable 1.
-#' @param nb1 A number indicating the number of bases for variable 1.
-#' @param basis2 A matrix of basis function values for variable 2.
-#' @param nb2 A number indicating the number of bases for variable 2.
-#' @param splines_degree A number indicating the degree of the splines.
-#' @return Figure/plots
-#' @export
-#' @importFrom graphics par
-plot_bi_differential <- function(location, est_beta, est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1, est_d1 = NULL, est_a2, est_b2, est_c2, est_d2 = NULL, radius, basis1, nb1 = ncol(basis1), basis2, nb2 = ncol(basis2), splines_degree = 4){
-
-  BETA <- est_beta
-  SCALE_HORIZONTAL <- est_scale_horizontal
-  SCALE_VERTICAL <- est_scale_vertical
-  A1 <- est_a1
-  B1 <- est_b1
-  A2 <- est_a2
-  B2 <- est_b2
-
-  if(splines_degree == 0){
-    C1 <- est_c1
-    C2 <- est_c2
-  }else if(splines_degree > 0){
-    C1 <- basis1 %*% matrix(est_c1, ncol = 1)
-    C2 <- basis2 %*% matrix(est_c2, ncol = 1)
-  }
-
-  if(is.null(est_d1) | is.null(est_d2)){
-    D1 <- 0
-    D2 <- 0
-  }else{
-    D1 <- est_d1
-    D2 <- est_d2
-  }
-
-  cov_mat <- cov_bi_differential(location = location, beta = BETA,
-                                 scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL,
-                                 a1 = A1, b1 = B1, c1 = C1, d1 = D1, a2 = A2, b2 = B2, c2 = C2, d2 = D2,
-                                 radius = radius)
-
-  par(mfrow = c(1, 3))
-
-  variance1 <- diag(cov_mat[1:nrow(location), 1:nrow(location)])
-  variance2 <- diag(cov_mat[nrow(location) + 1:nrow(location), nrow(location) + 1:nrow(location)])
-  covariance12 <- diag(cov_mat[1:nrow(location), nrow(location) + 1:nrow(location)])
-
-  plot(variance1, location[, 3], type = 'l', xlab = 'Variance', ylab = 'Depth', ylim = c(max(location[, 3]), 0))
-  plot(variance2, location[, 3], type = 'l', xlab = 'Variance', ylab = 'Depth', ylim = c(max(location[, 3]), 0))
-  plot(covariance12 / sqrt(variance1 * variance2), location[, 3], type = 'l', xlab = 'Colocated Correlation', ylab = 'Depth', ylim = c(max(location[, 3]), 0))
-
-}
