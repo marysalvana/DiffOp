@@ -290,7 +290,7 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' the relevant sphere is the Earth with \eqn{R=6,371} km.
 #'
 #' @usage cov_bi_differential_parallel(location, beta, scale_horizontal, scale_vertical,
-#' a1, b1, c1, d1, a2, b2, c2, d2, radius)
+#' a1, b1, c1, d1, a2, b2, c2, d2, radius, num_processors)
 #'
 #' @param location An \eqn{n \times 3} matrix of coordinates.
 #' @param beta A numeric constant indicating the colocated correlation parameter.

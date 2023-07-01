@@ -5,7 +5,7 @@
 \title{Compute the bivariate differential operator cross-covariance function in parallel}
 \usage{
 cov_bi_differential_parallel(location, beta, scale_horizontal, scale_vertical,
-a1, b1, c1, d1, a2, b2, c2, d2, radius)
+a1, b1, c1, d1, a2, b2, c2, d2, radius, num_processors)
 }
 \arguments{
 \item{location}{An \eqn{n \times 3} matrix of coordinates.}
