@@ -30,25 +30,26 @@ A copy of the GNU General Public License, version 3, is available at
 ---
 
 ## How to install the DiffOp package
+1. For Apple silicon (M1/M2) Macs, make sure you installed the R binary for Apple silicon arm64 (R-4.1.2-arm64.pkg). You can download [R-4.3.1-arm64.pkg](https://cran.r-project.org/bin/macosx/) from CRAN.
 
-1. Download the github repository:
+2. Download the github repository:
      ```
      git clone https://github.com/marysalvana/DiffOp.git
      ```
 
-2. Load the necessary modules:
+3. Load the necessary modules:
    + In University of Houston (UH) Carya cluster:
      ```
      module load R/4.2.0-foss-2021b
      ```
 
-3. Build the R package:
+4. Build the R package:
      ```
      R CMD build DiffOp
      ```
 This will create the `DiffOp_1.0.0.tar.gz` file.
 
-4. Install the R package:
+5. Install the R package:
      ```
      R CMD INSTALL DiffOp_1.0.0.tar.gz
      ```
