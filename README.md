@@ -30,7 +30,7 @@ A copy of the GNU General Public License, version 3, is available at
 ---
 
 ## How to install the DiffOp package
-1. For Apple silicon (M1/M2) Macs, make sure you installed the R binary for Apple silicon arm64 (R-4.1.2-arm64.pkg). You can download [R-4.3.1-arm64.pkg](https://cran.r-project.org/bin/macosx/) from CRAN.
+1. For Apple silicon (M1/M2) Macs, make sure you installed the R binary for Apple silicon arm64. You can download [R-4.3.1-arm64.pkg](https://cran.r-project.org/bin/macosx/) from CRAN.
 
 2. Download the github repository:
      ```
