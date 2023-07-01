@@ -23,16 +23,13 @@ Maintainer: Mary Lai Salvana <yourlainess@gmail.com>
 Depends:
     R (>= 2.15.0)
 Imports:
-    graphics,
-    stats,
-    mvtnorm,
-    pbdBASE
+    stats
 Suggests:
+    MASS,
     dplyr,
     testthat,
     devtools,
     roxygen2
-Remotes: marysalvana/pbdBASE
 License: GPL-3
 URL: https://github.com/marysalvana/DiffOp
 BugReports: https://github.com/marysalvana/DiffOp/issues
