@@ -66,7 +66,7 @@ A copy of the GNU General Public License, version 3, is available at
 
 3. Install the `R` packages in Step #2 in the following order:
      ```
-     R CMD build pbdMPI		#This will create the `pbdMPI_0.4-7.tar.gz` file which you will INSTALL next.
+     R CMD build pbdMPI	#This will create the `pbdMPI_0.4-7.tar.gz` file which you will INSTALL next.
      R CMD INSTALL pbdMPI_0.4-7.tar.gz
 
      R CMD build pbdSLAP	#This will create the `pbdSLAP_0.3-2.tar.gz` file which you will INSTALL next.
