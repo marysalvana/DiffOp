@@ -43,19 +43,54 @@ A copy of the GNU General Public License, version 3, is available at
         brew install openmpi
         ```
         * In UH Carya cluster, loading the `R` module above automatically loads `OpenMPI`. No need to run any additional commands.
+    - `gfortran`:
+        * For Apple silicon (M1/M2) Macs, `gfortran` can be installed using `brew` by running the following command on the terminal: 
+        ```
+        brew install gcc
+        ```
+        * In UH Carya cluster, loading the `R` module above automatically loads `gcc`. No need to run any additional commands.
+    - `GSL`:
+        * For Apple silicon (M1/M2) Macs, `GSL` can be installed using `brew` by running the following command on the terminal: 
+        ```
+        brew install gsl
+        ```
+        * In UH Carya cluster, loading the `R` module above automatically loads `GSL`. No need to run any additional commands.
 
-2. Download the github repository:
+2. Download the necessary `R` packages from Github:
+     ```
+     git clone https://github.com/RBigData/pbdMPI.git
+     git clone https://github.com/RBigData/pbdSLAP.git
+     git clone https://github.com/marysalvana/pbdBASE.git
+     git clone https://github.com/RBigData/pbdDMAT.git
+     ```
+
+3. Install the `R` packages in Step #2 in the following order:
+     ```
+     R CMD build pbdMPI		#This will create the `pbdMPI_0.4-7.tar.gz` file which you will INSTALL next.
+     R CMD INSTALL pbdMPI_0.4-7.tar.gz
+
+     R CMD build pbdSLAP	#This will create the `pbdSLAP_0.3-2.tar.gz` file which you will INSTALL next.
+     R CMD INSTALL pbdSLAP_0.3-2.tar.gz
+
+     R CMD build pbdBASE	#This will create the `pbdBASE_0.5-3.tar.gz` file which you will INSTALL next.
+     R CMD INSTALL pbdBASE_0.5-3.tar.gz
+
+     R CMD build pbdDMAT	#This will create the `pbdDMAT_0.5-2.tar.gz` file which you will INSTALL next.
+     R CMD INSTALL pbdDMAT_0.5-2.tar.gz
+     ```
+
+4. Download the github repository:
      ```
      git clone https://github.com/marysalvana/DiffOp.git
      ```
 
-3. Build the R package:
+5. Build the R package:
      ```
      R CMD build DiffOp
      ```
-This will create the `DiffOp_1.0.0.tar.gz` file.
+   This will create the `DiffOp_1.0.0.tar.gz` file.
 
-4. Install the R package:
+6. Install the R package:
      ```
      R CMD INSTALL DiffOp_1.0.0.tar.gz
      ```
