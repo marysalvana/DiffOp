@@ -56,7 +56,7 @@ A copy of the GNU General Public License, version 3, is available at
         ```
         * In UH Carya cluster, loading the `R` module above automatically loads `GSL`. No need to run any additional commands.
 
-2. Create a Makevars file and define the paths to source files:
+2. Create a Makevars file and define the paths to the source files of the software in Step #1:
      ```
      mkdir ~/.R
      vi ~/.R/Makevars
