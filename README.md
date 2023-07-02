@@ -40,7 +40,7 @@ A copy of the GNU General Public License, version 3, is available at
     - `OpenMPI`:
         * For Apple silicon (M1/M2) Macs, `OpenMPI` can be installed using `brew` by running the following command on the terminal: 
         ```
-        brew install openmpi
+        brew install open-mpi
         ```
         * In UH Carya cluster, loading the `R` module above automatically loads `OpenMPI`. No need to run any additional commands.
     - `gfortran`:
