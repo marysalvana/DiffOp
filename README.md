@@ -56,7 +56,23 @@ A copy of the GNU General Public License, version 3, is available at
         ```
         * In UH Carya cluster, loading the `R` module above automatically loads `GSL`. No need to run any additional commands.
 
-2. Download the necessary `R` packages from Github:
+2. Create a Makevars file and define the paths to source files:
+     ```
+     mkdir ~/.R
+     vi ~/.R/Makevars
+     ```
+     Inside `~/.R/Makevars`, add the following:
+     ```
+     export CPATH=/opt/homebrew/Cellar/gsl/2.7.1/include/
+     export LIBRARY_PATH=/opt/homebrew/Cellar/gsl/2.7.1/lib/
+     export LD_LIBRARY_PATH=/opt/homebrew/Cellar/gsl/2.7.1/lib/:$LD_LIBRARY_PATH
+
+     FC = /usr/local/gfortran/bin/gfortran
+     F77 = /usr/local/gfortran/bin/gfortran
+     FLIBS = -L/usr/local/gfortran/lib
+     ```
+
+3. Download the necessary `R` packages from Github:
      ```
      git clone https://github.com/RBigData/pbdMPI.git
      git clone https://github.com/RBigData/pbdSLAP.git
@@ -64,7 +80,7 @@ A copy of the GNU General Public License, version 3, is available at
      git clone https://github.com/RBigData/pbdDMAT.git
      ```
 
-3. Install the `R` packages in Step #2 in the following order:
+4. Install the `R` packages in Step #2 in the following order:
      ```
      R CMD build pbdMPI	#This will create the `pbdMPI_0.4-7.tar.gz` file which you will INSTALL next.
      R CMD INSTALL pbdMPI_0.4-7.tar.gz
@@ -79,18 +95,18 @@ A copy of the GNU General Public License, version 3, is available at
      R CMD INSTALL pbdDMAT_0.5-2.tar.gz
      ```
 
-4. Download the github repository:
+5. Download the github repository:
      ```
      git clone https://github.com/marysalvana/DiffOp.git
      ```
 
-5. Build the R package:
+6. Build the R package:
      ```
      R CMD build DiffOp
      ```
    This will create the `DiffOp_1.0.0.tar.gz` file.
 
-6. Install the R package:
+7. Install the R package:
      ```
      R CMD INSTALL DiffOp_1.0.0.tar.gz
      ```
