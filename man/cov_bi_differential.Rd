@@ -5,7 +5,8 @@
 \title{Compute the bivariate differential operator cross-covariance function}
 \usage{
 cov_bi_differential(location, beta, scale_horizontal, scale_vertical,
-a1, b1, c1, d1, a2, b2, c2, d2, radius)
+a1, b1, c1, d1, a2, b2, c2, d2, radius, splines_degree, knots1, knots2,
+c1_coef, c2_coef)
 }
 \arguments{
 \item{location}{An \eqn{n \times 3} matrix of coordinates.}
@@ -33,6 +34,21 @@ a1, b1, c1, d1, a2, b2, c2, d2, radius)
 \item{d2}{A numeric constant indicating the variance parameter from the fully isotropic component associated with variable 2.}
 
 \item{radius}{A numeric constant indicating the radius of the sphere.}
+
+\item{splines_degree}{A number indicating the degree of the splines when
+using splines to characterize the nonstationary parameters c1 and c2.}
+
+\item{knots1}{A vector of knot locations for variable 1 when using splines to
+characterize c1.}
+
+\item{knots2}{A vector of knot locations for variable 2 when using splines to
+characterize c2.}
+
+\item{c1_coef}{A numeric vector indicating the splines coefficients for the
+nonstationary with depth parameter c1 associated with variable 1.}
+
+\item{c2_coef}{A numeric vector indicating the splines coefficients for the
+nonstationary with depth parameter c2 associated with variable 2.}
 }
 \value{
 A matrix of dimension \eqn{2 n \times 2 n}.

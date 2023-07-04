@@ -5,8 +5,8 @@
 \title{Maximum Likelihood Estimation of the parameters of the bivariate differential operator cross-covariance function}
 \usage{
 est_bi_differential_mle(residuals, location, init_beta, init_scale_horizontal,
-init_scale_vertical, init_a1, init_b1, init_c1, init_d1,
-init_a2, init_b2, init_c2, init_d2,
+init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1,
+init_a2, init_b2, init_c2_coef, init_d2,
 beta_fix, scale_horizontal_fix, scale_vertical_fix,
 a1_fix, b1_fix, c1_fix, d1_fix, a2_fix, b2_fix, c2_fix, d2_fix,
 radius, splines_degree, knots1, knots2, iterlim, stepmax, hessian)
@@ -32,8 +32,9 @@ anisotropy in latitude parameter associated with variable 1.}
 \item{init_b1}{A numeric constant indicating the initial value for the
 anisotropy in longitude parameter associated with variable 1.}
 
-\item{init_c1}{A numeric vector indicating the initial value for the
-nonstationary parameters with depth associated with variable 1.}
+\item{init_c1_coef}{A numeric vector indicating the initial value for the
+splines coefficients for the nonstationary with depth parameter c1
+associated with variable 1.}
 
 \item{init_d1}{A numeric constant indicating the initial value for the
 variance parameter from the fully isotropic component associated with variable 1.}
@@ -44,8 +45,9 @@ anisotropy in latitude parameter associated with variable 2.}
 \item{init_b2}{A numeric constant indicating the initial value for the
 anisotropy in longitude parameter associated with variable 2.}
 
-\item{init_c2}{A numeric vector indicating the initial value for the
-nonstationary parameters with depth associated with variable 2.}
+\item{init_c2_coef}{A numeric vector indicating the initial value for the
+splines coefficients for the nonstationary with depth parameter c2
+associated with variable 2.}
 
 \item{init_d2}{A numeric constant indicating the initial value for the
 variance parameter from the fully isotropic component associated with variable 2.}
@@ -91,7 +93,8 @@ vertical scale parameter should not be estimated.}
 }
 \value{
 A list containing the values of the log likelihood function,
-estimated parameters, and their corresponding standard deviations.
+estimated parameters and their corresponding standard deviations,
+splines degree, and pre-specified knots.
 }
 \description{
 \code{est_bi_differential_mle} performs maximum likelihood estimation using a
@@ -161,18 +164,18 @@ INIT_C1 <- runif(length(KNOTS1) + SPLINES_DEGREE + 1, -5, 5)
 set.seed(1236)
 INIT_C2 <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
 
-\dontrun{est_params <- est_bi_differential_mle(residuals = Z, location = loc3d, init_beta = INIT_BETA,
+\dontrun{est_params_mle <- est_bi_differential_mle(residuals = Z, location = loc3d, init_beta = INIT_BETA,
                                  init_scale_horizontal = INIT_SCALE_HORIZONTAL,
                                  init_scale_vertical = INIT_SCALE_VERTICAL,
                                  init_a1 = INIT_A1, init_b1 = INIT_B1,
-                                 init_c1 = INIT_C1, init_d1 = INIT_D1,
+                                 init_c1_coef = INIT_C1, init_d1 = INIT_D1,
                                  init_a2 = INIT_A2, init_b2 = INIT_B2,
-                                 init_c2 = INIT_C2, init_d2 = INIT_D2,
+                                 init_c2_coef = INIT_C2, init_d2 = INIT_D2,
                                  d1_fix = TRUE, d2_fix = TRUE,
                                  radius = earthRadiusKm,
                                  splines_degree = SPLINES_DEGREE,
                                  knots1 = KNOTS1, knots2 = KNOTS2,
-                                 iterlim = 1, hessian = FALSE)}
+                                 iterlim = 1, hessian = T)}
 
 
 }
