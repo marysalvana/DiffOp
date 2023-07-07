@@ -457,7 +457,8 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #'
 #' @useDynLib DiffOp, .registration=TRUE
 #'
-#' @return A list containing the values of the minimum of the objective function,
+#' @return A list containing the values of the convergence code,
+#' minimum of the objective function,
 #' estimated parameters and their corresponding standard deviations,
 #' splines degree, and pre-specified knots.
 #'
@@ -523,9 +524,6 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
     print(paste("theta = c(", paste(round(theta, 8), collapse=","), ")", sep = ''))
 
     if(c1_fix){
-      #if(theta[1] < 0 | theta[1] > 1){
-      #  return(Inf)
-      #}
 
       BETA <- init_beta#theta[1]
       SCALE_HORIZONTAL <- exp(init_scale_horizontal)#exp(theta[2])
@@ -544,7 +542,7 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
 
         BETA <- 2 * (1 / (1 + exp(-theta[1]))) - 1
 
-        if(a1_fix){
+        if(a1_fix & b1_fix & a2_fix & b2_fix){
 
           A1 <- init_a1
           B1 <- init_b1
@@ -572,7 +570,7 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
 
               if(d1_fix){
                 D1 <- init_d1
-                C2_coef <- theta[nb1 + 1 + 1:nb2]
+                C2_coef <- theta[1 + nb1 + 1:nb2]
                 D2 <- init_d2
               }else{
                 D1 <- theta[nb1 + 2]
@@ -612,12 +610,41 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
                 D2 <- theta[nb1 + nb2 + 5]
               }
             }
+          }else if(!scale_horizontal_fix & !scale_vertical_fix){
+
+            SCALE_HORIZONTAL <- exp(theta[2])
+            SCALE_VERTICAL <- exp(theta[3])
+
+            if(splines_degree == 0){
+
+              C1_coef <- theta[4]
+
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[5]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[5]
+                C2_coef <- theta[6]
+                D2 <- theta[7]
+              }
+            }else if(splines_degree > 0){
+
+              C1_coef <- theta[3 + 1:nb1]
+
+              if(d1_fix){
+                D1 <- init_d1
+                C2_coef <- theta[nb1 + 3 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[nb1 + 4]
+                C2_coef <- theta[nb1 + 4 + 1:nb2]
+                D2 <- theta[nb1 + nb2 + 5]
+              }
+            }
           }
         }else if(!a1_fix){
           if(scale_horizontal_fix & scale_vertical_fix){
-            if(theta[2] < 0){
-              return(Inf)
-            }
 
             SCALE_HORIZONTAL <- init_scale_horizontal
             SCALE_VERTICAL <- init_scale_vertical
@@ -645,9 +672,9 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
 
               if(d1_fix){
                 D1 <- init_d1
-                A2 <- theta[nb1 + 4]
-                B2 <- theta[nb1 + 5]
-                C2_coef <- theta[nb1 + 5 + 1:nb2]
+                A2 <- theta[3 + nb1 + 1]
+                B2 <- theta[3 + nb1 + 2]
+                C2_coef <- theta[3 + nb1 + 2 + 1:nb2]
                 D2 <- init_d2
               }else{
                 D1 <- theta[nb1 + 4]
@@ -661,8 +688,8 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
 
             SCALE_HORIZONTAL <- exp(theta[2])
             SCALE_VERTICAL <- exp(theta[3])
-            A1 <- 0.1 * (1 / (1 + exp(-theta[4])))
-            B1 <- 0.1 * (1 / (1 + exp(-theta[5]))) - 0.1 / 2
+            A1 <- theta[4]
+            B1 <- theta[5]
 
             if(splines_degree == 0){
               C1_coef <- theta[6]
@@ -684,11 +711,10 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
               C1_coef <- theta[5 + 1:nb1]
 
               if(d1_fix){
-                print("YOU HERE")
                 D1 <- init_d1
-                A2 <- 0.1 * (1 / (1 + exp(-theta[5 + nb1 + 1]))) - 0.1 / 2 #theta[nb1 + 6]
-                B2 <- 0.1 * (1 / (1 + exp(-theta[5 + nb1 + 2]))) - 0.1 / 2 #theta[nb1 + 7]
-                C2_coef <- theta[nb1 + 7 + 1:nb2]
+                A2 <- theta[5 + nb1 + 1]
+                B2 <- theta[5 + nb1 + 2]
+                C2_coef <- theta[5 + nb1 + 2 + 1:nb2]
                 D2 <- init_d2
               }else{
                 D1 <- theta[nb1 + 6]
@@ -698,13 +724,54 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
                 D2 <- theta[nb1 + nb2 + 9]
               }
             }
+          }else if(!scale_horizontal_fix & scale_vertical_fix){
+
+            SCALE_HORIZONTAL <- exp(theta[2])
+            SCALE_VERTICAL <- init_scale_vertical
+            A1 <- theta[3]
+            B1 <- theta[4]
+
+            if(splines_degree == 0){
+              C1_coef <- theta[5]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[6]
+                B2 <- theta[7]
+                C2_coef <- theta[8]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[6]
+                A2 <- theta[7]
+                B2 <- theta[8]
+                C2_coef <- theta[9]
+                D2 <- theta[10]
+              }
+            }else if(splines_degree > 0){
+              C1_coef <- theta[4 + 1:nb1]
+
+              if(d1_fix){
+                print("YOU HERE")
+                D1 <- init_d1
+                A2 <- theta[4 + nb1 + 1]
+                B2 <- theta[4 + nb1 + 2]
+                C2_coef <- theta[4 + nb1 + 2 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[4 + nb1 + 1]
+                A2 <- theta[4 + nb1 + 2]
+                B2 <- theta[4 + nb1 + 3]
+                C2_coef <- theta[4 + nb1 + 3 + 1:nb2]
+                D2 <- theta[4 + nb1 + 3 + nb2 + 1]
+              }
+            }
           }
         }
       }else if(beta_fix){
 
         BETA <- init_beta
 
-        if(a1_fix){
+        if(a1_fix & b1_fix & a2_fix & b2_fix){
 
           A1 <- init_a1
           B1 <- init_b1
@@ -775,9 +842,6 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
           }
         }else if(!a1_fix){
           if(scale_horizontal_fix & scale_vertical_fix){
-            if(theta[1] < 0){
-              return(Inf)
-            }
 
             SCALE_HORIZONTAL <- init_scale_horizontal
             SCALE_VERTICAL <- init_scale_vertical
@@ -805,9 +869,9 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
 
               if(d1_fix){
                 D1 <- init_d1
-                A2 <- theta[nb1 + 3]
-                B2 <- theta[nb1 + 4]
-                C2_coef <- theta[nb1 + 4 + 1:nb2]
+                A2 <- theta[2 + nb1 + 1]
+                B2 <- theta[2 + nb1 + 2]
+                C2_coef <- theta[2 + nb1 + 2 + 1:nb2]
                 D2 <- init_d2
               }else{
                 D1 <- theta[nb1 + 3]
@@ -905,10 +969,24 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
                print.level = 2, iterlim = iterlim, stepmax = stepmax)
   }else{
     if(!beta_fix){
-      if(a1_fix){
+      if(a1_fix & b1_fix & a2_fix & b2_fix){
         if(scale_horizontal_fix & scale_vertical_fix){
           if(d1_fix){
-            fit <- optim(par = c(init_beta, init_c1_coef, init_c2_coef), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
+            fit <- nlm(NEGLOGLIK, c(init_beta, init_c1_coef, init_c2_coef), hessian = hessian,
+                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
+
+            BETA <- 2 * (1 / (1 + exp(-fit$estimate[1]))) - 1
+            SCALE_HORIZONTAL <- init_scale_horizontal
+            SCALE_VERTICAL <- init_scale_vertical
+            A1 <- init_a1
+            B1 <- init_b1
+            C1_coef <- fit$estimate[1 + 1:nb1]
+            D1 <- init_d1
+
+            A2 <- init_a2
+            B2 <- init_b2
+            C2_coef <- fit$estimate[1 + nb1 + 1:nb2]
+            D2 <- init_d2
           }else{
             fit <- optim(par = c(init_beta, init_c1_coef, init_d1, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
           }
@@ -922,40 +1000,86 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
       }else{
         if(scale_horizontal_fix & scale_vertical_fix){
           if(d1_fix){
-            fit <- optim(par = c(init_beta, init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
+            fit <- nlm(NEGLOGLIK, c(init_beta, init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef), hessian = hessian,
+                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
+
+            BETA <- 2 * (1 / (1 + exp(-fit$estimate[1]))) - 1
+            SCALE_HORIZONTAL <- init_scale_horizontal
+            SCALE_VERTICAL <- init_scale_vertical
+            A1 <- fit$estimate[2]
+            B1 <- fit$estimate[3]
+            C1_coef <- fit$estimate[3 + 1:nb1]
+            D1 <- init_d1
+
+            A2 <- fit$estimate[3 + nb1 + 1]
+            B2 <- fit$estimate[3 + nb1 + 2]
+            C2_coef <- fit$estimate[3 + nb1 + 2 + 1:nb2]
+            D2 <- init_d2
           }else{
             fit <- optim(par = c(init_beta, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
           }
-        }else{
+        }else if(!scale_horizontal_fix & !scale_vertical_fix){
           if(d1_fix){
-            print("YOU ARE HERE")
             fit <- nlm(NEGLOGLIK, c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef), hessian = hessian,
                        print.level = 2, iterlim = iterlim, stepmax = stepmax)
 
-            BETA <- fit$estimate[1]
+            BETA <- 2 * (1 / (1 + exp(-fit$estimate[1]))) - 1
             SCALE_HORIZONTAL <- exp(fit$estimate[2])
             SCALE_VERTICAL <- exp(fit$estimate[3])
-            A1 <- 0.1 * (1 / (1 + exp(-fit$estimate[4])))
-            B1 <- 0.1 * (1 / (1 + exp(-fit$estimate[5]))) - 0.1 / 2
+            A1 <- fit$estimate[4]
+            B1 <- fit$estimate[5]
             C1_coef <- fit$estimate[5 + 1:nb1]
             D1 <- init_d1
 
-            A2 <- 0.1 * (1 / (1 + exp(-fit$estimate[5 + nb1 + 1]))) - 0.1 / 2
-            B2 <- 0.1 * (1 / (1 + exp(-fit$estimate[5 + nb1 + 2]))) - 0.1 / 2
-            C2_coef <- fit$estimate[nb1 + 7 + 1:nb2]
+            A2 <- fit$estimate[5 + nb1 + 1]
+            B2 <- fit$estimate[5 + nb1 + 2]
+            C2_coef <- fit$estimate[5 + nb1 + 2 + 1:nb2]
             D2 <- init_d2
+          }else{
+            fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
+          }
+        }else if(!scale_horizontal_fix & scale_vertical_fix){
+          if(d1_fix){
+            print("YOU ARE HERE")
+            fit <- nlm(NEGLOGLIK, c(init_beta, init_scale_horizontal, init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef), hessian = hessian,
+                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
 
-            results <- list(minimum = fit$minimum, est_beta = BETA, est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL, est_a1 = A1, est_b1 = B1, est_c1_coef = C1_coef, est_d1 = D1, est_a2 = A2, est_b2 = B2, est_c2_coef = C2_coef, est_d2 = D2, splines_degree = splines_degree, knots1 = knots1, knots2 = knots2)
+            BETA <- 2 * (1 / (1 + exp(-fit$estimate[1]))) - 1
+            SCALE_HORIZONTAL <- exp(fit$estimate[2])
+            SCALE_VERTICAL <- init_scale_vertical
+            A1 <- fit$estimate[3]
+            B1 <- fit$estimate[4]
+            C1_coef <- fit$estimate[4 + 1:nb1]
+            D1 <- init_d1
+
+            A2 <- fit$estimate[4 + nb1 + 1]
+            B2 <- fit$estimate[4 + nb1 + 2]
+            C2_coef <- fit$estimate[4 + nb1 + 2 + 1:nb2]
+            D2 <- init_d2
           }else{
             fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
           }
         }
       }
     }else{
-      if(a1_fix){
+      if(a1_fix & b1_fix & a2_fix & b2_fix){
         if(scale_horizontal_fix & scale_vertical_fix){
           if(d1_fix){
-            fit <- optim(par = c(init_c1_coef, init_c2_coef), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
+            fit <- nlm(NEGLOGLIK, c(init_c1_coef, init_c2_coef), hessian = hessian,
+                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
+
+            BETA <- init_beta
+            SCALE_HORIZONTAL <- init_scale_horizontal
+            SCALE_VERTICAL <- init_scale_vertical
+            A1 <- init_a1
+            B1 <- init_b1
+            C1_coef <- fit$estimate[1:nb1]
+            D1 <- init_d1
+
+            A2 <- init_a2
+            B2 <- init_b2
+            C2_coef <- fit$estimate[nb1 + 1:nb2]
+            D2 <- init_d2
           }else{
             fit <- optim(par = c(init_c1_coef, init_d1, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
           }
@@ -969,7 +1093,21 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
       }else{
         if(scale_horizontal_fix & scale_vertical_fix){
           if(d1_fix){
-            fit <- optim(par = c(init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
+            fit <- nlm(NEGLOGLIK, c(init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef), hessian = hessian,
+                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
+
+            BETA <- init_beta
+            SCALE_HORIZONTAL <- init_scale_horizontal
+            SCALE_VERTICAL <- init_scale_vertical
+            A1 <- fit$estimate[1]
+            B1 <- fit$estimate[2]
+            C1_coef <- fit$estimate[2 + 1:nb1]
+            D1 <- init_d1
+
+            A2 <- fit$estimate[2 + nb1 + 1]
+            B2 <- fit$estimate[2 + nb1 + 2]
+            C2_coef <- fit$estimate[2 + nb1 + 2 + 1:nb2]
+            D2 <- init_d2
           }else{
             fit <- optim(par = c(init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
           }
@@ -983,7 +1121,7 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
       }
     }
   }
-
+  results <- list(convergence_code = fit$code, minimum = fit$minimum, theta = fit$estimate, est_beta = BETA, est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL, est_a1 = A1, est_b1 = B1, est_c1_coef = C1_coef, est_d1 = D1, est_a2 = A2, est_b2 = B2, est_c2_coef = C2_coef, est_d2 = D2, splines_degree = splines_degree, knots1 = knots1, knots2 = knots2)
   return(results)
 }
 
@@ -1063,7 +1201,8 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
 #'
 #' @useDynLib DiffOp, .registration=TRUE
 #'
-#' @return A list containing the values of the log likelihood function,
+#' @return A list containing the values of the convergence code,
+#' log likelihood function,
 #' estimated parameters and their corresponding standard deviations,
 #' splines degree, and pre-specified knots.
 #'
@@ -1312,9 +1451,6 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
               C1_coef <- theta[5 + 1:nb1]
 
               if(d1_fix){
-
-                print("YOU HERE")
-
                 D1 <- init_d1
                 A2 <- 0.1 * (1 / (1 + exp(-theta[5 + nb1 + 1]))) - 0.1 / 2
                 B2 <- 0.1 * (1 / (1 + exp(-theta[5 + nb1 + 2]))) - 0.1 / 2
@@ -1326,6 +1462,49 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
                 B2 <- theta[nb1 + 8]
                 C2_coef <- theta[nb1 + 8 + 1:nb2]
                 D2 <- theta[nb1 + nb2 + 9]
+              }
+            }
+          }else if(!scale_horizontal_fix & scale_vertical_fix){
+
+            SCALE_HORIZONTAL <- exp(theta[2])
+            SCALE_VERTICAL <- init_scale_vertical
+            A1 <- 0.1 * (1 / (1 + exp(-theta[3])))
+            B1 <- 0.1 * (1 / (1 + exp(-theta[4]))) - 0.1 / 2
+
+            if(splines_degree == 0){
+              C1_coef <- theta[5]
+
+              if(d1_fix){
+                D1 <- init_d1
+                A2 <- theta[6]
+                B2 <- theta[7]
+                C2_coef <- theta[8]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[6]
+                A2 <- theta[7]
+                B2 <- theta[8]
+                C2_coef <- theta[9]
+                D2 <- theta[10]
+              }
+            }else if(splines_degree > 0){
+              C1_coef <- theta[4 + 1:nb1]
+
+              if(d1_fix){
+
+                print("YOU HERE")
+
+                D1 <- init_d1
+                A2 <- 0.1 * (1 / (1 + exp(-theta[4 + nb1 + 1]))) - 0.1 / 2
+                B2 <- 0.1 * (1 / (1 + exp(-theta[4 + nb1 + 2]))) - 0.1 / 2
+                C2_coef <- theta[4 + nb1 + 2 + 1:nb2]
+                D2 <- init_d2
+              }else{
+                D1 <- theta[4 + nb1 + 1]
+                A2 <- theta[4 + nb1 + 2]
+                B2 <- theta[4 + nb1 + 3]
+                C2_coef <- theta[4 + nb1 + 3 + 1:nb2]
+                D2 <- theta[4 + nb1 + 3 + nb2 + 1]
               }
             }
           }
@@ -1555,14 +1734,13 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
           }else{
             fit <- optim(par = c(init_beta, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
           }
-        }else{
+        }else if(!scale_horizontal_fix & !scale_vertical_fix){
           if(d1_fix){
-            print("YOU ARE HERE")
 
             fit <- nlm(NEGLOGLIK, c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef), hessian = hessian,
                        print.level = 2, iterlim = iterlim, stepmax = stepmax)
 
-            BETA <- fit$estimate[1]
+            BETA <- 2 * (1 / (1 + exp(-fit$estimate[1]))) - 1
             SCALE_HORIZONTAL <- exp(fit$estimate[2])
             SCALE_VERTICAL <- exp(fit$estimate[3])
             A1 <- 0.1 * (1 / (1 + exp(-fit$estimate[4])))
@@ -1572,11 +1750,30 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
 
             A2 <- 0.1 * (1 / (1 + exp(-fit$estimate[5 + nb1 + 1]))) - 0.1 / 2
             B2 <- 0.1 * (1 / (1 + exp(-fit$estimate[5 + nb1 + 2]))) - 0.1 / 2
-            C2_coef <- fit$estimate[nb1 + 7 + 1:nb2]
+            C2_coef <- fit$estimate[5 + nb1 + 2 + 1:nb2]
             D2 <- init_d2
+          }else{
+            fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
+          }
+        }else if(!scale_horizontal_fix & scale_vertical_fix){
+          if(d1_fix){
+            print("YOU ARE HERE")
 
-            results <- list(minimum = fit$minimum, est_beta = BETA, est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL, est_a1 = A1, est_b1 = B1, est_c1_coef = C1_coef, est_d1 = D1, est_a2 = A2, est_b2 = B2, est_c2_coef = C2_coef, est_d2 = D2, splines_degree = splines_degree, knots1 = knots1, knots2 = knots2)
+            fit <- nlm(NEGLOGLIK, c(init_beta, init_scale_horizontal, init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef), hessian = hessian,
+                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
 
+            BETA <- 2 * (1 / (1 + exp(-fit$estimate[1]))) - 1
+            SCALE_HORIZONTAL <- exp(fit$estimate[2])
+            SCALE_VERTICAL <- init_scale_vertical
+            A1 <- 0.1 * (1 / (1 + exp(-fit$estimate[3])))
+            B1 <- 0.1 * (1 / (1 + exp(-fit$estimate[4]))) - 0.1 / 2
+            C1_coef <- fit$estimate[4 + 1:nb1]
+            D1 <- init_d1
+
+            A2 <- 0.1 * (1 / (1 + exp(-fit$estimate[4 + nb1 + 1]))) - 0.1 / 2
+            B2 <- 0.1 * (1 / (1 + exp(-fit$estimate[4 + nb1 + 2]))) - 0.1 / 2
+            C2_coef <- fit$estimate[4 + nb1 + 2 + 1:nb2]
+            D2 <- init_d2
           }else{
             fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
           }
@@ -1632,6 +1829,8 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
   #  "est_beta_sd" = est_sd[1], "est_scale_horizontal_sd" = est_sd[2], "est_scale_vertical_sd" = est_sd[3],
   #  "est_a1_sd" = est_sd[4], "est_b1_sd" = est_sd[5], "est_c1_sd" = est_sd[5 + 1:nb1], "est_d1_sd" = NA,
   #  "est_a2_sd" = est_sd[5 + nb1 + 1], "est_b2_sd" = est_sd[5 + nb1 + 2], "est_c2_sd" = est_sd[5 + nb1 + 2 + 1:nb2], "est_d2" = NA))
+
+  results <- list(convergence_code = fit$code, loglikelihood_value = -fit$minimum, theta = fit$estimate, est_beta = BETA, est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL, est_a1 = A1, est_b1 = B1, est_c1_coef = C1_coef, est_d1 = D1, est_a2 = A2, est_b2 = B2, est_c2_coef = C2_coef, est_d2 = D2, splines_degree = splines_degree, knots1 = knots1, knots2 = knots2)
 
   return(results)
 }

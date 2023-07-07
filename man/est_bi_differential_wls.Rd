@@ -102,7 +102,8 @@ in the weighted least squares objective function.}
 \item{hessian}{If \code{TRUE}, the hessian is not returned.}
 }
 \value{
-A list containing the values of the minimum of the objective function,
+A list containing the values of the convergence code,
+minimum of the objective function,
 estimated parameters and their corresponding standard deviations,
 splines degree, and pre-specified knots.
 }

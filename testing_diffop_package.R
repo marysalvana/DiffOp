@@ -110,7 +110,7 @@ plot(emp_cov[1, seq(1, 1000, by = 10)])
 KNOTS1 <- c(0.1, 0.5, 0.9)
 KNOTS2 <- c(0.1, 0.5, 0.9)
 
-INIT_BETA = 0.6
+INIT_BETA = 1
 INIT_SCALE_HORIZONTAL = log(0.02)
 INIT_SCALE_VERTICAL = log(0.4)
 INIT_A1 = INIT_A2 = 0.005
@@ -127,44 +127,66 @@ INIT_C2 <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -0.1, 0.1)
 
 est_params_wls <- est_bi_differential_wls(empirical_values = emp_cov, location = loc3d,
                                       init_beta = INIT_BETA,
-                                      init_scale_horizontal = INIT_SCALE_HORIZONTAL,
-                                      init_scale_vertical = INIT_SCALE_VERTICAL,
-                                      init_a1 = INIT_A1, init_b1 = INIT_B1,
+                                      init_scale_horizontal = SCALE_HORIZONTAL,
+                                      init_scale_vertical = SCALE_VERTICAL,
+                                      init_a1 = A1, init_b1 = B1,
                                       init_c1_coef = INIT_C1, init_d1 = INIT_D1,
-                                      init_a2 = INIT_A2, init_b2 = INIT_B2,
+                                      init_a2 = A2, init_b2 = B2,
                                       init_c2_coef = INIT_C2, init_d2 = INIT_D2,
-                                      d1_fix = TRUE, d2_fix = TRUE,
+                                      a1_fix = TRUE, b1_fix = TRUE, a2_fix = TRUE, b2_fix = TRUE,
+                                      beta_fix = TRUE, scale_horizontal_fix = TRUE, scale_vertical_fix = TRUE, d1_fix = TRUE, d2_fix = TRUE,
                                       radius = earthRadiusKm,
                                       splines_degree = SPLINES_DEGREE,
                                       knots1 = KNOTS1, knots2 = KNOTS2,
-                                      w1 = 100, w2 = 50000, w12 = 1000,
-                                      iterlim = 1000, hessian = T)
+                                      w1 = 0, w2 = 0, w12 = 1000,
+                                      iterlim = 1000, stepmax = 10, hessian = T)
 
-theta = c(1.58e-06,-4.7813677,1.04131888,-3.1830562,0.04081191,0.00159106,-0.00666072,-0.12630797,0.1927597,-0.13017259,-0.06530689,-0.01515386,-0.0457482,0.01752583,0.02381038,-0.04111447,0.00381765,0.03179052,0.01964975)
+#theta = c(1.09860651,8.85e-06,9.3e-06,0.55610915,1.06328949,0.71657971,-1.67041401,0.50020981,0.55009588,9.06e-06,9.1e-06,0.76672491,0.85972797,-1.51263424,0.19974999,1.29147789,0.76841933)
+
+theta = c(-0.35699489,-0.306007,0.08675093,-0.03231822,0.01926797,0.00011174,-0.35695048,-0.30596901,0.08674003,-0.03231428,0.01926572,0.0003118)
 
 est_params_wls <- est_bi_differential_wls(empirical_values = emp_cov, location = loc3d,
-                                          init_beta = theta[1],
-                                          init_scale_horizontal = theta[2],
-                                          init_scale_vertical = theta[3],
-                                          init_a1 = theta[4], init_b1 = theta[5],
-                                          init_c1_coef = theta[5 + 1:length(INIT_C1)], init_d1 = INIT_D1,
-                                          init_a2 = theta[5 + length(INIT_C1) + 1], init_b2 = theta[5 + length(INIT_C1) + 2],
-                                          init_c2_coef = theta[5 + length(INIT_C1) + 2 + 1:length(INIT_C2)], init_d2 = INIT_D2,
-                                          d1_fix = TRUE, d2_fix = TRUE,
+                                          init_beta = INIT_BETA,
+                                          init_scale_horizontal = SCALE_HORIZONTAL,
+                                          init_scale_vertical = SCALE_VERTICAL,
+                                          init_a1 = A1, init_b1 = B1,
+                                          init_c1_coef = theta[1:6], init_d1 = INIT_D1,
+                                          init_a2 = A2, init_b2 = B2,
+                                          init_c2_coef = theta[6 + 1:6], init_d2 = INIT_D2,
+                                          a1_fix = TRUE, b1_fix = TRUE, a2_fix = TRUE, b2_fix = TRUE,
+                                          beta_fix = TRUE, scale_horizontal_fix = TRUE, scale_vertical_fix = TRUE, d1_fix = TRUE, d2_fix = TRUE,
                                           radius = earthRadiusKm,
                                           splines_degree = SPLINES_DEGREE,
                                           knots1 = KNOTS1, knots2 = KNOTS2,
-                                          w1 = 100, w2 = 50000, w12 = 1000,
-                                          iterlim = 5, hessian = T)
+                                          w1 = 100, w2 = 100, w12 = 0,
+                                          iterlim = 1000, stepmax = 10, hessian = T)
 
-theta = c(-0.05355685,-4.10759032,1.66002015,-5.67731641,-0.11125447,-0.02032645,-0.06730041,0.0420658,-0.07155357,0.03149789,0.0051676,-0.03456796,-0.00634583,0.00859718,0.01393778,-0.02207468,0.00269277,0.01529831,0.01034171)
+theta = c(-0.61850718,-1.06475112,-0.49701469,-1.41274972,-0.19323138,-0.31166466,-0.13661519,-0.01966373,-0.51527089,-0.15759114,-0.24551491,-0.18268225)
 
-est_cov_mat <- cov_bi_differential(location = loc3d, beta = est_params_wls$est_beta, scale_horizontal = est_params_wls$est_scale_horizontal, scale_vertical = est_params_wls$est_scale_vertical, a1 = est_params_wls$est_a1, b1 = est_params_wls$est_b1, c1_coef = est_params_wls$est_c1_coef, d1 = est_params_wls$est_d1, a2 = est_params_wls$est_a2, b2 = est_params_wls$est_b2, c2_coef = est_params_wls$est_c2_coef, d2 = est_params_wls$est_d2, radius = earthRadiusKm, splines_degree = est_params_wls$splines_degree, knots1 = est_params_wls$knots1, knots2 = est_params_wls$knots2)
+est_params_wls <- est_bi_differential_wls(empirical_values = emp_cov, location = loc3d,
+                                          init_beta = INIT_BETA,
+                                          init_scale_horizontal = SCALE_HORIZONTAL,
+                                          init_scale_vertical = SCALE_VERTICAL,
+                                          init_a1 = A1, init_b1 = B1,
+                                          init_c1_coef = theta[1:6], init_d1 = INIT_D1,
+                                          init_a2 = A2, init_b2 = B2,
+                                          init_c2_coef = theta[6 + 1:6], init_d2 = INIT_D2,
+                                          a1_fix = TRUE, b1_fix = TRUE, a2_fix = TRUE, b2_fix = TRUE,
+                                          beta_fix = TRUE, scale_horizontal_fix = TRUE, scale_vertical_fix = TRUE, d1_fix = TRUE, d2_fix = TRUE,
+                                          radius = earthRadiusKm,
+                                          splines_degree = SPLINES_DEGREE,
+                                          knots1 = KNOTS1, knots2 = KNOTS2,
+                                          w1 = 100, w2 = 100, w12 = 10,
+                                          iterlim = 1000, stepmax = 10, hessian = T)
 
-est_variance1 <- diag(est_cov_mat[1:nrow(loc3d), 1:nrow(loc3d)])
-est_variance2 <- diag(est_cov_mat[nrow(loc3d) + 1:nrow(loc3d), nrow(loc3d) + 1:nrow(loc3d)])
-est_covariance12 <- diag(est_cov_mat[1:nrow(loc3d), nrow(loc3d) + 1:nrow(loc3d)])
-est_correlation12 <- est_covariance12 / sqrt(est_variance1 * est_variance2)
+wls_est_cov_mat <- cov_bi_differential(location = loc3d, beta = est_params_wls$est_beta, scale_horizontal = est_params_wls$est_scale_horizontal, scale_vertical = est_params_wls$est_scale_vertical, a1 = est_params_wls$est_a1, b1 = est_params_wls$est_b1, c1_coef = est_params_wls$est_c1_coef, d1 = est_params_wls$est_d1, a2 = est_params_wls$est_a2, b2 = est_params_wls$est_b2, c2_coef = est_params_wls$est_c2_coef, d2 = est_params_wls$est_d2, radius = earthRadiusKm, splines_degree = est_params_wls$splines_degree, knots1 = est_params_wls$knots1, knots2 = est_params_wls$knots2)
+#wls_est_cov_mat <- cov_bi_differential(location = loc3d, beta = 1, scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL, a1 = A1, b1 = B1, c1_coef = theta[1:6], d1 = 0,
+#                                       a2 = A2, b2 = B2, c2_coef = theta[6 + 1:6], d2 = 0, radius = earthRadiusKm, splines_degree = SPLINES_DEGREE, knots1 = KNOTS1, knots2 = KNOTS2)
+
+wls_est_variance1 <- diag(wls_est_cov_mat[1:nrow(loc3d), 1:nrow(loc3d)])
+wls_est_variance2 <- diag(wls_est_cov_mat[nrow(loc3d) + 1:nrow(loc3d), nrow(loc3d) + 1:nrow(loc3d)])
+wls_est_covariance12 <- diag(wls_est_cov_mat[1:nrow(loc3d), nrow(loc3d) + 1:nrow(loc3d)])
+wls_est_correlation12 <- wls_est_covariance12 / sqrt(wls_est_variance1 * wls_est_variance2)
 
 par(mfrow = c(2, 3))
 
@@ -172,27 +194,50 @@ plot(variance1[1:10])
 plot(variance2[1:10])
 plot(correlation12[1:10])
 
-plot(est_variance1[1:10])
-plot(est_variance2[1:10])
-plot(est_correlation12[1:10])
+plot(wls_est_variance1[1:10])
+plot(wls_est_variance2[1:10])
+plot(wls_est_correlation12[1:10])
+
+plot(emp_cov[1, 1000 + seq(1, 100, by = 10)])
+plot(wls_est_cov_mat[1, 1000 + seq(1, 100, by = 10)])
+
+
+est_params_mle <- est_bi_differential_mle(residuals = Z, location = loc3d,
+                                      init_beta = theta[1],
+                                      init_scale_horizontal = theta[2],
+                                      init_scale_vertical = theta[3],
+                                      init_a1 = theta[4], init_b1 = theta[5],
+                                      init_c1_coef = theta[5 + 1:length(INIT_C1)], init_d1 = INIT_D1,
+                                      init_a2 = theta[5 + length(INIT_C1) + 1], init_b2 = theta[5 + length(INIT_C1) + 2],
+                                      init_c2_coef = theta[5 + length(INIT_C1) + 2 + 1:length(INIT_C2)], init_d2 = INIT_D2,
+                                      d1_fix = TRUE, d2_fix = TRUE,
+                                      radius = earthRadiusKm,
+                                      splines_degree = SPLINES_DEGREE,
+                                      knots1 = KNOTS1, knots2 = KNOTS2,
+                                      iterlim = 1, hessian = T)
+
+theta = c(-0.12107742,-4.89338811,-1.1452082,-17.4438933,-0.22523577,-0.89459747,-1.36523283,-2.91636576,-3.28533167,-2.07808692,-2.59283651,0.37166639,0.56941461,2.15740875,1.80154959,-0.11354508,0.67696366,1.84610893,1.93622192)
+
+mle_est_cov_mat <- cov_bi_differential(location = loc3d, beta = est_params_mle$est_beta, scale_horizontal = est_params_mle$est_scale_horizontal, scale_vertical = est_params_mle$est_scale_vertical, a1 = est_params_mle$est_a1, b1 = est_params_mle$est_b1, c1_coef = est_params_mle$est_c1_coef, d1 = est_params_mle$est_d1, a2 = est_params_mle$est_a2, b2 = est_params_mle$est_b2, c2_coef = est_params_mle$est_c2_coef, d2 = est_params_mle$est_d2, radius = earthRadiusKm, splines_degree = est_params_mle$splines_degree, knots1 = est_params_mle$knots1, knots2 = est_params_mle$knots2)
+
+mle_est_variance1 <- diag(mle_est_cov_mat[1:nrow(loc3d), 1:nrow(loc3d)])
+mle_est_variance2 <- diag(mle_est_cov_mat[nrow(loc3d) + 1:nrow(loc3d), nrow(loc3d) + 1:nrow(loc3d)])
+mle_est_covariance12 <- diag(mle_est_cov_mat[1:nrow(loc3d), nrow(loc3d) + 1:nrow(loc3d)])
+mle_est_correlation12 <- mle_est_covariance12 / sqrt(mle_est_variance1 * mle_est_variance2)
+
+par(mfrow = c(2, 3))
+
+plot(variance1[1:10])
+plot(variance2[1:10])
+plot(correlation12[1:10])
+
+plot(mle_est_variance1[1:10])
+plot(mle_est_variance2[1:10])
+plot(mle_est_correlation12[1:10])
 
 plot(emp_cov[1, seq(1, 100, by = 10)])
-plot(est_cov_mat[1, seq(1, 100, by = 10)])
+plot(mle_est_cov_mat[1, seq(1, 100, by = 10)])
 
-
-est_params <- est_bi_differential_mle(residuals = Z, location = loc3d, init_beta = est_params_wls$est_beta,
-                                  init_scale_horizontal = est_params_wls$est_scale_horizontal,
-                                  init_scale_vertical = est_params_wls$est_scale_vertical,
-                                  init_a1 = est_params_wls$est_a1, init_b1 = est_params_wls$est_b1,
-                                  init_c1_coef = est_params_wls$est_c1_coef, init_d1 = est_params_wls$est_d1,
-                                  init_a2 = est_params_wls$est_a2, init_b2 = est_params_wls$est_b2,
-                                  init_c2_coef = est_params_wls$est_c2_coef, init_d2 = est_params_wls$est_d2,
-                                  d1_fix = TRUE, d2_fix = TRUE,
-                                  radius = earthRadiusKm,
-                                  splines_degree = est_params_wls$splines_degree,
-                                  knots1 = est_params_wls$knots, knots2 = est_params_wls$knots2,
-                                  iterlim = 1000, hessian = T)
-
-
+#return the theta vector also
 print("DONE . . . ")
 

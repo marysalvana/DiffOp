@@ -92,7 +92,8 @@ vertical scale parameter should not be estimated.}
 \item{hessian}{If \code{TRUE}, the hessian is not returned.}
 }
 \value{
-A list containing the values of the log likelihood function,
+A list containing the values of the convergence code,
+log likelihood function,
 estimated parameters and their corresponding standard deviations,
 splines degree, and pre-specified knots.
 }
