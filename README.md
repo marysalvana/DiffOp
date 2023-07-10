@@ -107,8 +107,13 @@ A copy of the GNU General Public License, version 3, is available at
    This will create the `DiffOp_1.0.0.tar.gz` file.
 
 7. Install the R package:
+     * For general laptops, run the command:
      ```
      R CMD INSTALL DiffOp_1.0.0.tar.gz
+     ```
+     * In UH Carya cluster, run the command:
+     ```
+     R CMD INSTALL DiffOp_1.0.0.tar.gz --library=/project/jun/msalvana/R/x86_64-pc-linux-gnu-library/4.2/
      ```
 ---
 
@@ -125,7 +130,7 @@ A copy of the GNU General Public License, version 3, is available at
     #SBATCH --mem=100GB
 
     #SBATCH --cpus-per-task=20
-    #SBATCH -n 4
+    #SBATCH -n 1
 
     echo "Starting at `date`"
     echo "Running on hosts: $SLURM_NODELIST"
@@ -140,7 +145,7 @@ A copy of the GNU General Public License, version 3, is available at
 
     echo "FITTING MODEL ON REAL DATASET"
 
-    mpiexec -np $SLURM_NTASKS Rscript ./testing_diffop_package.R  $SLURM_NTASKS
+    mpiexec -np $SLURM_NTASKS Rscript ./testing_diffop_package.R 
     ```
 
 Save the job script in a file named `job.sub`. 

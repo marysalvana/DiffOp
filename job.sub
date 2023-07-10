@@ -8,7 +8,7 @@
 ##SBATCH --mem=200GB
 
 #SBATCH --cpus-per-task=20
-#SBATCH -n 4
+#SBATCH -n 1
 
 echo "Starting at `date`"
 echo "Running on hosts: $SLURM_NODELIST"
@@ -23,7 +23,7 @@ path=`pwd -P`
 
 echo "FITTING MODEL ON REAL DATASET"
 
-mpiexec -np $SLURM_NTASKS Rscript ./testing_diffop_package.R  $SLURM_NTASKS
+mpiexec -np $SLURM_NTASKS Rscript ./testing_diffop_package.R
 
 
 
