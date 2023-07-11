@@ -12,3 +12,4 @@
 ^Z\.RData$
 ^testing\.R$
 ^README\.md$
+^\.out$
