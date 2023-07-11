@@ -1900,7 +1900,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
 #' @author Mary Lai Salvana \email{yourlainess@gmail.com}
 #'
 #' @export
-predict_bi_differential <- function(residuals, location, location_new, est_beta, est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1, est_d1, est_a2, est_b2, est_c2, est_d2, radius, splines_degree = 2, inner_knots1, inner_knots2){
+predict_bi_differential <- function(residuals, location, location_new, est_beta, est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1_coef, est_d1, est_a2, est_b2, est_c2_coef, est_d2, radius, splines_degree = 2, inner_knots1, inner_knots2){
 
   BETA <- est_beta
   SCALE_HORIZONTAL <- est_scale_horizontal
@@ -1909,8 +1909,8 @@ predict_bi_differential <- function(residuals, location, location_new, est_beta,
   B1 <- est_b1
   A2 <- est_a2
   B2 <- est_b2
-  C1_coef <- est_c1
-  C2_coef <- est_c2
+  C1_coef <- est_c1_coef
+  C2_coef <- est_c2_coef
   D1 <- est_d1
   D2 <- est_d2
 

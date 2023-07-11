@@ -170,9 +170,9 @@ Z_pred <- predict_bi_differential(residuals = Z, location = loc3d,
                                   est_scale_horizontal = 0.01541487,
                                   est_scale_vertical = 0.2473264,
                                   est_a1 = 2.534356e-05, est_b1 = -4.751549e-06,
-                                  est_c1 = c(-6.0423734, -5.8585368, -0.7910191, 2.9407869, -0.7534488, -1.3051477), est_d1 = 0,
+                                  est_c1_coef = c(-6.0423734, -5.8585368, -0.7910191, 2.9407869, -0.7534488, -1.3051477), est_d1 = 0,
                                   est_a2 = -4.914751e-05, est_b2 = -2.395199e-05,
-                                  est_c2 = c(-2.1237812, -1.7196022, 2.9021517, -0.3172772, -3.0745846, -2.5363932), est_d2 = 0,
+                                  est_c2_coef = c(-2.1237812, -1.7196022, 2.9021517, -0.3172772, -3.0745846, -2.5363932), est_d2 = 0,
                                   radius = earthRadiusKm, splines_degree = SPLINES_DEGREE,
                                   inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2)
 
