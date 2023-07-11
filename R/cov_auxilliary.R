@@ -1651,7 +1651,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
       variance <- j %*% fisher_info %*% t(j)
       est_sd <- sqrt(diag(variance))
 
-      results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate,
+      results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate, gradient = fit$gradient,
                       est_beta = BETA, est_beta_sd = est_sd[1], est_scale_horizontal = SCALE_HORIZONTAL, est_scale_horizontal_sd = est_sd[2],
                       est_scale_vertical = SCALE_VERTICAL, est_scale_vertical_sd = est_sd[3], est_a1 = A1, est_a1_sd = est_sd[4], est_b1 = B1, est_b1_sd = est_sd[5],
                       est_c1_coef = C1_coef, est_d1 = D1, est_a2 = A2, est_a2_sd = est_sd[6], est_b2 = B2, est_b2_sd = est_sd[7], est_c2_coef = C2_coef, est_d2 = D2,
@@ -1694,7 +1694,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
             variance <- j %*% fisher_info %*% t(j)
             est_sd <- sqrt(diag(variance))
 
-            results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate,
+            results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate, gradient = fit$gradient,
                             est_beta = BETA, est_beta_sd = est_sd[1], est_scale_horizontal = SCALE_HORIZONTAL, est_scale_horizontal_sd = est_sd[2],
                             est_scale_vertical = SCALE_VERTICAL, est_scale_vertical_sd = est_sd[3], est_a1 = A1, est_b1 = B1,
                             est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[3 + 1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_b2 = B2,
@@ -1735,7 +1735,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
             variance <- j %*% fisher_info %*% t(j)
             est_sd <- sqrt(diag(variance))
 
-            results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate,
+            results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate, gradient = fit$gradient,
                             est_beta = BETA, est_beta_sd = est_sd[1], est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL,
                             est_a1 = A1, est_a1_sd = est_sd[2], est_b1 = B1, est_b1_sd = est_sd[3],
                             est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[3 + 1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_a2_sd = est_sd[3 + length(init_c1_coef) + 1],
@@ -1774,7 +1774,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
             variance <- j %*% fisher_info %*% t(j)
             est_sd <- sqrt(diag(variance))
 
-            results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate,
+            results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate, gradient = fit$gradient,
                             est_beta = BETA, est_beta_sd = est_sd[1], est_scale_horizontal = SCALE_HORIZONTAL, est_scale_horizontal_sd = est_sd[2],
                             est_scale_vertical = SCALE_VERTICAL, est_scale_vertical_sd = est_sd[3],
                             est_a1 = A1, est_a1_sd = est_sd[4], est_b1 = B1, est_b1_sd = est_sd[5],
@@ -1817,7 +1817,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
             variance <- j %*% fisher_info %*% t(j)
             est_sd <- sqrt(diag(variance))
 
-            results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate,
+            results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate, gradient = fit$gradient,
                             est_beta = BETA, est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL, est_a1 = A1, est_b1 = B1,
                             est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_b2 = B2,
                             est_c2_coef = C2_coef, est_c2_coef_sd = est_sd[length(init_c1_coef) + 1:length(init_c2_coef)], est_d2 = D2,
