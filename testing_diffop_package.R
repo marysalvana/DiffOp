@@ -75,7 +75,7 @@ if(!RERUN){
 
   theta = c(-1.34275931,-4.19699546,-1.40356004,-3.28839135,0.01260649,-5.95608014,-5.63169883,-0.73918238,2.77539212,-0.71020166,-1.25388331,-0.04938566,-0.02351991,-2.49742114,-1.82023835,3.02128988,-0.32669139,-3.22855959,-2.62419402)
 
-  est_params_mle <- est_bi_differential_mle(residuals = Z, location = loc3d,
+  est_params_mle2 <- est_bi_differential_mle(residuals = Z, location = loc3d,
                                             init_beta = theta[1],
                                             init_scale_horizontal = theta[2],
                                             init_scale_vertical = theta[3],
@@ -83,13 +83,13 @@ if(!RERUN){
                                             init_c1_coef = theta[5 + 1:length(INIT_C1_COEF)], init_d1 = 0,
                                             init_a2 = theta[5 + length(INIT_C1_COEF) + 1], init_b2 = theta[5 + length(INIT_C1_COEF) + 2],
                                             init_c2_coef = theta[5 + length(INIT_C1_COEF) + 2 + 1:length(INIT_C2_COEF)], init_d2 = 0,
-                                            d1_fix = TRUE, d2_fix = TRUE,
+                                            c1_fix = TRUE, c2_fix = TRUE, d1_fix = TRUE, d2_fix = TRUE,
                                             radius = earthRadiusKm,
                                             splines_degree = SPLINES_DEGREE,
                                             knots1 = KNOTS1, knots2 = KNOTS2,
-                                            iterlim = 5, stepmax = 1, hessian = T)
+                                            iterlim = 1, stepmax = 1, hessian = T)
 
-  print(est_params_mle)
+  print(est_params_mle2)
 
 }
 

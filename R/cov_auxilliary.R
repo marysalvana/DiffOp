@@ -1267,7 +1267,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
       BETA <- 1 / (1 + exp(-theta[1]))
       SCALE_HORIZONTAL <- exp(theta[2])
       SCALE_VERTICAL <- exp(theta[3])
-      A1 <- theta[4] * 1e-3
+      A1 <- exp(theta[4]) * 1e-3
       B1 <- theta[5] * 1e-3
       C1_coef <- init_c1_coef
       D1 <- init_d1
