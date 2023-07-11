@@ -47,14 +47,15 @@ KNOTS2 <- c(0.1, 0.5, 0.9)
 
 SPLINES_DEGREE = 2
 
+set.seed(1235)
+INIT_C1_COEF <- runif(length(KNOTS1) + SPLINES_DEGREE + 1, -0.1, 0.1)
+
+set.seed(1236)
+INIT_C2_COEF <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -0.1, 0.1)
+
 RERUN = T
 
 if(!RERUN){
-  set.seed(1235)
-  INIT_C1_COEF <- runif(length(KNOTS1) + SPLINES_DEGREE + 1, -0.1, 0.1)
-
-  set.seed(1236)
-  INIT_C2_COEF <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -0.1, 0.1)
 
   est_params_mle <- est_bi_differential_mle(residuals = Z, location = loc3d,
                                             init_beta = INIT_BETA,
@@ -87,6 +88,8 @@ if(!RERUN){
                                             splines_degree = SPLINES_DEGREE,
                                             knots1 = KNOTS1, knots2 = KNOTS2,
                                             iterlim = 5, stepmax = 1, hessian = T)
+
+  print(est_params_mle)
 
 }
 
