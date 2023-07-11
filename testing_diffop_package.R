@@ -33,6 +33,63 @@ Z <- mvrnorm(1, mu = rep(0, ncol(cov_mat)), Sigma = cov_mat)
 Z1 <- Z[1:nrow(loc3d)]
 Z2 <- Z[nrow(loc3d) + 1:nrow(loc3d)]
 
+PLOTTING = F
+
+if(PLOTTING){
+  subset <- which(loc3d[, 3] == 0)
+
+  library(fields)
+
+  pdf(file = paste('/Users/laisalvana/Library/CloudStorage/GoogleDrive-yourlainess@gmail.com/My Drive/Work/Research/UH/bivariate_argo/figures/ex1j.pdf', sep = ''), width = 6.5, height = 10)
+
+  par(mfrow = c(2, 1))
+  par(pty = 's')
+  par(mai = c(0.3, 0.1, 0.6, 0.5))
+  quilt.plot(loc3d[subset, 1], loc3d[subset, 2], Z1[subset], nx = length(x), ny = length(y), xlab = "Longitude", ylab = "", zlim = range(Z), xaxt = 'n')
+  mtext("Latitude", side = 2, line = 2)
+  mtext(expression(Z[1]), side = 2, line = 3, col = 4, cex = 1.5)
+  par(mai = c(0.8, 0.1, 0.1, 0.5))
+  quilt.plot(loc3d[subset, 1], loc3d[subset, 2], Z2[subset], nx = length(x), ny = length(y), xlab = "Longitude", ylab = "", zlim = range(Z))
+  mtext("Latitude", side = 2, line = 2)
+  mtext(expression(Z[2]), side = 2, line = 3, col = 4, cex = 1.5)
+
+  dev.off()
+
+  subset <- which(loc3d[, 2] == 0)
+
+  pdf(file = paste('/Users/laisalvana/Library/CloudStorage/GoogleDrive-yourlainess@gmail.com/My Drive/Work/Research/UH/bivariate_argo/figures/ex1k.pdf', sep = ''), width = 6.5, height = 10)
+
+  par(mfrow = c(2, 1))
+  par(pty = 's')
+  par(mai = c(0.3, 0.1, 0.6, 0.5))
+  quilt.plot(loc3d[subset, 1], loc3d[subset, 3], Z1[subset], nx = length(x), ny = length(depth), xlab = "Longitude", ylab = "", zlim = range(Z), ylim = c(1, 0), xaxt = 'n')
+  mtext("Depth", side = 2, line = 2)
+  mtext(expression(Z[1]), side = 2, line = 3, col = 4, cex = 1.5)
+  par(mai = c(0.8, 0.1, 0.1, 0.5))
+  quilt.plot(loc3d[subset, 1], loc3d[subset, 3], Z2[subset], nx = length(x), ny = length(depth), xlab = "Longitude", ylab = "", zlim = range(Z), ylim = c(1, 0))
+  mtext("Depth", side = 2, line = 2)
+  mtext(expression(Z[2]), side = 2, line = 3, col = 4, cex = 1.5)
+
+  dev.off()
+
+  subset <- which(loc3d[, 1] == 0)
+
+  pdf(file = paste('/Users/laisalvana/Library/CloudStorage/GoogleDrive-yourlainess@gmail.com/My Drive/Work/Research/UH/bivariate_argo/figures/ex1l.pdf', sep = ''), width = 6.5, height = 10)
+
+  par(mfrow = c(2, 1))
+  par(pty = 's')
+  par(mai = c(0.3, 0.1, 0.6, 0.5))
+  quilt.plot(loc3d[subset, 2], loc3d[subset, 3], Z1[subset], nx = length(y), ny = length(depth), xlab = "Latitude", ylab = "", zlim = range(Z), ylim = c(1, 0), xaxt = 'n')
+  mtext("Depth", side = 2, line = 2)
+  mtext(expression(Z[1]), side = 2, line = 3, col = 4, cex = 1.5)
+  par(mai = c(0.8, 0.1, 0.1, 0.5))
+  quilt.plot(loc3d[subset, 2], loc3d[subset, 3], Z2[subset], nx = length(y), ny = length(depth), xlab = "Latitude", ylab = "", zlim = range(Z), ylim = c(1, 0))
+  mtext("Depth", side = 2, line = 2)
+  mtext(expression(Z[2]), side = 2, line = 3, col = 4, cex = 1.5)
+
+  dev.off()
+}
+
 ####### ESTIMATION #######
 
 INIT_BETA = 0
@@ -96,53 +153,99 @@ if(!RERUN){
 
 }
 
+####### PREDICTION #######
 
+x_new <- x[-length(x)] + (x[-1] - x[-length(x)]) / 2
+loc2d_new1 <- expand.grid(x_new, y) %>% as.matrix()
+
+y_new <- y[-length(y)] + (y[-1] - y[-length(y)]) / 2
+loc2d_new2 <- expand.grid(c(x, x_new), y_new) %>% as.matrix()
+
+loc2d_new <- rbind(loc2d_new1, loc2d_new2)
+
+loc3d_new <- cbind(rep(loc2d_new[, 1], each = length(depth)), rep(loc2d_new[, 2], each = length(depth)), depth)
+
+Z_pred <- predict_bi_differential(residuals = Z, location = loc3d,
+                                  location_new = loc3d_new, est_beta = 0.345513,
+                                  est_scale_horizontal = 0.01541487,
+                                  est_scale_vertical = 0.2473264,
+                                  est_a1 = 2.534356e-05, est_b1 = -4.751549e-06,
+                                  est_c1 = c(-6.0423734, -5.8585368, -0.7910191, 2.9407869, -0.7534488, -1.3051477), est_d1 = 0,
+                                  est_a2 = -4.914751e-05, est_b2 = -2.395199e-05,
+                                  est_c2 = c(-2.1237812, -1.7196022, 2.9021517, -0.3172772, -3.0745846, -2.5363932), est_d2 = 0,
+                                  radius = earthRadiusKm, splines_degree = SPLINES_DEGREE,
+                                  inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2)
+
+Z1_pred <- Z_pred[1:nrow(loc3d_new)]
+Z2_pred <- Z_pred[nrow(loc3d_new) + 1:nrow(loc3d_new)]
+
+loc3d_full <- rbind(loc3d, loc3d_new)
+Z1_full <- c(Z1, Z1_pred)
+Z2_full <- c(Z2, Z2_pred)
+
+Z_full <- c(Z, Z_pred)
+
+if(PLOTTING){
+
+  library(fields)
+
+  subset <- which(loc3d_full[, 3] == 0)
+
+  pdf(file = paste('/Users/laisalvana/Library/CloudStorage/GoogleDrive-yourlainess@gmail.com/My Drive/Work/Research/UH/bivariate_argo/figures/ex1j_new.pdf', sep = ''), width = 6.5, height = 10)
+
+  par(mfrow = c(2, 1))
+  par(pty = 's')
+  par(mai = c(0.3, 0.1, 0.6, 0.5))
+  quilt.plot(loc3d_full[subset, 1], loc3d_full[subset, 2], Z1_full[subset], nx = length(x) + length(x_new), ny = length(y) + length(y_new), xlab = "Longitude", ylab = "", zlim = range(Z_full), xaxt = 'n')
+  mtext("Latitude", side = 2, line = 2)
+  mtext(expression(Z[1]), side = 2, line = 3, col = 4, cex = 1.5)
+  par(mai = c(0.8, 0.1, 0.1, 0.5))
+  quilt.plot(loc3d_full[subset, 1], loc3d_full[subset, 2], Z2_full[subset], nx = length(x) + length(x_new), ny = length(y) + length(y_new), xlab = "Longitude", ylab = "", zlim = range(Z_full))
+  mtext("Latitude", side = 2, line = 2)
+  mtext(expression(Z[2]), side = 2, line = 3, col = 4, cex = 1.5)
+
+  dev.off()
+
+  subset <- which(loc3d_full[, 2] == 0)
+
+  pdf(file = paste('/Users/laisalvana/Library/CloudStorage/GoogleDrive-yourlainess@gmail.com/My Drive/Work/Research/UH/bivariate_argo/figures/ex1k_new.pdf', sep = ''), width = 6.5, height = 10)
+
+  par(mfrow = c(2, 1))
+  par(pty = 's')
+  par(mai = c(0.3, 0.1, 0.6, 0.5))
+  quilt.plot(loc3d_full[subset, 1], loc3d_full[subset, 3], Z1_full[subset], nx = length(x) + length(x_new), ny = length(depth), xlab = "Longitude", ylab = "", zlim = range(Z_full), ylim = c(1, 0), xaxt = 'n')
+  mtext("Depth", side = 2, line = 2)
+  mtext(expression(Z[1]), side = 2, line = 3, col = 4, cex = 1.5)
+  par(mai = c(0.8, 0.1, 0.1, 0.5))
+  quilt.plot(loc3d_full[subset, 1], loc3d_full[subset, 3], Z2_full[subset], nx = length(x) + length(x_new), ny = length(depth), xlab = "Longitude", ylab = "", zlim = range(Z_full), ylim = c(1, 0))
+  mtext("Depth", side = 2, line = 2)
+  mtext(expression(Z[2]), side = 2, line = 3, col = 4, cex = 1.5)
+
+  dev.off()
+
+  subset <- which(loc3d_full[, 1] == 0)
+
+  pdf(file = paste('/Users/laisalvana/Library/CloudStorage/GoogleDrive-yourlainess@gmail.com/My Drive/Work/Research/UH/bivariate_argo/figures/ex1l_new.pdf', sep = ''), width = 6.5, height = 10)
+
+  par(mfrow = c(2, 1))
+  par(pty = 's')
+  par(mai = c(0.3, 0.1, 0.6, 0.5))
+  quilt.plot(loc3d_full[subset, 2], loc3d_full[subset, 3], Z1_full[subset], nx = length(y) + length(y_new), ny = length(depth), xlab = "Latitude", ylab = "", zlim = range(Z_full), ylim = c(1, 0), xaxt = 'n')
+  mtext("Depth", side = 2, line = 2)
+  mtext(expression(Z[1]), side = 2, line = 3, col = 4, cex = 1.5)
+  par(mai = c(0.8, 0.1, 0.1, 0.5))
+  quilt.plot(loc3d_full[subset, 2], loc3d_full[subset, 3], Z2_full[subset], nx = length(y) + length(y_new), ny = length(depth), xlab = "Latitude", ylab = "", zlim = range(Z_full), ylim = c(1, 0))
+  mtext("Depth", side = 2, line = 2)
+  mtext(expression(Z[2]), side = 2, line = 3, col = 4, cex = 1.5)
+
+  dev.off()
+}
+
+####### SCRATCH #######
 
 SCRATCH = F
 
 if(SCRATCH){
-  subset <- which(loc3d[, 3] == 0)
-
-  library(fields)
-
-  par(mfrow = c(2, 1))
-  par(pty = 's')
-  par(mai = c(0.3, 0.1, 0.6, 0.5))
-  quilt.plot(loc3d[subset, 1], loc3d[subset, 2], Z1[subset], nx = length(x), ny = length(y), xlab = "Longitude", ylab = "", zlim = range(Z), xaxt = 'n')
-  mtext("Latitude", side = 2, line = 2)
-  mtext(expression(Z[1]), side = 2, line = 3, col = 4, cex = 1.5)
-  par(mai = c(0.8, 0.1, 0.1, 0.5))
-  quilt.plot(loc3d[subset, 1], loc3d[subset, 2], Z2[subset], nx = length(x), ny = length(y), xlab = "Longitude", ylab = "", zlim = range(Z))
-  mtext("Latitude", side = 2, line = 2)
-  mtext(expression(Z[2]), side = 2, line = 3, col = 4, cex = 1.5)
-
-
-  subset <- which(loc3d[, 2] == 0)
-
-  par(mfrow = c(2, 1))
-  par(pty = 's')
-  par(mai = c(0.3, 0.1, 0.6, 0.5))
-  quilt.plot(loc3d[subset, 1], loc3d[subset, 3], Z1[subset], nx = length(x), ny = length(depth), xlab = "Longitude", ylab = "", zlim = range(Z), ylim = c(1, 0), xaxt = 'n')
-  mtext("Depth", side = 2, line = 2)
-  mtext(expression(Z[1]), side = 2, line = 3, col = 4, cex = 1.5)
-  par(mai = c(0.8, 0.1, 0.1, 0.5))
-  quilt.plot(loc3d[subset, 1], loc3d[subset, 3], Z2[subset], nx = length(x), ny = length(depth), xlab = "Longitude", ylab = "", zlim = range(Z), ylim = c(1, 0))
-  mtext("Depth", side = 2, line = 2)
-  mtext(expression(Z[2]), side = 2, line = 3, col = 4, cex = 1.5)
-
-
-  subset <- which(loc3d[, 1] == 0)
-
-  par(mfrow = c(2, 1))
-  par(pty = 's')
-  par(mai = c(0.3, 0.1, 0.6, 0.5))
-  quilt.plot(loc3d[subset, 2], loc3d[subset, 3], Z1[subset], nx = length(y), ny = length(depth), xlab = "Latitude", ylab = "", zlim = range(Z), ylim = c(1, 0), xaxt = 'n')
-  mtext("Depth", side = 2, line = 2)
-  mtext(expression(Z[1]), side = 2, line = 3, col = 4, cex = 1.5)
-  par(mai = c(0.8, 0.1, 0.1, 0.5))
-  quilt.plot(loc3d[subset, 2], loc3d[subset, 3], Z2[subset], nx = length(y), ny = length(depth), xlab = "Latitude", ylab = "", zlim = range(Z), ylim = c(1, 0))
-  mtext("Depth", side = 2, line = 2)
-  mtext(expression(Z[2]), side = 2, line = 3, col = 4, cex = 1.5)
 
   ####### COMPUTING EMPIRICAL COVARIANCE #######
 
