@@ -9,7 +9,7 @@ init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1,
 init_a2, init_b2, init_c2_coef, init_d2,
 beta_fix, scale_horizontal_fix, scale_vertical_fix,
 a1_fix, b1_fix, c1_fix, d1_fix, a2_fix, b2_fix, c2_fix, d2_fix,
-radius, splines_degree, knots1, knots2, iterlim, stepmax, hessian)
+radius, splines_degree, inner_knots1, inner_knots2, iterlim, stepmax, hessian)
 }
 \arguments{
 \item{residuals}{A \eqn{2 n} vector of residuals with
@@ -81,9 +81,9 @@ vertical scale parameter should not be estimated.}
 
 \item{splines_degree}{A number indicating the degree of the splines.}
 
-\item{knots1}{A vector of knot locations for variable 1.}
+\item{inner_knots1}{A vector of inner knot locations for variable 1.}
 
-\item{knots2}{A vector of knot locations for variable 2.}
+\item{inner_knots2}{A vector of inner knot locations for variable 2.}
 
 \item{iterlim}{A number indicating the maximum number of iterations for \code{nlm}.}
 
@@ -147,8 +147,8 @@ Z <- mvrnorm(1, mu = rep(0, ncol(cov_mat)), Sigma = cov_mat)
 Z1 <- Z[1:nrow(loc3d)]
 Z2 <- Z[nrow(loc3d) + 1:nrow(loc3d)]
 
-KNOTS1 <- c(0.1, 0.5, 0.9)
-KNOTS2 <- c(0.1, 0.5, 0.9)
+INNER_KNOTS1 <- c(0.1, 0.5, 0.9)
+INNER_KNOTS2 <- c(0.1, 0.5, 0.9)
 
 INIT_BETA = 0.6
 INIT_SCALE_HORIZONTAL = log(0.02)
@@ -160,10 +160,10 @@ INIT_D1 = INIT_D2 = 0
 SPLINES_DEGREE = 2
 
 set.seed(1235)
-INIT_C1 <- runif(length(KNOTS1) + SPLINES_DEGREE + 1, -5, 5)
+INIT_C1 <- runif(length(INNER_KNOTS1) + SPLINES_DEGREE + 1, -5, 5)
 
 set.seed(1236)
-INIT_C2 <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
+INIT_C2 <- runif(length(INNER_KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
 
 \dontrun{est_params_mle <- est_bi_differential_mle(residuals = Z, location = loc3d, init_beta = INIT_BETA,
                                  init_scale_horizontal = INIT_SCALE_HORIZONTAL,
@@ -175,7 +175,8 @@ INIT_C2 <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
                                  d1_fix = TRUE, d2_fix = TRUE,
                                  radius = earthRadiusKm,
                                  splines_degree = SPLINES_DEGREE,
-                                 knots1 = KNOTS1, knots2 = KNOTS2,
+                                 inner_knots1 = INNER_KNOTS1,
+                                 inner_knots2 = INNER_KNOTS2,
                                  iterlim = 1, hessian = T)}
 
 

@@ -264,8 +264,8 @@ compute_emp_cov <- function(location, variable1_residuals, variable2_residuals, 
 #' the relevant sphere is the Earth with \eqn{R=6,371} km.
 #'
 #' @usage cov_bi_differential(location, beta, scale_horizontal, scale_vertical,
-#' a1, b1, c1, d1, a2, b2, c2, d2, radius, splines_degree, knots1, knots2,
-#' c1_coef, c2_coef)
+#' a1, b1, c1, d1, a2, b2, c2, d2, radius, splines_degree,
+#' inner_knots1, inner_knots2, c1_coef, c2_coef)
 #'
 #' @param location An \eqn{n \times 3} matrix of coordinates.
 #' @param beta A numeric constant indicating the colocated correlation parameter.
@@ -282,9 +282,9 @@ compute_emp_cov <- function(location, variable1_residuals, variable2_residuals, 
 #' @param radius A numeric constant indicating the radius of the sphere.
 #' @param splines_degree A number indicating the degree of the splines when
 #' using splines to characterize the nonstationary parameters c1 and c2.
-#' @param knots1 A vector of knot locations for variable 1 when using splines to
+#' @param inner_knots1 A vector of knot locations for variable 1 when using splines to
 #' characterize c1.
-#' @param knots2 A vector of knot locations for variable 2 when using splines to
+#' @param inner_knots2 A vector of knot locations for variable 2 when using splines to
 #' characterize c2.
 #' @param c1_coef A numeric vector indicating the splines coefficients for the
 #' nonstationary with depth parameter c1 associated with variable 1.
@@ -330,7 +330,7 @@ compute_emp_cov <- function(location, variable1_residuals, variable2_residuals, 
 #'
 #'
 #' @export
-cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical, a1, b1, c1 = NULL, d1, a2, b2, c2 = NULL, d2, radius, splines_degree = NULL, knots1 = NULL, knots2 = NULL, c1_coef = NULL, c2_coef = NULL){
+cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical, a1, b1, c1 = NULL, d1, a2, b2, c2 = NULL, d2, radius, splines_degree = NULL, inner_knots1 = NULL, inner_knots2 = NULL, c1_coef = NULL, c2_coef = NULL){
 
   LAT1D <- matrix(location[, 2], nrow(location), nrow(location), byrow = F)
   LON1D <- matrix(location[, 1], nrow(location), nrow(location), byrow = F)
@@ -340,9 +340,9 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
   PRES2 <- matrix(location[, 3], nrow(location), nrow(location), byrow = T)
 
   if(!is.null(splines_degree)){
-    basis1 <- bsplineBasis(location[, 3], splines_degree, knots1)
+    basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
     nb1 <- ncol(basis1)
-    basis2 <- bsplineBasis(location[, 3], splines_degree, knots2)
+    basis2 <- bsplineBasis(location[, 3], splines_degree, inner_knots2)
     nb2 <- ncol(basis2)
 
     if(splines_degree == 0){
@@ -395,7 +395,7 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' init_a2, init_b2, init_c2_coef, init_d2,
 #' beta_fix, scale_horizontal_fix, scale_vertical_fix,
 #' a1_fix, b1_fix, c1_fix, d1_fix, a2_fix, b2_fix, c2_fix, d2_fix,
-#' radius, splines_degree, knots1, knots2,
+#' radius, splines_degree, inner_knots1, inner_knots2,
 #' w1, w2, w12, iterlim, stepmax, hessian)
 #'
 #' @param empirical_values A matrix of dimension \eqn{2 n \times 2 n} containing
@@ -441,8 +441,8 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' @param d2_fix If \code{TRUE}, the d2 parameter is not be estimated.
 #' @param radius A numeric constant indicating the radius of the sphere.
 #' @param splines_degree A number indicating the degree of the splines.
-#' @param knots1 A vector of knot locations for variable 1.
-#' @param knots2 A vector of knot locations for variable 2.
+#' @param inner_knots1 A vector of knot locations for variable 1.
+#' @param inner_knots2 A vector of knot locations for variable 2.
 #' @param w1 A number indicating the weight for the marginal covariance
 #' for variable 1 in the weighted least squares objective function.
 #' @param w2 A number indicating the weight for the marginal covariance
@@ -478,8 +478,8 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03,
 #' radius = earthRadiusKm)}
 #'
-#' KNOTS1 <- c(0.1, 0.5, 0.9)
-#' KNOTS2 <- c(0.1, 0.5, 0.9)
+#' INNER_KNOTS1 <- c(0.1, 0.5, 0.9)
+#' INNER_KNOTS2 <- c(0.1, 0.5, 0.9)
 #'
 #' INIT_BETA = 0.6
 #' INIT_SCALE_HORIZONTAL = log(0.02)
@@ -491,10 +491,10 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' SPLINES_DEGREE = 2
 #'
 #' set.seed(1235)
-#' INIT_C1 <- runif(length(KNOTS1) + SPLINES_DEGREE + 1, -5, 5)
+#' INIT_C1 <- runif(length(INNER_KNOTS1) + SPLINES_DEGREE + 1, -5, 5)
 #'
 #' set.seed(1236)
-#' INIT_C2 <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
+#' INIT_C2 <- runif(length(INNER_KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
 #'
 #' \dontrun{est_params_wls <- est_bi_differential_wls(empirical_values = emp_cov, location = loc3d,
 #'                                  init_beta = INIT_BETA,
@@ -507,16 +507,17 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #'                                  d1_fix = TRUE, d2_fix = TRUE,
 #'                                  radius = earthRadiusKm,
 #'                                  splines_degree = SPLINES_DEGREE,
-#'                                  knots1 = KNOTS1, knots2 = KNOTS2,
+#'                                  inner_knots1 = INNER_KNOTS1,
+#'                                  inner_knots2 = INNER_KNOTS2,
 #'                                  w1 = 100, w2 = 50000, w12 = 1000,
 #'                                  iterlim = 1, hessian = FALSE)}
 #'
 #' @export
-est_bi_differential_wls <- function(empirical_values, location, init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2, beta_fix = F, scale_horizontal_fix = F, scale_vertical_fix = F, a1_fix = F, b1_fix = F, c1_fix = F, d1_fix = F, a2_fix = F, b2_fix = F, c2_fix = F, d2_fix = F, radius, splines_degree = 2, knots1, knots2, w1 = 100, w2 = 50000, w12 = 1000, iterlim = 2000, stepmax = 1, hessian = TRUE){
+est_bi_differential_wls <- function(empirical_values, location, init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2, beta_fix = F, scale_horizontal_fix = F, scale_vertical_fix = F, a1_fix = F, b1_fix = F, c1_fix = F, d1_fix = F, a2_fix = F, b2_fix = F, c2_fix = F, d2_fix = F, radius, splines_degree = 2, inner_knots1, inner_knots2, w1 = 100, w2 = 50000, w12 = 1000, iterlim = 2000, stepmax = 1, hessian = TRUE){
 
-  basis1 <- bsplineBasis(location[, 3], splines_degree, knots1)
+  basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
   nb1 <- ncol(basis1)
-  basis2 <- bsplineBasis(location[, 3], splines_degree, knots2)
+  basis2 <- bsplineBasis(location[, 3], splines_degree, inner_knots2)
   nb2 <- ncol(basis2)
 
   NEGLOGLIK <- function(theta){
@@ -1094,7 +1095,7 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
       }
     }
   }
-  results <- list(convergence_code = fit$code, iterations = fit$iterations, minimum = fit$minimum, theta = fit$estimate, est_beta = BETA, est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL, est_a1 = A1, est_b1 = B1, est_c1_coef = C1_coef, est_d1 = D1, est_a2 = A2, est_b2 = B2, est_c2_coef = C2_coef, est_d2 = D2, splines_degree = splines_degree, knots1 = knots1, knots2 = knots2)
+  results <- list(convergence_code = fit$code, iterations = fit$iterations, minimum = fit$minimum, theta = fit$estimate, est_beta = BETA, est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL, est_a1 = A1, est_b1 = B1, est_c1_coef = C1_coef, est_d1 = D1, est_a2 = A2, est_b2 = B2, est_c2_coef = C2_coef, est_d2 = D2, splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
   return(results)
 }
 
@@ -1119,7 +1120,7 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
 #' init_a2, init_b2, init_c2_coef, init_d2,
 #' beta_fix, scale_horizontal_fix, scale_vertical_fix,
 #' a1_fix, b1_fix, c1_fix, d1_fix, a2_fix, b2_fix, c2_fix, d2_fix,
-#' radius, splines_degree, knots1, knots2, iterlim, stepmax, hessian)
+#' radius, splines_degree, inner_knots1, inner_knots2, iterlim, stepmax, hessian)
 #'
 #' @param residuals A \eqn{2 n} vector of residuals with
 #' variable 1 and 2 residuals appended next to each other.
@@ -1164,8 +1165,8 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
 #' @param d2_fix If \code{TRUE}, the d2 parameter is not be estimated.
 #' @param radius A numeric constant indicating the radius of the sphere.
 #' @param splines_degree A number indicating the degree of the splines.
-#' @param knots1 A vector of knot locations for variable 1.
-#' @param knots2 A vector of knot locations for variable 2.
+#' @param inner_knots1 A vector of inner knot locations for variable 1.
+#' @param inner_knots2 A vector of inner knot locations for variable 2.
 #' @param iterlim A number indicating the maximum number of iterations for \code{nlm}.
 #' @param stepmax A number indicating the stepmax of nlm.
 #' @param hessian If \code{TRUE}, the hessian is not returned.
@@ -1218,8 +1219,8 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
 #' Z1 <- Z[1:nrow(loc3d)]
 #' Z2 <- Z[nrow(loc3d) + 1:nrow(loc3d)]
 #'
-#' KNOTS1 <- c(0.1, 0.5, 0.9)
-#' KNOTS2 <- c(0.1, 0.5, 0.9)
+#' INNER_KNOTS1 <- c(0.1, 0.5, 0.9)
+#' INNER_KNOTS2 <- c(0.1, 0.5, 0.9)
 #'
 #' INIT_BETA = 0.6
 #' INIT_SCALE_HORIZONTAL = log(0.02)
@@ -1231,10 +1232,10 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
 #' SPLINES_DEGREE = 2
 #'
 #' set.seed(1235)
-#' INIT_C1 <- runif(length(KNOTS1) + SPLINES_DEGREE + 1, -5, 5)
+#' INIT_C1 <- runif(length(INNER_KNOTS1) + SPLINES_DEGREE + 1, -5, 5)
 #'
 #' set.seed(1236)
-#' INIT_C2 <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
+#' INIT_C2 <- runif(length(INNER_KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
 #'
 #' \dontrun{est_params_mle <- est_bi_differential_mle(residuals = Z, location = loc3d, init_beta = INIT_BETA,
 #'                                  init_scale_horizontal = INIT_SCALE_HORIZONTAL,
@@ -1246,16 +1247,17 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
 #'                                  d1_fix = TRUE, d2_fix = TRUE,
 #'                                  radius = earthRadiusKm,
 #'                                  splines_degree = SPLINES_DEGREE,
-#'                                  knots1 = KNOTS1, knots2 = KNOTS2,
+#'                                  inner_knots1 = INNER_KNOTS1,
+#'                                  inner_knots2 = INNER_KNOTS2,
 #'                                  iterlim = 1, hessian = T)}
 #'
 #'
 #' @export
-est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2, beta_fix = F, scale_horizontal_fix = F, scale_vertical_fix = F, a1_fix = F, b1_fix = F, c1_fix = F, d1_fix = F, a2_fix = F, b2_fix = F, c2_fix = F, d2_fix = F, radius, splines_degree = 2, knots1, knots2, iterlim = 2000, stepmax = 1, hessian = TRUE){
+est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2, beta_fix = F, scale_horizontal_fix = F, scale_vertical_fix = F, a1_fix = F, b1_fix = F, c1_fix = F, d1_fix = F, a2_fix = F, b2_fix = F, c2_fix = F, d2_fix = F, radius, splines_degree = 2, inner_knots1, inner_knots2, iterlim = 2000, stepmax = 1, hessian = TRUE){
 
-  basis1 <- bsplineBasis(location[, 3], splines_degree, knots1)
+  basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
   nb1 <- ncol(basis1)
-  basis2 <- bsplineBasis(location[, 3], splines_degree, knots2)
+  basis2 <- bsplineBasis(location[, 3], splines_degree, inner_knots2)
   nb2 <- ncol(basis2)
 
   NEGLOGLIK <- function(theta){
@@ -1655,7 +1657,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
                       est_beta = BETA, est_beta_sd = est_sd[1], est_scale_horizontal = SCALE_HORIZONTAL, est_scale_horizontal_sd = est_sd[2],
                       est_scale_vertical = SCALE_VERTICAL, est_scale_vertical_sd = est_sd[3], est_a1 = A1, est_a1_sd = est_sd[4], est_b1 = B1, est_b1_sd = est_sd[5],
                       est_c1_coef = C1_coef, est_d1 = D1, est_a2 = A2, est_a2_sd = est_sd[6], est_b2 = B2, est_b2_sd = est_sd[7], est_c2_coef = C2_coef, est_d2 = D2,
-                      splines_degree = splines_degree, knots1 = knots1, knots2 = knots2)
+                      splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
     }
   }else{
     if(!beta_fix){
@@ -1699,7 +1701,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
                             est_scale_vertical = SCALE_VERTICAL, est_scale_vertical_sd = est_sd[3], est_a1 = A1, est_b1 = B1,
                             est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[3 + 1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_b2 = B2,
                             est_c2_coef = C2_coef, est_c2_coef_sd = est_sd[3 + length(init_c1_coef) + 1:length(init_c2_coef)], est_d2 = D2,
-                            splines_degree = splines_degree, knots1 = knots1, knots2 = knots2)
+                            splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
 
           }else{
             fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
@@ -1740,7 +1742,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
                             est_a1 = A1, est_a1_sd = est_sd[2], est_b1 = B1, est_b1_sd = est_sd[3],
                             est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[3 + 1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_a2_sd = est_sd[3 + length(init_c1_coef) + 1],
                             est_b2 = B2, est_b2_sd = est_sd[3 + length(init_c1_coef) + 2], est_c2_coef = C2_coef, est_c1_coef_sd = est_sd[3 + length(init_c1_coef) + 2 + 1:length(init_c2_coef)], est_d2 = D2,
-                            splines_degree = splines_degree, knots1 = knots1, knots2 = knots2)
+                            splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
 
           }else{
             fit <- optim(par = c(init_beta, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
@@ -1780,7 +1782,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
                             est_a1 = A1, est_a1_sd = est_sd[4], est_b1 = B1, est_b1_sd = est_sd[5],
                             est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[5 + 1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_a2_sd = est_sd[5 + length(init_c1_coef) + 1],
                             est_b2 = B2, est_b2_sd = est_sd[5 + length(init_c1_coef) + 2], est_c2_coef = C2_coef, est_c1_coef_sd = est_sd[5 + length(init_c1_coef) + 2 + 1:length(init_c2_coef)], est_d2 = D2,
-                            splines_degree = splines_degree, knots1 = knots1, knots2 = knots2)
+                            splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
 
           }else{
             fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
@@ -1821,7 +1823,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
                             est_beta = BETA, est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL, est_a1 = A1, est_b1 = B1,
                             est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_b2 = B2,
                             est_c2_coef = C2_coef, est_c2_coef_sd = est_sd[length(init_c1_coef) + 1:length(init_c2_coef)], est_d2 = D2,
-                            splines_degree = splines_degree, knots1 = knots1, knots2 = knots2)
+                            splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
 
           }else{
             fit <- optim(par = c(init_c1_coef, init_d1, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
@@ -1857,7 +1859,8 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
 #'
 #' @usage predict_bi_differential(residuals, location, location_new, est_beta,
 #' est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1, est_d1,
-#' est_a2, est_b2, est_c2, est_d2, radius, splines_degree, knots1, knots2)
+#' est_a2, est_b2, est_c2, est_d2, radius, splines_degree,
+#' inner_knots1, inner_knots2)
 #'
 #' @param residuals A \eqn{2 n} vector of residuals with
 #' variable 1 and 2 residuals appended next to each other.
@@ -1887,8 +1890,8 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
 #' variance parameter from the fully isotropic component associated with variable 2.
 #' @param radius A numeric constant indicating the radius of the sphere.
 #' @param splines_degree A number indicating the degree of the splines.
-#' @param knots1 A vector of knot locations for variable 1.
-#' @param knots2 A vector of knot locations for variable 2.
+#' @param inner_knots1 A vector of inner knot locations for variable 1.
+#' @param inner_knots2 A vector of inner knot locations for variable 2.
 #'
 #' @return A vector of predictions.
 #'
@@ -1897,7 +1900,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
 #' @author Mary Lai Salvana \email{yourlainess@gmail.com}
 #'
 #' @export
-predict_bi_differential <- function(residuals, location, location_new, est_beta, est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1, est_d1, est_a2, est_b2, est_c2, est_d2, radius, splines_degree = 2, knots1, knots2){
+predict_bi_differential <- function(residuals, location, location_new, est_beta, est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1, est_d1, est_a2, est_b2, est_c2, est_d2, radius, splines_degree = 2, inner_knots1, inner_knots2){
 
   BETA <- est_beta
   SCALE_HORIZONTAL <- est_scale_horizontal
@@ -1913,9 +1916,9 @@ predict_bi_differential <- function(residuals, location, location_new, est_beta,
 
   location_full <- rbind(location, location_new)
 
-  basis1 <- bsplineBasis(location_full[, 3], splines_degree, knots1)
+  basis1 <- bsplineBasis(location_full[, 3], splines_degree, inner_knots1)
   nb1 <- ncol(basis1)
-  basis2 <- bsplineBasis(location_full[, 3], splines_degree, knots2)
+  basis2 <- bsplineBasis(location_full[, 3], splines_degree, inner_knots2)
   nb2 <- ncol(basis2)
 
   C1 <- basis1 %*% matrix(C1_coef, ncol = 1)

@@ -5,8 +5,8 @@
 \title{Compute the bivariate differential operator cross-covariance function}
 \usage{
 cov_bi_differential(location, beta, scale_horizontal, scale_vertical,
-a1, b1, c1, d1, a2, b2, c2, d2, radius, splines_degree, knots1, knots2,
-c1_coef, c2_coef)
+a1, b1, c1, d1, a2, b2, c2, d2, radius, splines_degree,
+inner_knots1, inner_knots2, c1_coef, c2_coef)
 }
 \arguments{
 \item{location}{An \eqn{n \times 3} matrix of coordinates.}
@@ -38,10 +38,10 @@ c1_coef, c2_coef)
 \item{splines_degree}{A number indicating the degree of the splines when
 using splines to characterize the nonstationary parameters c1 and c2.}
 
-\item{knots1}{A vector of knot locations for variable 1 when using splines to
+\item{inner_knots1}{A vector of knot locations for variable 1 when using splines to
 characterize c1.}
 
-\item{knots2}{A vector of knot locations for variable 2 when using splines to
+\item{inner_knots2}{A vector of knot locations for variable 2 when using splines to
 characterize c2.}
 
 \item{c1_coef}{A numeric vector indicating the splines coefficients for the

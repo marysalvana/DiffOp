@@ -42,16 +42,16 @@ INIT_A1 = INIT_A2 = 0
 INIT_B1 = INIT_B2 = 0
 INIT_D1 = INIT_D2 = 0
 
-KNOTS1 <- c(0.1, 0.5, 0.9)
-KNOTS2 <- c(0.1, 0.5, 0.9)
+INNER_KNOTS1 <- c(0.1, 0.5, 0.9)
+INNER_KNOTS2 <- c(0.1, 0.5, 0.9)
 
 SPLINES_DEGREE = 2
 
 set.seed(1235)
-INIT_C1_COEF <- runif(length(KNOTS1) + SPLINES_DEGREE + 1, -0.1, 0.1)
+INIT_C1_COEF <- runif(length(INNER_KNOTS1) + SPLINES_DEGREE + 1, -0.1, 0.1)
 
 set.seed(1236)
-INIT_C2_COEF <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -0.1, 0.1)
+INIT_C2_COEF <- runif(length(INNER_KNOTS2) + SPLINES_DEGREE + 1, -0.1, 0.1)
 
 RERUN = T
 
@@ -68,12 +68,14 @@ if(!RERUN){
                                             d1_fix = TRUE, d2_fix = TRUE,
                                             radius = earthRadiusKm,
                                             splines_degree = SPLINES_DEGREE,
-                                            knots1 = KNOTS1, knots2 = KNOTS2,
+                                            inner_knots1 = INNER_KNOTS1,
+                                            inner_knots2 = INNER_KNOTS2,
                                             iterlim = 1000, stepmax = 1, hessian = T)
 
 }else{
 
   theta = c(-0.62974117,-4.12387248,-1.35632716,-3.86085051,0.0120121,-6.1526825,-5.63067144,-0.67988251,2.63699104,-0.67474937,-1.17650398,-0.0458907,-0.02159446,-2.03764979,-1.56692038,2.62100262,-0.28790217,-2.77460515,-2.23372887)
+  theta = c(-0.86196686,-4.1648521,-1.39985347,-3.48921176,0.01208163,-6.04237337,-5.85853677,-0.79101908,2.94078691,-0.75344884,-1.30514771,-0.04817469,-0.02415194,-2.12378123,-1.71960218,2.90215174,-0.3172772,-3.07458465,-2.53639316)
 
   est_params_mle2 <- est_bi_differential_mle(residuals = Z, location = loc3d,
                                             init_beta = theta[1],
@@ -86,7 +88,8 @@ if(!RERUN){
                                             c1_fix = TRUE, c2_fix = TRUE, d1_fix = TRUE, d2_fix = TRUE,
                                             radius = earthRadiusKm,
                                             splines_degree = SPLINES_DEGREE,
-                                            knots1 = KNOTS1, knots2 = KNOTS2,
+                                            inner_knots1 = INNER_KNOTS1,
+                                            inner_knots2 = INNER_KNOTS2,
                                             iterlim = 1000, stepmax = 1, hessian = T)
 
   print(est_params_mle2)

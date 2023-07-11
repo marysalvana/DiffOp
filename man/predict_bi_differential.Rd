@@ -6,7 +6,8 @@
 \usage{
 predict_bi_differential(residuals, location, location_new, est_beta,
 est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1, est_d1,
-est_a2, est_b2, est_c2, est_d2, radius, splines_degree, knots1, knots2)
+est_a2, est_b2, est_c2, est_d2, radius, splines_degree,
+inner_knots1, inner_knots2)
 }
 \arguments{
 \item{residuals}{A \eqn{2 n} vector of residuals with
@@ -53,9 +54,9 @@ variance parameter from the fully isotropic component associated with variable 2
 
 \item{splines_degree}{A number indicating the degree of the splines.}
 
-\item{knots1}{A vector of knot locations for variable 1.}
+\item{inner_knots1}{A vector of inner knot locations for variable 1.}
 
-\item{knots2}{A vector of knot locations for variable 2.}
+\item{inner_knots2}{A vector of inner knot locations for variable 2.}
 }
 \value{
 A vector of predictions.

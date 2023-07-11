@@ -9,7 +9,7 @@ init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1,
 init_a2, init_b2, init_c2_coef, init_d2,
 beta_fix, scale_horizontal_fix, scale_vertical_fix,
 a1_fix, b1_fix, c1_fix, d1_fix, a2_fix, b2_fix, c2_fix, d2_fix,
-radius, splines_degree, knots1, knots2,
+radius, splines_degree, inner_knots1, inner_knots2,
 w1, w2, w12, iterlim, stepmax, hessian)
 }
 \arguments{
@@ -82,9 +82,9 @@ vertical scale parameter should not be estimated.}
 
 \item{splines_degree}{A number indicating the degree of the splines.}
 
-\item{knots1}{A vector of knot locations for variable 1.}
+\item{inner_knots1}{A vector of knot locations for variable 1.}
 
-\item{knots2}{A vector of knot locations for variable 2.}
+\item{inner_knots2}{A vector of knot locations for variable 2.}
 
 \item{w1}{A number indicating the weight for the marginal covariance
 for variable 1 in the weighted least squares objective function.}
@@ -131,8 +131,8 @@ variable2_residuals = argo_ref_loc1$SalinityResiduals,
 bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03,
 radius = earthRadiusKm)}
 
-KNOTS1 <- c(0.1, 0.5, 0.9)
-KNOTS2 <- c(0.1, 0.5, 0.9)
+INNER_KNOTS1 <- c(0.1, 0.5, 0.9)
+INNER_KNOTS2 <- c(0.1, 0.5, 0.9)
 
 INIT_BETA = 0.6
 INIT_SCALE_HORIZONTAL = log(0.02)
@@ -144,10 +144,10 @@ INIT_D1 = INIT_D2 = 0
 SPLINES_DEGREE = 2
 
 set.seed(1235)
-INIT_C1 <- runif(length(KNOTS1) + SPLINES_DEGREE + 1, -5, 5)
+INIT_C1 <- runif(length(INNER_KNOTS1) + SPLINES_DEGREE + 1, -5, 5)
 
 set.seed(1236)
-INIT_C2 <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
+INIT_C2 <- runif(length(INNER_KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
 
 \dontrun{est_params_wls <- est_bi_differential_wls(empirical_values = emp_cov, location = loc3d,
                                  init_beta = INIT_BETA,
@@ -160,7 +160,8 @@ INIT_C2 <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
                                  d1_fix = TRUE, d2_fix = TRUE,
                                  radius = earthRadiusKm,
                                  splines_degree = SPLINES_DEGREE,
-                                 knots1 = KNOTS1, knots2 = KNOTS2,
+                                 inner_knots1 = INNER_KNOTS1,
+                                 inner_knots2 = INNER_KNOTS2,
                                  w1 = 100, w2 = 50000, w12 = 1000,
                                  iterlim = 1, hessian = FALSE)}
 
