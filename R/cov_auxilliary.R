@@ -1279,7 +1279,8 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
     }else{
       if(!beta_fix){
 
-        BETA <- 2 * (1 / (1 + exp(-theta[1]))) - 1
+        #BETA <- 2 * (1 / (1 + exp(-theta[1]))) - 1
+        BETA <- 1 / (1 + exp(-theta[1]))
 
         if(a1_fix & b1_fix & a2_fix & b2_fix){
 
@@ -1355,7 +1356,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
 
             SCALE_HORIZONTAL <- init_scale_horizontal
             SCALE_VERTICAL <- init_scale_vertical
-            A1 <- theta[2] * 1e-3
+            A1 <- exp(theta[2]) * 1e-3
             B1 <- theta[3] * 1e-3
 
             if(splines_degree == 0){
@@ -1395,7 +1396,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
 
             SCALE_HORIZONTAL <- exp(theta[2])
             SCALE_VERTICAL <- exp(theta[3])
-            A1 <- theta[4] * 1e-3
+            A1 <- exp(theta[4]) * 1e-3
             B1 <- theta[5] * 1e-3
 
             if(splines_degree == 0){
@@ -1511,7 +1512,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
 
             SCALE_HORIZONTAL <- init_scale_horizontal
             SCALE_VERTICAL <- init_scale_vertical
-            A1 <- theta[1] * 1e-3
+            A1 <- exp(theta[1]) * 1e-3
             B1 <- theta[2] * 1e-3
 
             if(splines_degree == 0){
@@ -1551,7 +1552,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
 
             SCALE_HORIZONTAL <- exp(theta[1])
             SCALE_VERTICAL <- exp(theta[2])
-            A1 <- theta[3] * 1e-3
+            A1 <- exp(theta[3]) * 1e-3
             B1 <- theta[4] * 1e-3
 
             if(splines_degree == 0){
