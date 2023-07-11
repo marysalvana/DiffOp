@@ -1,4 +1,5 @@
-library(DiffOp)
+library(DiffOp, lib.loc = "/project/jun/msalvana/R/x86_64-pc-linux-gnu-library/4.2/")
+#library(DiffOp)
 
 ####### SIMULATION #######
 
@@ -32,6 +33,62 @@ Z <- mvrnorm(1, mu = rep(0, ncol(cov_mat)), Sigma = cov_mat)
 Z1 <- Z[1:nrow(loc3d)]
 Z2 <- Z[nrow(loc3d) + 1:nrow(loc3d)]
 
+####### ESTIMATION #######
+
+INIT_BETA = 0
+INIT_SCALE_HORIZONTAL = log(0.02)
+INIT_SCALE_VERTICAL = log(0.2)
+INIT_A1 = INIT_A2 = 0
+INIT_B1 = INIT_B2 = 0
+INIT_D1 = INIT_D2 = 0
+
+KNOTS1 <- c(0.1, 0.5, 0.9)
+KNOTS2 <- c(0.1, 0.5, 0.9)
+
+SPLINES_DEGREE = 2
+
+RERUN = T
+
+if(!RERUN){
+  set.seed(1235)
+  INIT_C1_COEF <- runif(length(KNOTS1) + SPLINES_DEGREE + 1, -0.1, 0.1)
+
+  set.seed(1236)
+  INIT_C2_COEF <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -0.1, 0.1)
+
+  est_params_mle <- est_bi_differential_mle(residuals = Z, location = loc3d,
+                                            init_beta = INIT_BETA,
+                                            init_scale_horizontal = INIT_SCALE_HORIZONTAL,
+                                            init_scale_vertical = INIT_SCALE_VERTICAL,
+                                            init_a1 = INIT_A1, init_b1 = INIT_B1,
+                                            init_c1_coef = INIT_C1_COEF, init_d1 = INIT_D1,
+                                            init_a2 = INIT_A2, init_b2 = INIT_B2,
+                                            init_c2_coef = INIT_C2_COEF, init_d2 = INIT_D2,
+                                            d1_fix = TRUE, d2_fix = TRUE,
+                                            radius = earthRadiusKm,
+                                            splines_degree = SPLINES_DEGREE,
+                                            knots1 = KNOTS1, knots2 = KNOTS2,
+                                            iterlim = 1000, stepmax = 1, hessian = T)
+
+}else{
+
+  theta = c(-1.34275931,-4.19699546,-1.40356004,-3.28839135,0.01260649,-5.95608014,-5.63169883,-0.73918238,2.77539212,-0.71020166,-1.25388331,-0.04938566,-0.02351991,-2.49742114,-1.82023835,3.02128988,-0.32669139,-3.22855959,-2.62419402)
+
+  est_params_mle <- est_bi_differential_mle(residuals = Z, location = loc3d,
+                                            init_beta = theta[1],
+                                            init_scale_horizontal = theta[2],
+                                            init_scale_vertical = theta[3],
+                                            init_a1 = theta[4], init_b1 = theta[5],
+                                            init_c1_coef = theta[5 + 1:length(INIT_C1_COEF)], init_d1 = 0,
+                                            init_a2 = theta[5 + length(INIT_C1_COEF) + 1], init_b2 = theta[5 + length(INIT_C1_COEF) + 2],
+                                            init_c2_coef = theta[5 + length(INIT_C1_COEF) + 2 + 1:length(INIT_C2_COEF)], init_d2 = 0,
+                                            d1_fix = TRUE, d2_fix = TRUE,
+                                            radius = earthRadiusKm,
+                                            splines_degree = SPLINES_DEGREE,
+                                            knots1 = KNOTS1, knots2 = KNOTS2,
+                                            iterlim = 5, stepmax = 1, hessian = T)
+
+}
 
 
 
@@ -162,6 +219,8 @@ if(SCRATCH){
                                              iterlim = 1000, stepmax = 1, hessian = T)
 
   theta = c(-0.76204644,-4.55804423,-1.94605509,0.12655982,0.84346228,-1.77218938,-2.58028244,-4.76804631,11.30294595,19.61923519,13.42143752,0.01686747,-0.0091102,4.45767872,3.74930212,-5.95174338,-13.13890413,-6.97093002,-5.27942716)
+  theta = c(-0.6632838,-4.68657405,-1.96919145,-0.0181081,-0.00779444,-2.29079773,-3.37330351,-6.36289091,15.65553785,17.68589565,15.42971718,0.01913544,-0.02844181,4.50154414,3.6582661,-5.87692042,-10.13408209,-6.36045902,-4.62118685)
+  theta = c(-0.66590267,-4.79841894,-2.08258705,-0.02122895,-0.00879531,-2.86779729,-4.22278888,-7.97421044,19.62227991,22.18458008,19.31297487,0.02191214,-0.03393269,5.63829784,4.58674391,-7.37019452,-12.71733809,-7.97630343,-5.79275871)
 
   est_params_mle2 <- est_bi_differential_mle(residuals = Z, location = loc3d,
                                              init_beta = theta[1],
@@ -177,6 +236,8 @@ if(SCRATCH){
                                              knots1 = KNOTS1, knots2 = KNOTS2,
                                              iterlim = 1000, stepmax = 1, hessian = T)
 
+  mle_est_cov_mat <- cov_bi_differential(location = loc3d, beta = 0.1329132, scale_horizontal = 0.01393392, scale_vertical = 0.2279596, a1 = exp(-3.35678979) * 1e-3, b1 = 0.01580268 * 1e-3, c1_coef = c(-6.13353992,-6.45820406,-1.0103012,3.56694107,-0.91411356,-1.59157996), d1 = 0,
+                                         a2 = -0.05821896 * 1e-3, b2 = -0.02910226 * 1e-3, c2_coef = c(-2.58166409,-2.03010153,3.41535242,-0.38895313,-3.52456627,-2.8773148), d2 = 0, radius = earthRadiusKm, splines_degree = SPLINES_DEGREE, knots1 = KNOTS1, knots2 = KNOTS2)
 
 
   theta2 = c(-0.54476181,-4.84498315,-1.43957751,5.17121931,6.46133916,0.03203775,0.21407682)
@@ -216,15 +277,6 @@ if(SCRATCH){
                                             knots1 = KNOTS1, knots2 = KNOTS2,
                                             w1 = 1, w2 = 1, w12 = 1,
                                             iterlim = 1000, stepmax = 10, hessian = T)
-  #w12 = 0: minimum = 3.762514, with cov_mat
-  theta = c(-0.58824841,-1.12191566,-0.76319908,1.77320153,-0.53293114,-0.58714179,0.80815322,0.92454372,-1.61688095,0.22649478,1.35237963,0.80979308)
-
-  #w12 = 0: minimum = 120.9826, with emp_cov
-  theta = c(0.61850536,1.06475403,0.49700978,1.41275038,0.19323393,0.31166667,-0.13662041,-0.01967288,-0.51526506,-0.15759683,-0.24550915,-0.18268438)
-  #w12 = 0.1: minimum = 121.4423, with emp_cov
-  theta = c(0.61797399,1.06402943,0.49691149,1.41179833,0.19326209,0.31153443,-0.11824864,-0.01172988,-0.48771374,-0.14545836,-0.23689136,-0.17442548)
-  #w12 = 1: minimum = 123.5051, with emp_cov
-  theta = c(0.61910027,1.06540235,0.49718786,1.41199994,0.19333108,0.31161038,0.06939223,0.05087207,-0.06649795,0.01196319,-0.06364634,-0.03215431)
 
   wls_est_cov_mat <- cov_bi_differential(location = loc3d, beta = est_params_wls$est_beta, scale_horizontal = est_params_wls$est_scale_horizontal, scale_vertical = est_params_wls$est_scale_vertical, a1 = est_params_wls$est_a1, b1 = est_params_wls$est_b1, c1_coef = est_params_wls$est_c1_coef, d1 = est_params_wls$est_d1, a2 = est_params_wls$est_a2, b2 = est_params_wls$est_b2, c2_coef = est_params_wls$est_c2_coef, d2 = est_params_wls$est_d2, radius = earthRadiusKm, splines_degree = est_params_wls$splines_degree, knots1 = est_params_wls$knots1, knots2 = est_params_wls$knots2)
 
@@ -309,38 +361,3 @@ if(SCRATCH){
 
 
 }
-
-####### ESTIMATION #######
-
-INIT_BETA = 0
-INIT_SCALE_HORIZONTAL = log(0.02)
-INIT_SCALE_VERTICAL = log(0.2)
-INIT_A1 = INIT_A2 = 0
-INIT_B1 = INIT_B2 = 0
-INIT_D1 = INIT_D2 = 0
-
-KNOTS1 <- c(0.1, 0.5, 0.9)
-KNOTS2 <- c(0.1, 0.5, 0.9)
-
-SPLINES_DEGREE = 2
-
-set.seed(1235)
-INIT_C1_COEF <- runif(length(KNOTS1) + SPLINES_DEGREE + 1, -0.1, 0.1)
-
-set.seed(1236)
-INIT_C2_COEF <- runif(length(KNOTS2) + SPLINES_DEGREE + 1, -0.1, 0.1)
-
-est_params_mle <- est_bi_differential_mle(residuals = Z, location = loc3d,
-                                          init_beta = INIT_BETA,
-                                          init_scale_horizontal = INIT_SCALE_HORIZONTAL,
-                                          init_scale_vertical = INIT_SCALE_VERTICAL,
-                                          init_a1 = INIT_A1, init_b1 = INIT_B1,
-                                          init_c1_coef = INIT_C1_COEF, init_d1 = 0,
-                                          init_a2 = INIT_A2, init_b2 = INIT_B2,
-                                          init_c2_coef = INIT_C2_COEF, init_d2 = 0,
-                                          d1_fix = TRUE, d2_fix = TRUE,
-                                          radius = earthRadiusKm,
-                                          splines_degree = SPLINES_DEGREE,
-                                          knots1 = KNOTS1, knots2 = KNOTS2,
-                                          iterlim = 1000, stepmax = 1, hessian = T)
-

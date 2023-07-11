@@ -1264,7 +1264,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
 
     if(c1_fix & c2_fix){
 
-      BETA <- 2 * (1 / (1 + exp(-theta[1]))) - 1
+      BETA <- 1 / (1 + exp(-theta[1]))
       SCALE_HORIZONTAL <- exp(theta[2])
       SCALE_VERTICAL <- exp(theta[3])
       A1 <- theta[4] * 1e-3
@@ -1279,7 +1279,6 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
     }else{
       if(!beta_fix){
 
-        #BETA <- 2 * (1 / (1 + exp(-theta[1]))) - 1
         BETA <- 1 / (1 + exp(-theta[1]))
 
         if(a1_fix & b1_fix & a2_fix & b2_fix){
@@ -1632,10 +1631,10 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
       fit <- nlm(NEGLOGLIK, theta0, hessian = T,
                  print.level = 2, iterlim = iterlim, stepmax = stepmax)
 
-      BETA <- 2 * (1 / (1 + exp(-fit$estimate[1]))) - 1
+      BETA <- 1 / (1 + exp(-fit$estimate[1]))
       SCALE_HORIZONTAL <- exp(fit$estimate[2])
       SCALE_VERTICAL <- exp(fit$estimate[3])
-      A1 <- fit$estimate[4] * 1e-3
+      A1 <- exp(fit$estimate[4]) * 1e-3
       B1 <- fit$estimate[5] * 1e-3
       C1_coef <- init_c1_coef
       D1 <- init_d1
@@ -1647,7 +1646,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
 
       est_gradient <- fit$gradient
       est_hessian <- fit$hessian
-      j <- diag(c(2 * exp(-fit$estimate[1]) / (1 + exp(-fit$estimate[1]))^2, exp(fit$estimate[2:3]), rep(1e-3, 4)), nrow = length(theta0), ncol = length(theta0))
+      j <- diag(c(exp(-fit$estimate[1]) / (1 + exp(-fit$estimate[1]))^2, exp(fit$estimate[2:3]), exp(fit$estimate[4]) * 1e-3, rep(1e-3, 3)), nrow = length(theta0), ncol = length(theta0))
       fisher_info<-solve(est_hessian)
       variance <- j %*% fisher_info %*% t(j)
       est_sd <- sqrt(diag(variance))
@@ -1675,7 +1674,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
             fit <- nlm(NEGLOGLIK, theta0, hessian = hessian,
                        print.level = 2, iterlim = iterlim, stepmax = stepmax)
 
-            BETA <- 2 * (1 / (1 + exp(-fit$estimate[1]))) - 1
+            BETA <- 1 / (1 + exp(-fit$estimate[1]))
             SCALE_HORIZONTAL <- exp(fit$estimate[2])
             SCALE_VERTICAL <- exp(fit$estimate[3])
             A1 <- init_a1
@@ -1690,7 +1689,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
 
             est_gradient <- fit$gradient
             est_hessian <- fit$hessian
-            j <- diag(c(2 * exp(-fit$estimate[1]) / (1 + exp(-fit$estimate[1]))^2, exp(fit$estimate[2:3]), rep(1, length(init_c1_coef) + length(init_c2_coef))), nrow = length(theta0), ncol = length(theta0))
+            j <- diag(c(exp(-fit$estimate[1]) / (1 + exp(-fit$estimate[1]))^2, exp(fit$estimate[2:3]), rep(1, length(init_c1_coef) + length(init_c2_coef))), nrow = length(theta0), ncol = length(theta0))
             fisher_info<-solve(est_hessian)
             variance <- j %*% fisher_info %*% t(j)
             est_sd <- sqrt(diag(variance))
@@ -1715,10 +1714,10 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
             fit <- nlm(NEGLOGLIK, theta0, hessian = hessian,
                        print.level = 2, iterlim = iterlim, stepmax = stepmax)
 
-            BETA <- 2 * (1 / (1 + exp(-fit$estimate[1]))) - 1
+            BETA <- 1 / (1 + exp(-fit$estimate[1]))
             SCALE_HORIZONTAL <- init_scale_horizontal
             SCALE_VERTICAL <- init_scale_vertical
-            A1 <- fit$estimate[2] * 1e-3
+            A1 <- exp(fit$estimate[2]) * 1e-3
             B1 <- fit$estimate[3] * 1e-3
 
             C1_coef <- fit$estimate[3 + 1:length(init_c1_coef)]
@@ -1731,7 +1730,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
 
             est_gradient <- fit$gradient
             est_hessian <- fit$hessian
-            j <- diag(c(2 * exp(-fit$estimate[1]) / (1 + exp(-fit$estimate[1]))^2, rep(1e-3, 2), rep(1, length(init_c1_coef)), rep(1e-3, 2), rep(1, length(init_c2_coef))), nrow = length(theta0), ncol = length(theta0))
+            j <- diag(c(exp(-fit$estimate[1]) / (1 + exp(-fit$estimate[1]))^2, exp(fit$estimate[2]) * 1e-3, 1e-3, rep(1, length(init_c1_coef)), rep(1e-3, 2), rep(1, length(init_c2_coef))), nrow = length(theta0), ncol = length(theta0))
             fisher_info<-solve(est_hessian)
             variance <- j %*% fisher_info %*% t(j)
             est_sd <- sqrt(diag(variance))
@@ -1754,10 +1753,10 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
             fit <- nlm(NEGLOGLIK, theta0, hessian = hessian,
                        print.level = 2, iterlim = iterlim, stepmax = stepmax)
 
-            BETA <- 2 * (1 / (1 + exp(-fit$estimate[1]))) - 1
+            BETA <- 1 / (1 + exp(-fit$estimate[1]))
             SCALE_HORIZONTAL <- exp(fit$estimate[2])
             SCALE_VERTICAL <- exp(fit$estimate[3])
-            A1 <- fit$estimate[4] * 1e-3
+            A1 <- exp(fit$estimate[4]) * 1e-3
             B1 <- fit$estimate[5] * 1e-3
 
             C1_coef <- fit$estimate[5 + 1:length(init_c1_coef)]
@@ -1770,7 +1769,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta, init_scale_h
 
             est_gradient <- fit$gradient
             est_hessian <- fit$hessian
-            j <- diag(c(2 * exp(-fit$estimate[1]) / (1 + exp(-fit$estimate[1]))^2, exp(fit$estimate[2:3]), rep(1e-3, 2), rep(1, length(init_c1_coef)), rep(1e-3, 2), rep(1, length(init_c2_coef))), nrow = length(theta0), ncol = length(theta0))
+            j <- diag(c(exp(-fit$estimate[1]) / (1 + exp(-fit$estimate[1]))^2, exp(fit$estimate[2:3]), exp(fit$estimate[4]) * 1e-3, 1e-3, rep(1, length(init_c1_coef)), rep(1e-3, 2), rep(1, length(init_c2_coef))), nrow = length(theta0), ncol = length(theta0))
             fisher_info<-solve(est_hessian)
             variance <- j %*% fisher_info %*% t(j)
             est_sd <- sqrt(diag(variance))
