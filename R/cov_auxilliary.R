@@ -513,7 +513,7 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #'                                  iterlim = 1, hessian = FALSE)}
 #'
 #' @export
-est_bi_differential_wls <- function(empirical_values, location, init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2, beta_fix = F, scale_horizontal_fix = F, scale_vertical_fix = F, a1_fix = F, b1_fix = F, c1_fix = F, d1_fix = F, a2_fix = F, b2_fix = F, c2_fix = F, d2_fix = F, radius, splines_degree = 2, inner_knots1, inner_knots2, w1 = 100, w2 = 50000, w12 = 1000, iterlim = 2000, stepmax = 1, hessian = TRUE){
+est_bi_differential_wls <- function(empirical_values, location, init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2, beta_fix = F, scale_horizontal_fix = F, scale_vertical_fix = F, a1_fix = F, b1_fix = F, c1_fix = F, d1_fix = F, a2_fix = F, b2_fix = F, c2_fix = F, d2_fix = F, radius, splines_degree = 2, inner_knots1, inner_knots2, w1 = 1, w2 = 1, w12 = 1, iterlim = 2000, stepmax = 1, hessian = TRUE){
 
   basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
   nb1 <- ncol(basis1)
