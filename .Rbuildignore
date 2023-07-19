@@ -9,7 +9,6 @@
 ^\.git$
 ^job\.sub$
 ^testing_diffop_package\.R$
-^Z\.RData$
 ^testing\.R$
 ^README\.md$
-^\.out$
+^.*\.out$
