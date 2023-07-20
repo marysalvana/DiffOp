@@ -9,6 +9,9 @@ init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1,
 init_a2, init_b2, init_c2_coef, init_d2,
 beta_fix, scale_horizontal_fix, scale_vertical_fix,
 a1_fix, b1_fix, c1_fix, d1_fix, a2_fix, b2_fix, c2_fix, d2_fix,
+beta_scaling, horizontal_scale_scaling, vertical_scale_scaling,
+a1_scaling, b1_scaling, c1_coef_scaling, d1_scaling,
+a2_scaling, b2_scaling, c2_coef_scaling, d2_scaling,
 radius, splines_degree, inner_knots1, inner_knots2,
 w1, w2, w12, iterlim, stepmax, hessian)
 }
@@ -77,6 +80,41 @@ vertical scale parameter should not be estimated.}
 \item{c2_fix}{If \code{TRUE}, the c2 parameters are not be estimated.}
 
 \item{d2_fix}{If \code{TRUE}, the d2 parameter is not be estimated.}
+
+\item{beta_scaling}{A numeric constant indicating the scaling applied to the
+colocated correlation parameter}
+
+\item{horizontal_scale_scaling}{A numeric constant indicating the scaling
+applied to the horizontal scale parameter.}
+
+\item{vertical_scale_scaling}{A numeric constant indicating the scaling
+applied to the vertical scale parameter.}
+
+\item{a1_scaling}{A numeric constant indicating the scaling applied to the
+anisotropy in latitude parameter associated with variable 1.}
+
+\item{b1_scaling}{A numeric constant indicating the scaling applied to the
+anisotropy in longitude parameter associated with variable 1.}
+
+\item{c1_coef_scaling}{A numeric constant indicating the scaling
+applied to the splines coefficients for the nonstationary with depth
+parameter c1 associated with variable 1.}
+
+\item{d1_scaling}{A numeric constant indicating the scaling applied to the
+variance parameter from the fully isotropic component associated with variable 1.}
+
+\item{a2_scaling}{A numeric constant indicating the scaling applied to the
+anisotropy in latitude parameter associated with variable 2.}
+
+\item{b2_scaling}{A numeric constant indicating the scaling applied to the
+anisotropy in longitude parameter associated with variable 2.}
+
+\item{c2_coef_scaling}{A numeric constant indicating the scaling
+applied to the splines coefficients for the nonstationary with depth
+parameter c2 associated with variable 2.}
+
+\item{d2_scaling}{A numeric constant indicating the scaling applied to the
+variance parameter from the fully isotropic component associated with variable 2.}
 
 \item{radius}{A numeric constant indicating the radius of the sphere.}
 
@@ -158,6 +196,8 @@ INIT_C2 <- runif(length(INNER_KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
                                  init_a2 = INIT_A2, init_b2 = INIT_B2,
                                  init_c2_coef = INIT_C2, init_d2 = INIT_D2,
                                  d1_fix = TRUE, d2_fix = TRUE,
+                                 a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                 a2_scaling = 1e-3, b2_scaling = 1e-3,
                                  radius = earthRadiusKm,
                                  splines_degree = SPLINES_DEGREE,
                                  inner_knots1 = INNER_KNOTS1,

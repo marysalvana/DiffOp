@@ -378,6 +378,407 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 
 }
 
+transformParams <- function(theta){
+
+  if(c1_fix & c2_fix){
+    if(d1_fix & d2_fix){
+
+      BETA <- 1 / (1 + exp(-theta[1] * beta_scaling))
+      SCALE_HORIZONTAL <- exp(theta[2]) * horizontal_scale_scaling
+      SCALE_VERTICAL <- exp(theta[3]) * vertical_scale_scaling
+      A1 <- exp(theta[4]) * a1_scaling
+      B1 <- theta[5] * b1_scaling
+      C1_coef <- init_c1_coef
+      D1 <- init_d1
+      A2 <- theta[6] * a2_scaling
+      B2 <- theta[7] * b2_scaling
+      C2_coef <- init_c2_coef
+      D2 <- init_d2
+
+    }
+  }else{
+    if(!beta_fix){
+
+      BETA <- 1 / (1 + exp(-theta[1] * beta_scaling))
+
+      if(a1_fix & b1_fix & a2_fix & b2_fix){
+
+        A1 <- init_a1
+        B1 <- init_b1
+        A2 <- init_a2
+        B2 <- init_b2
+
+        if(scale_horizontal_fix & scale_vertical_fix){
+
+          SCALE_HORIZONTAL <- init_scale_horizontal
+          SCALE_VERTICAL <- init_scale_vertical
+
+          if(splines_degree == 0){
+
+            C1_coef <- theta[2]* c1_coef_scaling
+
+            if(is.null(init_d1) | is.null(init_d2)){
+
+              D1 <- 0
+              C2_coef <- theta[3] * c2_coef_scaling
+              D2 <- 0
+
+            }else{
+
+              D1 <- theta[3] * d1_scaling
+              C2_coef <- theta[4] * c2_coef_scaling
+              D2 <- theta[5] * d2_scaling
+
+            }
+          }else if(splines_degree > 0){
+
+            C1_coef <- theta[1 + 1:nb1] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+
+              D1 <- init_d1
+              C2_coef <- theta[nb1 + 1 + 1:nb2] * c2_coef_scaling
+              D2 <- init_d2
+
+            }else{
+              D1 <- theta[nb1 + 2] * d1_scaling
+              C2_coef <- theta[nb1 + 2 + 1:nb2] * c2_coef_scaling
+              D2 <- theta[nb1 + nb2 + 3] * d2_scaling
+            }
+          }
+        }else if(!scale_horizontal_fix & !scale_vertical_fix){
+
+          SCALE_HORIZONTAL <- exp(theta[2]) * horizontal_scale_scaling
+          SCALE_VERTICAL <- exp(theta[3]) * vertical_scale_scaling
+
+          if(splines_degree == 0){
+
+            C1_coef <- theta[4] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+
+              D1 <- init_d1
+              C2_coef <- theta[5] * c2_coef_scaling
+              D2 <- init_d2
+
+            }else{
+              D1 <- theta[5] * d1_scaling
+              C2_coef <- theta[6] * c2_coef_scaling
+              D2 <- theta[7] * d2_scaling
+            }
+          }else if(splines_degree > 0){
+
+            C1_coef <- theta[3 + 1:nb1] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+              D1 <- init_d1
+              C2_coef <- theta[nb1 + 3 + 1:nb2] * c2_coef_scaling
+              D2 <- init_d2
+            }else{
+              D1 <- theta[nb1 + 4] * d1_scaling
+              C2_coef <- theta[nb1 + 4 + 1:nb2] * c2_coef_scaling
+              D2 <- theta[nb1 + nb2 + 5] * d2_scaling
+            }
+          }
+        }
+      }else{
+        if(scale_horizontal_fix & scale_vertical_fix){
+
+          SCALE_HORIZONTAL <- init_scale_horizontal
+          SCALE_VERTICAL <- init_scale_vertical
+          A1 <- exp(theta[2]) * a1_scaling
+          B1 <- theta[3] * b1_scaling
+
+          if(splines_degree == 0){
+
+            C1_coef <- theta[4] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+
+              D1 <- init_d1
+              A2 <- theta[5] * a2_scaling
+              B2 <- theta[6] * b2_scaling
+              C2_coef <- theta[7] * c2_coef_scaling
+              D2 <- init_d2
+
+            }else{
+
+              D1 <- theta[5] * d1_scaling
+              A2 <- theta[6] * a2_scaling
+              B2 <- theta[7] * b2_scaling
+              C2_coef <- theta[8] * c2_coef_scaling
+              D2 <- theta[9] * d2_scaling
+
+            }
+          }else if(splines_degree > 0){
+
+            C1_coef <- theta[3 + 1:nb1] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+
+              D1 <- init_d1
+              A2 <- theta[nb1 + 4] * a2_scaling
+              B2 <- theta[nb1 + 5] * b2_scaling
+              C2_coef <- theta[nb1 + 5 + 1:nb2] * c2_coef_scaling
+              D2 <- init_d2
+
+            }else{
+
+              D1 <- theta[nb1 + 4] * d1_scaling
+              A2 <- theta[nb1 + 5] * a2_scaling
+              B2 <- theta[nb1 + 6] * b2_scaling
+              C2_coef <- theta[nb1 + 6 + 1:nb2] * c2_coef_scaling
+              D2 <- theta[nb1 + nb2 + 7] * d2_scaling
+
+            }
+          }
+        }else if(!scale_horizontal_fix & !scale_vertical_fix){
+
+          SCALE_HORIZONTAL <- exp(theta[2]) * horizontal_scale_scaling
+          SCALE_VERTICAL <- exp(theta[3]) * vertical_scale_scaling
+          A1 <- exp(theta[4]) * a1_scaling
+          B1 <- theta[5] * b1_scaling
+
+          if(splines_degree == 0){
+
+            C1_coef <- theta[6] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+
+              D1 <- init_d1
+              A2 <- theta[7] * a2_scaling
+              B2 <- theta[8] * b2_scaling
+              C2_coef <- theta[9] * c2_coef_scaling
+              D2 <- init_d2
+
+            }else{
+              D1 <- theta[7] * d1_scaling
+              A2 <- theta[8] * a2_scaling
+              B2 <- theta[9] * b2_scaling
+              C2_coef <- theta[10] * c2_coef_scaling
+              D2 <- theta[11] * d2_scaling
+            }
+          }else if(splines_degree > 0){
+
+            C1_coef <- theta[5 + 1:nb1] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+
+              D1 <- init_d1
+              A2 <- theta[5 + nb1 + 1] * a2_scaling
+              B2 <- theta[5 + nb1 + 2] * b2_scaling
+              C2_coef <- theta[5 + nb1 + 2 + 1:nb2] * c2_coef_scaling
+              D2 <- init_d2
+
+            }else{
+
+              D1 <- theta[nb1 + 6] * d1_scaling
+              A2 <- theta[nb1 + 7] * a2_scaling
+              B2 <- theta[nb1 + 8] * b2_scaling
+              C2_coef <- theta[nb1 + 8 + 1:nb2] * c2_coef_scaling
+              D2 <- theta[nb1 + nb2 + 9] * d2_scaling
+
+            }
+          }
+        }
+      }
+    }else if(beta_fix){
+
+      BETA <- init_beta
+
+      if(a1_fix & b1_fix & a2_fix & b2_fix){
+
+        A1 <- init_a1
+        B1 <- init_b1
+        A2 <- init_a2
+        B2 <- init_b2
+
+        if(scale_horizontal_fix & scale_vertical_fix){
+
+          SCALE_HORIZONTAL <- init_scale_horizontal
+          SCALE_VERTICAL <- init_scale_vertical
+
+          if(splines_degree == 0){
+
+            C1_coef <- theta[1] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+
+              D1 <- init_d1
+              C2_coef <- theta[2] * c2_coef_scaling
+              D2 <- init_d2
+
+            }else{
+
+              D1 <- theta[2] * d1_scaling
+              C2_coef <- theta[3] * c2_coef_scaling
+              D2 <- theta[4] * d2_scaling
+
+            }
+          }else if(splines_degree > 0){
+
+            C1_coef <- theta[1:nb1] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+
+              D1 <- init_d1
+              C2_coef <- theta[nb1 + 1:nb2] * c2_coef_scaling
+              D2 <- init_d2
+
+            }else{
+              D1 <- theta[nb1 + 1] * d1_scaling
+              C2_coef <- theta[nb1 + 1 + 1:nb2] * c2_coef_scaling
+              D2 <- theta[nb1 + nb2 + 2] * d2_scaling
+            }
+          }
+        }else if(!scale_horizontal_fix & !scale_vertical_fix){
+
+          SCALE_HORIZONTAL <- exp(theta[1]) * horizontal_scale_scaling
+          SCALE_VERTICAL <- exp(theta[2]) * vertical_scale_scaling
+
+          if(splines_degree == 0){
+
+            C1_coef <- theta[3] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+
+              D1 <- init_d1
+              C2_coef <- theta[4] * c2_coef_scaling
+              D2 <- init_d2
+
+            }else{
+
+              D1 <- theta[4] * d1_scaling
+              C2_coef <- theta[5] * c2_coef_scaling
+              D2 <- theta[6] * d2_scaling
+
+            }
+          }else if(splines_degree > 0){
+
+            C1_coef <- theta[2 + 1:nb1] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+              D1 <- init_d1
+              C2_coef <- theta[nb1 + 2 + 1:nb2] * c2_coef_scaling
+              D2 <- init_d2
+            }else{
+              D1 <- theta[nb1 + 3] * d1_scaling
+              C2_coef <- theta[nb1 + 3 + 1:nb2] * c2_coef_scaling
+              D2 <- theta[nb1 + nb2 + 4] * d2_scaling
+            }
+          }
+        }
+      }else{
+        if(scale_horizontal_fix & scale_vertical_fix){
+
+          SCALE_HORIZONTAL <- init_scale_horizontal
+          SCALE_VERTICAL <- init_scale_vertical
+          A1 <- exp(theta[1]) * a1_scaling
+          B1 <- theta[2] * b1_scaling
+
+          if(splines_degree == 0){
+
+            C1_coef <- theta[3] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+
+              D1 <- init_d1
+              A2 <- theta[4] * a2_scaling
+              B2 <- theta[5] * b2_scaling
+              C2_coef <- theta[6] * c2_coef_scaling
+              D2 <- init_d2
+
+            }else{
+
+              D1 <- theta[4] * d1_scaling
+              A2 <- theta[5] * a2_scaling
+              B2 <- theta[6] * b2_scaling
+              C2_coef <- theta[7] * c2_coef_scaling
+              D2 <- theta[8] * d2_scaling
+
+            }
+          }else if(splines_degree > 0){
+
+            C1_coef <- theta[2 + 1:nb1] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+
+              D1 <- init_d1
+              A2 <- theta[nb1 + 3] * a2_scaling
+              B2 <- theta[nb1 + 4] * b2_scaling
+              C2_coef <- theta[nb1 + 4 + 1:nb2] * c2_coef_scaling
+              D2 <- init_d2
+
+            }else{
+
+              D1 <- theta[nb1 + 3] * d1_scaling
+              A2 <- theta[nb1 + 4] * a2_scaling
+              B2 <- theta[nb1 + 5] * b2_scaling
+              C2_coef <- theta[nb1 + 5 + 1:nb2] * c2_coef_scaling
+              D2 <- theta[nb1 + nb2 + 6] * d2_scaling
+
+            }
+          }
+        }else if(!scale_horizontal_fix & !scale_vertical_fix){
+
+          SCALE_HORIZONTAL <- exp(theta[1]) * horizontal_scale_scaling
+          SCALE_VERTICAL <- exp(theta[2]) * vertical_scale_scaling
+          A1 <- exp(theta[3]) * a1_scaling
+          B1 <- theta[4] * b1_scaling
+
+          if(splines_degree == 0){
+
+            C1_coef <- theta[5] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+
+              D1 <- init_d1
+              A2 <- theta[6] * a2_scaling
+              B2 <- theta[7] * b2_scaling
+              C2_coef <- theta[8] * c2_coef_scaling
+              D2 <- init_d2
+
+            }else{
+
+              D1 <- theta[6] * d1_scaling
+              A2 <- theta[7] * a2_scaling
+              B2 <- theta[8] * b2_scaling
+              C2_coef <- theta[9] * c2_coef_scaling
+              D2 <- theta[10] * d2_scaling
+
+            }
+          }else if(splines_degree > 0){
+
+            C1_coef <- theta[4 + 1:nb1] * c1_coef_scaling
+
+            if(d1_fix & d2_fix){
+
+              D1 <- init_d1
+              A2 <- theta[nb1 + 5] * a2_scaling
+              B2 <- theta[nb1 + 6] * b2_scaling
+              C2_coef <- theta[nb1 + 6 + 1:nb2] * c2_coef_scaling
+              D2 <- init_d2
+
+            }else{
+              D1 <- theta[nb1 + 5] * d1_scaling
+              A2 <- theta[nb1 + 6] * a2_scaling
+              B2 <- theta[nb1 + 7] * b2_scaling
+              C2_coef <- theta[nb1 + 7 + 1:nb2] * c2_coef_scaling
+              D2 <- theta[nb1 + nb2 + 8] * d2_scaling
+            }
+          }
+        }
+      }
+    }
+  }
+
+  param <-  list(BETA = BETA, SCALE_HORIZONTAL = SCALE_HORIZONTAL,
+                 SCALE_VERTICAL = SCALE_VERTICAL, A1 = A1, B1 = B1, C1_coef = C1_coef,
+                 D1 = D1, A2 = A2, B2 = B2, C2_coef = C2_coef, D2 = D2)
+
+  return(param)
+}
+
 #' Weighted Least Squares Estimation of the parameters of the bivariate differential operator cross-covariance function
 #'
 #' @description
@@ -395,6 +796,9 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' init_a2, init_b2, init_c2_coef, init_d2,
 #' beta_fix, scale_horizontal_fix, scale_vertical_fix,
 #' a1_fix, b1_fix, c1_fix, d1_fix, a2_fix, b2_fix, c2_fix, d2_fix,
+#' beta_scaling, horizontal_scale_scaling, vertical_scale_scaling,
+#' a1_scaling, b1_scaling, c1_coef_scaling, d1_scaling,
+#' a2_scaling, b2_scaling, c2_coef_scaling, d2_scaling,
 #' radius, splines_degree, inner_knots1, inner_knots2,
 #' w1, w2, w12, iterlim, stepmax, hessian)
 #'
@@ -439,6 +843,30 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' @param b2_fix If \code{TRUE}, the b2 parameter is not be estimated.
 #' @param c2_fix If \code{TRUE}, the c2 parameters are not be estimated.
 #' @param d2_fix If \code{TRUE}, the d2 parameter is not be estimated.
+#' @param beta_scaling A numeric constant indicating the scaling applied to the
+#' colocated correlation parameter
+#' @param horizontal_scale_scaling A numeric constant indicating the scaling
+#' applied to the horizontal scale parameter.
+#' @param vertical_scale_scaling A numeric constant indicating the scaling
+#' applied to the vertical scale parameter.
+#' @param a1_scaling A numeric constant indicating the scaling applied to the
+#' anisotropy in latitude parameter associated with variable 1.
+#' @param b1_scaling A numeric constant indicating the scaling applied to the
+#' anisotropy in longitude parameter associated with variable 1.
+#' @param c1_coef_scaling A numeric constant indicating the scaling
+#' applied to the splines coefficients for the nonstationary with depth
+#' parameter c1 associated with variable 1.
+#' @param d1_scaling A numeric constant indicating the scaling applied to the
+#' variance parameter from the fully isotropic component associated with variable 1.
+#' @param a2_scaling A numeric constant indicating the scaling applied to the
+#' anisotropy in latitude parameter associated with variable 2.
+#' @param b2_scaling A numeric constant indicating the scaling applied to the
+#' anisotropy in longitude parameter associated with variable 2.
+#' @param c2_coef_scaling A numeric constant indicating the scaling
+#' applied to the splines coefficients for the nonstationary with depth
+#' parameter c2 associated with variable 2.
+#' @param d2_scaling A numeric constant indicating the scaling applied to the
+#' variance parameter from the fully isotropic component associated with variable 2.
 #' @param radius A numeric constant indicating the radius of the sphere.
 #' @param splines_degree A number indicating the degree of the splines.
 #' @param inner_knots1 A vector of knot locations for variable 1.
@@ -505,6 +933,8 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #'                                  init_a2 = INIT_A2, init_b2 = INIT_B2,
 #'                                  init_c2_coef = INIT_C2, init_d2 = INIT_D2,
 #'                                  d1_fix = TRUE, d2_fix = TRUE,
+#'                                  a1_scaling = 1e-3, b1_scaling = 1e-3,
+#'                                  a2_scaling = 1e-3, b2_scaling = 1e-3,
 #'                                  radius = earthRadiusKm,
 #'                                  splines_degree = SPLINES_DEGREE,
 #'                                  inner_knots1 = INNER_KNOTS1,
@@ -513,7 +943,26 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #'                                  iterlim = 1, hessian = FALSE)}
 #'
 #' @export
-est_bi_differential_wls <- function(empirical_values, location, init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2, beta_fix = F, scale_horizontal_fix = F, scale_vertical_fix = F, a1_fix = F, b1_fix = F, c1_fix = F, d1_fix = F, a2_fix = F, b2_fix = F, c2_fix = F, d2_fix = F, radius, splines_degree = 2, inner_knots1, inner_knots2, w1 = 1, w2 = 1, w12 = 1, iterlim = 2000, stepmax = 1, hessian = TRUE){
+est_bi_differential_wls <- function(empirical_values, location, init_beta,
+                                    init_scale_horizontal, init_scale_vertical,
+                                    init_a1, init_b1, init_c1_coef, init_d1,
+                                    init_a2, init_b2, init_c2_coef, init_d2,
+                                    beta_fix = F, scale_horizontal_fix = F,
+                                    scale_vertical_fix = F,
+                                    a1_fix = F, b1_fix = F,
+                                    c1_fix = F, d1_fix = F,
+                                    a2_fix = F, b2_fix = F,
+                                    c2_fix = F, d2_fix = F,
+                                    beta_scaling = 1, horizontal_scale_scaling = 1,
+                                    vertical_scale_scaling = 1,
+                                    a1_scaling = 1, b1_scaling = 1,
+                                    c1_coef_scaling = 1, d1_scaling = 1,
+                                    a2_scaling = 1, b2_scaling = 1,
+                                    c2_coef_scaling = 1, d2_scaling = 1,
+                                    radius, splines_degree = 2,
+                                    inner_knots1, inner_knots2,
+                                    w1 = 1, w2 = 1, w12 = 1,
+                                    iterlim = 2000, stepmax = 1, hessian = TRUE){
 
   basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
   nb1 <- ncol(basis1)
@@ -524,336 +973,32 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
 
     print(paste("theta = c(", paste(round(theta, 8), collapse=","), ")", sep = ''))
 
-    if(c1_fix & c2_fix){
-      if(d1_fix & d2_fix){
-        BETA <- 1 / (1 + exp(-theta[1]))
-        SCALE_HORIZONTAL <- exp(theta[2])
-        SCALE_VERTICAL <- exp(theta[3])
-        A1 <- exp(theta[4]) * 1e-3
-        B1 <- theta[5] * 1e-3
-        C1_coef <- init_c1_coef
-        D1 <- init_d1
-        A2 <- theta[6] * 1e-3
-        B2 <- theta[7] * 1e-3
-        C2_coef <- init_c2_coef
-        D2 <- init_d2
-      }
-    }else{
-      if(!beta_fix){
+    param <- transformParams(theta, init_beta,
+                             init_scale_horizontal, init_scale_vertical,
+                             init_a1, init_b1, init_c1_coef, init_d1,
+                             init_a2, init_b2, init_c2_coef, init_d2,
+                             beta_fix, scale_horizontal_fix,
+                             scale_vertical_fix,
+                             a1_fix, b1_fix, c1_fix, d1_fix,
+                             a2_fix, b2_fix, c2_fix, d2_fix,
+                             beta_scaling, horizontal_scale_scaling,
+                             vertical_scale_scaling, a1_scaling, b1_scaling,
+                             c1_coef_scaling, d1_scaling,
+                             a2_scaling, b2_scaling,
+                             c2_coef_scaling, d2_scaling,
+                             splines_degree, nb1, nb2)
 
-        BETA <- 1 / (1 + exp(-theta[1]))
-
-        if(a1_fix & b1_fix & a2_fix & b2_fix){
-
-          A1 <- init_a1
-          B1 <- init_b1
-          A2 <- init_a2
-          B2 <- init_b2
-
-          if(scale_horizontal_fix & scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- init_scale_horizontal
-            SCALE_VERTICAL <- init_scale_vertical
-
-            if(splines_degree == 0){
-              C1_coef <- theta[2]
-              if(is.null(init_d1) | is.null(init_d2)){
-                D1 <- 0
-                C2_coef <- theta[3]
-                D2 <- 0
-              }else{
-                D1 <- theta[3]
-                C2_coef <- theta[4]
-                D2 <- theta[5]
-              }
-            }else if(splines_degree > 0){
-              C1_coef <- theta[1 + 1:nb1]
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                C2_coef <- theta[nb1 + 1 + 1:nb2]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[nb1 + 2]
-                C2_coef <- theta[nb1 + 2 + 1:nb2]
-                D2 <- theta[nb1 + nb2 + 3]
-              }
-            }
-          }else if(!scale_horizontal_fix & !scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- exp(theta[2])
-            SCALE_VERTICAL <- exp(theta[3])
-
-            if(splines_degree == 0){
-
-              C1_coef <- theta[4]
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                C2_coef <- theta[5]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[5]
-                C2_coef <- theta[6]
-                D2 <- theta[7]
-              }
-            }else if(splines_degree > 0){
-
-              C1_coef <- theta[3 + 1:nb1]
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                C2_coef <- theta[nb1 + 3 + 1:nb2]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[nb1 + 4]
-                C2_coef <- theta[nb1 + 4 + 1:nb2]
-                D2 <- theta[nb1 + nb2 + 5]
-              }
-            }
-          }
-        }else{
-          if(scale_horizontal_fix & scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- init_scale_horizontal
-            SCALE_VERTICAL <- init_scale_vertical
-            A1 <- exp(theta[2]) * 1e-3
-            B1 <- theta[3] * 1e-3
-
-            if(splines_degree == 0){
-              C1_coef <- theta[4]
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                A2 <- theta[5] * 1e-3
-                B2 <- theta[6] * 1e-3
-                C2_coef <- theta[7]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[5]
-                A2 <- theta[6] * 1e-3
-                B2 <- theta[7] * 1e-3
-                C2_coef <- theta[8]
-                D2 <- theta[9]
-              }
-            }else if(splines_degree > 0){
-              C1_coef <- theta[3 + 1:nb1]
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                A2 <- theta[nb1 + 4] * 1e-3
-                B2 <- theta[nb1 + 5] * 1e-3
-                C2_coef <- theta[nb1 + 5 + 1:nb2]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[nb1 + 4]
-                A2 <- theta[nb1 + 5] * 1e-3
-                B2 <- theta[nb1 + 6] * 1e-3
-                C2_coef <- theta[nb1 + 6 + 1:nb2]
-                D2 <- theta[nb1 + nb2 + 7]
-              }
-            }
-          }else if(!scale_horizontal_fix & !scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- exp(theta[2])
-            SCALE_VERTICAL <- exp(theta[3])
-            A1 <- exp(theta[4]) * 1e-3
-            B1 <- theta[5] * 1e-3
-
-            if(splines_degree == 0){
-              C1_coef <- theta[6]
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                A2 <- theta[7] * 1e-3
-                B2 <- theta[8] * 1e-3
-                C2_coef <- theta[9]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[7]
-                A2 <- theta[8] * 1e-3
-                B2 <- theta[9] * 1e-3
-                C2_coef <- theta[10]
-                D2 <- theta[11]
-              }
-            }else if(splines_degree > 0){
-              C1_coef <- theta[5 + 1:nb1]
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                A2 <- theta[5 + nb1 + 1] * 1e-3
-                B2 <- theta[5 + nb1 + 2] * 1e-3
-                C2_coef <- theta[5 + nb1 + 2 + 1:nb2]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[nb1 + 6]
-                A2 <- theta[nb1 + 7] * 1e-3
-                B2 <- theta[nb1 + 8] * 1e-3
-                C2_coef <- theta[nb1 + 8 + 1:nb2]
-                D2 <- theta[nb1 + nb2 + 9]
-              }
-            }
-          }
-        }
-      }else if(beta_fix){
-
-        BETA <- init_beta
-
-        if(a1_fix & b1_fix & a2_fix & b2_fix){
-
-          A1 <- init_a1
-          B1 <- init_b1
-          A2 <- init_a2
-          B2 <- init_b2
-
-          if(scale_horizontal_fix & scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- init_scale_horizontal
-            SCALE_VERTICAL <- init_scale_vertical
-
-            if(splines_degree == 0){
-              C1_coef <- theta[1]
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                C2_coef <- theta[2]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[2]
-                C2_coef <- theta[3]
-                D2 <- theta[4]
-              }
-            }else if(splines_degree > 0){
-              C1_coef <- theta[1:nb1]
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                C2_coef <- theta[nb1 + 1:nb2]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[nb1 + 1]
-                C2_coef <- theta[nb1 + 1 + 1:nb2]
-                D2 <- theta[nb1 + nb2 + 2]
-              }
-            }
-          }else if(!scale_horizontal_fix & !scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- exp(theta[1])
-            SCALE_VERTICAL <- exp(theta[2])
-
-            if(splines_degree == 0){
-
-              C1_coef <- theta[3]
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                C2_coef <- theta[4]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[4]
-                C2_coef <- theta[5]
-                D2 <- theta[6]
-              }
-            }else if(splines_degree > 0){
-
-              C1_coef <- theta[2 + 1:nb1]
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                C2_coef <- theta[nb1 + 2 + 1:nb2]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[nb1 + 3]
-                C2_coef <- theta[nb1 + 3 + 1:nb2]
-                D2 <- theta[nb1 + nb2 + 4]
-              }
-            }
-          }
-        }else{
-          if(scale_horizontal_fix & scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- init_scale_horizontal
-            SCALE_VERTICAL <- init_scale_vertical
-            A1 <- exp(theta[1]) * 1e-3
-            B1 <- theta[2] * 1e-3
-
-            if(splines_degree == 0){
-              C1_coef <- theta[3]
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                A2 <- theta[4] * 1e-3
-                B2 <- theta[5] * 1e-3
-                C2_coef <- theta[6]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[4]
-                A2 <- theta[5] * 1e-3
-                B2 <- theta[6] * 1e-3
-                C2_coef <- theta[7]
-                D2 <- theta[8]
-              }
-            }else if(splines_degree > 0){
-              C1_coef <- theta[2 + 1:nb1]
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                A2 <- theta[nb1 + 3] * 1e-3
-                B2 <- theta[nb1 + 4] * 1e-3
-                C2_coef <- theta[nb1 + 4 + 1:nb2]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[nb1 + 3]
-                A2 <- theta[nb1 + 4] * 1e-3
-                B2 <- theta[nb1 + 5] * 1e-3
-                C2_coef <- theta[nb1 + 5 + 1:nb2]
-                D2 <- theta[nb1 + nb2 + 6]
-              }
-            }
-          }else if(!scale_horizontal_fix & !scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- exp(theta[1])
-            SCALE_VERTICAL <- exp(theta[2])
-            A1 <- exp(theta[3]) * 1e-3
-            B1 <- theta[4] * 1e-3
-
-            if(splines_degree == 0){
-              C1_coef <- theta[5]
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                A2 <- theta[6] * 1e-3
-                B2 <- theta[7] * 1e-3
-                C2_coef <- theta[8]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[6]
-                A2 <- theta[7] * 1e-3
-                B2 <- theta[8] * 1e-3
-                C2_coef <- theta[9]
-                D2 <- theta[10]
-              }
-            }else if(splines_degree > 0){
-              C1_coef <- theta[4 + 1:nb1]
-
-              if(d1_fix & d2_fix){
-
-                D1 <- init_d1
-                A2 <- theta[nb1 + 5] * 1e-3
-                B2 <- theta[nb1 + 6] * 1e-3
-                C2_coef <- theta[nb1 + 6 + 1:nb2]
-                D2 <- init_d2
-              }else{
-                D1 <- theta[nb1 + 5]
-                A2 <- theta[nb1 + 6] * 1e-3
-                B2 <- theta[nb1 + 7] * 1e-3
-                C2_coef <- theta[nb1 + 7 + 1:nb2]
-                D2 <- theta[nb1 + nb2 + 8]
-              }
-            }
-          }
-        }
-      }
-    }
+    BETA <- param$BETA
+    SCALE_HORIZONTAL <- param$SCALE_HORIZONTAL
+    SCALE_VERTICAL <- param$SCALE_VERTICAL
+    A1 <- param$A1
+    B1 <- param$B1
+    C1_coef <- param$C1_coef
+    D1 <- param$D1
+    A2 <- param$A2
+    B2 <- param$B2
+    C2_coef <- param$C2_coef
+    D2 <- param$D2
 
     if(splines_degree == 0){
       C1 <- C1_coef
@@ -862,9 +1007,6 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
       C1 <- basis1 %*% matrix(C1_coef, ncol = 1)
       C2 <- basis2 %*% matrix(C2_coef, ncol = 1)
     }
-
-    #param_list <- list(beta = BETA, scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL, a1 = A1, b1 = B1, c1 = C1_coef, d1 = D1, a2 = A2, b2 = B2, c2 = C2_coef, d2 = D2)
-    #print(param_list)
 
     cov_mat <- cov_bi_differential(location = location, beta = BETA,
                                    scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL,
@@ -884,237 +1026,71 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta, init_
     out <- sum((emp_covariance1 - covariance1)^2 * w1 + (emp_covariance2 - covariance2)^2 * w2 + (emp_covariance12 - covariance12)^2 * w12)
 
     return(out)
+
   }
 
-  if(c1_fix & c2_fix){
-    if(d1_fix & d2_fix){
+  init_theta <- prepareInitials(init_beta,
+                                init_scale_horizontal, init_scale_vertical,
+                                init_a1, init_b1, init_c1_coef, init_d1,
+                                init_a2, init_b2, init_c2_coef, init_d2,
+                                beta_fix, scale_horizontal_fix,
+                                scale_vertical_fix,
+                                a1_fix, b1_fix, c1_fix, d1_fix,
+                                a2_fix, b2_fix, c2_fix, d2_fix)
 
-      theta0 <- c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_a2, init_b2)
+  fit <- nlm(NEGLOGLIK, init_theta, hessian = T,
+             print.level = 2, iterlim = iterlim, stepmax = stepmax)
 
-      fit <- nlm(NEGLOGLIK, theta0, hessian = T,
-                 print.level = 2, iterlim = iterlim, stepmax = stepmax)
+  est_param <- transformParams(theta = fit$estimate, init_beta,
+                               init_scale_horizontal, init_scale_vertical,
+                               init_a1, init_b1, init_c1_coef, init_d1,
+                               init_a2, init_b2, init_c2_coef, init_d2,
+                               beta_fix, scale_horizontal_fix,
+                               scale_vertical_fix,
+                               a1_fix, b1_fix, c1_fix, d1_fix,
+                               a2_fix, b2_fix, c2_fix, d2_fix,
+                               beta_scaling, horizontal_scale_scaling,
+                               vertical_scale_scaling, a1_scaling, b1_scaling,
+                               c1_coef_scaling, d1_scaling,
+                               a2_scaling, b2_scaling,
+                               c2_coef_scaling, d2_scaling,
+                               splines_degree, nb1, nb2)
 
-      BETA <- 1 / (1 + exp(-fit$estimate[1]))
-      SCALE_HORIZONTAL <- exp(fit$estimate[2])
-      SCALE_VERTICAL <- exp(fit$estimate[3])
-      A1 <- exp(fit$estimate[4]) * 1e-3
-      B1 <- fit$estimate[5] * 1e-3
-      C1_coef <- init_c1_coef
-      D1 <- init_d1
+  BETA <- est_param$BETA
+  SCALE_HORIZONTAL <- est_param$SCALE_HORIZONTAL
+  SCALE_VERTICAL <- est_param$SCALE_VERTICAL
+  A1 <- est_param$A1
+  B1 <- est_param$B1
+  C1_coef <- est_param$C1_coef
+  D1 <- est_param$D1
+  A2 <- est_param$A2
+  B2 <- est_param$B2
+  C2_coef <- est_param$C2_coef
+  D2 <- est_param$D2
 
-      A2 <- fit$estimate[6] * 1e-3
-      B2 <- fit$estimate[7] * 1e-3
-      C2_coef <- init_c2_coef
-      D2 <- init_d2
+  est_sd <- computeSD(fittedModel = fit,
+                      beta_fix, scale_horizontal_fix,
+                      scale_vertical_fix,
+                      a1_fix, b1_fix, c1_fix, d1_fix,
+                      a2_fix, b2_fix, c2_fix, d2_fix,
+                      beta_scaling, horizontal_scale_scaling,
+                      vertical_scale_scaling, a1_scaling, b1_scaling,
+                      c1_coef_scaling, d1_scaling,
+                      a2_scaling, b2_scaling,
+                      c2_coef_scaling, d2_scaling, nb1, nb2)
 
-      est_gradient <- fit$gradient
-      est_hessian <- fit$hessian
-      j <- diag(c(exp(-fit$estimate[1]) / (1 + exp(-fit$estimate[1]))^2, exp(fit$estimate[2:3]), exp(fit$estimate[4]) * 1e-3, rep(1e-3, 3)), nrow = length(theta0), ncol = length(theta0))
-      fisher_info<-solve(est_hessian)
-      variance <- j %*% fisher_info %*% t(j)
-      est_sd <- sqrt(diag(variance))
-
-      results <- list(convergence_code = fit$code, iterations = fit$iterations, minimum = fit$minimum, theta = fit$estimate, gradient = fit$gradient,
-                      est_beta = BETA, est_beta_sd = est_sd[1], est_scale_horizontal = SCALE_HORIZONTAL, est_scale_horizontal_sd = est_sd[2],
-                      est_scale_vertical = SCALE_VERTICAL, est_scale_vertical_sd = est_sd[3], est_a1 = A1, est_a1_sd = est_sd[4], est_b1 = B1, est_b1_sd = est_sd[5],
-                      est_c1_coef = C1_coef, est_d1 = D1, est_a2 = A2, est_a2_sd = est_sd[6], est_b2 = B2, est_b2_sd = est_sd[7], est_c2_coef = C2_coef, est_d2 = D2,
-                      splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
-    }
-  }else{
-    if(!beta_fix){
-      if(a1_fix & b1_fix & a2_fix & b2_fix){
-        if(scale_horizontal_fix & scale_vertical_fix){
-          if(d1_fix & d2_fix){
-            fit <- optim(par = c(init_beta, init_c1_coef, init_c2_coef), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }else{
-            fit <- optim(par = c(init_beta, init_c1_coef, init_d1, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }
-        }else{
-          if(d1_fix & d2_fix){
-
-            theta0 <- c(init_beta, init_scale_horizontal, init_scale_vertical, init_c1_coef, init_c2_coef)
-
-            fit <- nlm(NEGLOGLIK, theta0, hessian = hessian,
-                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
-
-            BETA <- 1 / (1 + exp(-fit$estimate[1]))
-            SCALE_HORIZONTAL <- exp(fit$estimate[2])
-            SCALE_VERTICAL <- exp(fit$estimate[3])
-            A1 <- init_a1
-            B1 <- init_b1
-            C1_coef <- fit$estimate[3 + 1:length(init_c1_coef)]
-            D1 <- init_d1
-
-            A2 <- init_a2
-            B2 <- init_b2
-            C2_coef <- fit$estimate[3 + length(init_c1_coef) + 1:length(init_c2_coef)]
-            D2 <- init_d2
-
-            est_gradient <- fit$gradient
-            est_hessian <- fit$hessian
-            j <- diag(c(exp(-fit$estimate[1]) / (1 + exp(-fit$estimate[1]))^2, exp(fit$estimate[2:3]), rep(1, length(init_c1_coef) + length(init_c2_coef))), nrow = length(theta0), ncol = length(theta0))
-            fisher_info<-solve(est_hessian)
-            variance <- j %*% fisher_info %*% t(j)
-            est_sd <- sqrt(diag(variance))
-
-            results <- list(convergence_code = fit$code, iterations = fit$iterations, minimum = fit$minimum, theta = fit$estimate, gradient = fit$gradient,
-                            est_beta = BETA, est_beta_sd = est_sd[1], est_scale_horizontal = SCALE_HORIZONTAL, est_scale_horizontal_sd = est_sd[2],
-                            est_scale_vertical = SCALE_VERTICAL, est_scale_vertical_sd = est_sd[3], est_a1 = A1, est_b1 = B1,
-                            est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[3 + 1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_b2 = B2,
-                            est_c2_coef = C2_coef, est_c2_coef_sd = est_sd[3 + length(init_c1_coef) + 1:length(init_c2_coef)], est_d2 = D2,
-                            splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
-
-          }else{
-            fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }
-        }
-      }else{
-        if(scale_horizontal_fix & scale_vertical_fix){
-          if(d1_fix & d2_fix){
-
-            theta0 <- c(init_beta, init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef)
-
-            fit <- nlm(NEGLOGLIK, theta0, hessian = hessian,
-                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
-
-            BETA <- 1 / (1 + exp(-fit$estimate[1]))
-            SCALE_HORIZONTAL <- init_scale_horizontal
-            SCALE_VERTICAL <- init_scale_vertical
-            A1 <- exp(fit$estimate[2]) * 1e-3
-            B1 <- fit$estimate[3] * 1e-3
-
-            C1_coef <- fit$estimate[3 + 1:length(init_c1_coef)]
-            D1 <- init_d1
-
-            A2 <- fit$estimate[3 + length(init_c1_coef) + 1] * 1e-3
-            B2 <- fit$estimate[3 + length(init_c1_coef) + 2] * 1e-3
-            C2_coef <- fit$estimate[3 + length(init_c1_coef) + 2 + 1:length(init_c2_coef)]
-            D2 <- init_d2
-
-            est_gradient <- fit$gradient
-            est_hessian <- fit$hessian
-            j <- diag(c(exp(-fit$estimate[1]) / (1 + exp(-fit$estimate[1]))^2, exp(fit$estimate[2]) * 1e-3, 1e-3, rep(1, length(init_c1_coef)), rep(1e-3, 2), rep(1, length(init_c2_coef))), nrow = length(theta0), ncol = length(theta0))
-            fisher_info<-solve(est_hessian)
-            variance <- j %*% fisher_info %*% t(j)
-            est_sd <- sqrt(diag(variance))
-
-            results <- list(convergence_code = fit$code, iterations = fit$iterations, minimum = fit$minimum, theta = fit$estimate, gradient = fit$gradient,
-                            est_beta = BETA, est_beta_sd = est_sd[1], est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL,
-                            est_a1 = A1, est_a1_sd = est_sd[2], est_b1 = B1, est_b1_sd = est_sd[3],
-                            est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[3 + 1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_a2_sd = est_sd[3 + length(init_c1_coef) + 1],
-                            est_b2 = B2, est_b2_sd = est_sd[3 + length(init_c1_coef) + 2], est_c2_coef = C2_coef, est_c2_coef_sd = est_sd[3 + length(init_c1_coef) + 2 + 1:length(init_c2_coef)], est_d2 = D2,
-                            splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
-
-          }else{
-            fit <- optim(par = c(init_beta, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }
-        }else if(!scale_horizontal_fix & !scale_vertical_fix){
-          if(d1_fix & d2_fix){
-
-            theta0 <- c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef)
-
-            fit <- nlm(NEGLOGLIK, theta0, hessian = hessian,
-                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
-
-            BETA <- 1 / (1 + exp(-fit$estimate[1]))
-            SCALE_HORIZONTAL <- exp(fit$estimate[2])
-            SCALE_VERTICAL <- exp(fit$estimate[3])
-            A1 <- exp(fit$estimate[4]) * 1e-3
-            B1 <- fit$estimate[5] * 1e-3
-
-            C1_coef <- fit$estimate[5 + 1:length(init_c1_coef)]
-            D1 <- init_d1
-
-            A2 <- fit$estimate[5 + length(init_c1_coef) + 1] * 1e-3
-            B2 <- fit$estimate[5 + length(init_c1_coef) + 2] * 1e-3
-            C2_coef <- fit$estimate[5 + length(init_c1_coef) + 2 + 1:length(init_c2_coef)]
-            D2 <- init_d2
-
-            est_gradient <- fit$gradient
-            est_hessian <- fit$hessian
-            j <- diag(c(exp(-fit$estimate[1]) / (1 + exp(-fit$estimate[1]))^2, exp(fit$estimate[2:3]), exp(fit$estimate[4]) * 1e-3, 1e-3, rep(1, length(init_c1_coef)), rep(1e-3, 2), rep(1, length(init_c2_coef))), nrow = length(theta0), ncol = length(theta0))
-            fisher_info<-solve(est_hessian)
-            variance <- j %*% fisher_info %*% t(j)
-            est_sd <- sqrt(diag(variance))
-
-            results <- list(convergence_code = fit$code, iterations = fit$iterations, minimum = fit$minimum, theta = fit$estimate, gradient = fit$gradient,
-                            est_beta = BETA, est_beta_sd = est_sd[1], est_scale_horizontal = SCALE_HORIZONTAL, est_scale_horizontal_sd = est_sd[2],
-                            est_scale_vertical = SCALE_VERTICAL, est_scale_vertical_sd = est_sd[3],
-                            est_a1 = A1, est_a1_sd = est_sd[4], est_b1 = B1, est_b1_sd = est_sd[5],
-                            est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[5 + 1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_a2_sd = est_sd[5 + length(init_c1_coef) + 1],
-                            est_b2 = B2, est_b2_sd = est_sd[5 + length(init_c1_coef) + 2], est_c2_coef = C2_coef, est_c2_coef_sd = est_sd[5 + length(init_c1_coef) + 2 + 1:length(init_c2_coef)], est_d2 = D2,
-                            splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
-
-          }else{
-            fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
-          }
-        }
-      }
-    }else{
-      if(a1_fix & b1_fix & a2_fix & b2_fix){
-        if(scale_horizontal_fix & scale_vertical_fix){
-          if(d1_fix & d2_fix){
-
-            theta0 <- c(init_c1_coef, init_c2_coef)
-
-            fit <- nlm(NEGLOGLIK, theta0, hessian = hessian,
-                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
-
-            BETA <- init_beta
-            SCALE_HORIZONTAL <- init_scale_horizontal
-            SCALE_VERTICAL <- init_scale_vertical
-            A1 <- init_a1
-            B1 <- init_b1
-            C1_coef <- fit$estimate[1:length(init_c1_coef)]
-            D1 <- init_d1
-
-            A2 <- init_a2
-            B2 <- init_b2
-            C2_coef <- fit$estimate[length(init_c1_coef) + 1:length(init_c2_coef)]
-            D2 <- init_d2
-
-            est_gradient <- fit$gradient
-            est_hessian <- fit$hessian
-            j <- diag(c(rep(1, length(init_c1_coef) + length(init_c2_coef))), nrow = length(theta0), ncol = length(theta0))
-            fisher_info<-solve(est_hessian)
-            variance <- j %*% fisher_info %*% t(j)
-            est_sd <- sqrt(diag(variance))
-
-            results <- list(convergence_code = fit$code, iterations = fit$iterations, minimum = fit$minimum, theta = fit$estimate, gradient = fit$gradient,
-                            est_beta = BETA, est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL, est_a1 = A1, est_b1 = B1,
-                            est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_b2 = B2,
-                            est_c2_coef = C2_coef, est_c2_coef_sd = est_sd[length(init_c1_coef) + 1:length(init_c2_coef)], est_d2 = D2,
-                            splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
-
-          }else{
-            fit <- optim(par = c(init_c1_coef, init_d1, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }
-        }else{
-          if(d1_fix & d2_fix){
-            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_c1_coef, init_c2_coef), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }else{
-            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_c1_coef, init_d1, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }
-        }
-      }else{
-        if(scale_horizontal_fix & scale_vertical_fix){
-          if(d1_fix & d2_fix){
-            fit <- optim(par = c(init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }else{
-            fit <- optim(par = c(init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }
-        }else{
-          if(d1_fix & d2_fix){
-            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }else{
-            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }
-        }
-      }
-    }
-  }
+  results <- prepareResults_wls(fittedModel = fit,
+                                BETA, SCALE_HORIZONTAL, SCALE_VERTICAL,
+                                A1, B1, C1_coef, D1, A2, B2, C2_coef, D2,
+                                est_sd,
+                                beta_fix, scale_horizontal_fix,
+                                scale_vertical_fix,
+                                a1_fix, b1_fix, c1_fix, d1_fix,
+                                a2_fix, b2_fix, c2_fix, d2_fix,
+                                splines_degree, inner_knots1, inner_knots2, nb1, nb2)
 
   return(results)
+
 }
 
 
@@ -1329,397 +1305,32 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
 
     print(paste("theta = c(", paste(round(theta, 8), collapse=","), ")", sep = ''))
 
-    if(c1_fix & c2_fix){
-      if(d1_fix & d2_fix){
-
-        BETA <- 1 / (1 + exp(-theta[1] * beta_scaling))
-        SCALE_HORIZONTAL <- exp(theta[2]) * horizontal_scale_scaling
-        SCALE_VERTICAL <- exp(theta[3]) * vertical_scale_scaling
-        A1 <- exp(theta[4]) * a1_scaling
-        B1 <- theta[5] * b1_scaling
-        C1_coef <- init_c1_coef
-        D1 <- init_d1
-        A2 <- theta[6] * a2_scaling
-        B2 <- theta[7] * b2_scaling
-        C2_coef <- init_c2_coef
-        D2 <- init_d2
-
-      }
-    }else{
-      if(!beta_fix){
-
-        BETA <- 1 / (1 + exp(-theta[1] * beta_scaling))
-
-        if(a1_fix & b1_fix & a2_fix & b2_fix){
-
-          A1 <- init_a1
-          B1 <- init_b1
-          A2 <- init_a2
-          B2 <- init_b2
-
-          if(scale_horizontal_fix & scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- init_scale_horizontal
-            SCALE_VERTICAL <- init_scale_vertical
-
-            if(splines_degree == 0){
-
-              C1_coef <- theta[2]* c1_coef_scaling
-
-              if(is.null(init_d1) | is.null(init_d2)){
-
-                D1 <- 0
-                C2_coef <- theta[3] * c2_coef_scaling
-                D2 <- 0
-
-              }else{
-
-                D1 <- theta[3] * d1_scaling
-                C2_coef <- theta[4] * c2_coef_scaling
-                D2 <- theta[5] * d2_scaling
-
-              }
-            }else if(splines_degree > 0){
-
-              C1_coef <- theta[1 + 1:nb1] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-
-                D1 <- init_d1
-                C2_coef <- theta[nb1 + 1 + 1:nb2] * c2_coef_scaling
-                D2 <- init_d2
-
-              }else{
-                D1 <- theta[nb1 + 2] * d1_scaling
-                C2_coef <- theta[nb1 + 2 + 1:nb2] * c2_coef_scaling
-                D2 <- theta[nb1 + nb2 + 3] * d2_scaling
-              }
-            }
-          }else if(!scale_horizontal_fix & !scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- exp(theta[2]) * horizontal_scale_scaling
-            SCALE_VERTICAL <- exp(theta[3]) * vertical_scale_scaling
-
-            if(splines_degree == 0){
-
-              C1_coef <- theta[4] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-
-                D1 <- init_d1
-                C2_coef <- theta[5] * c2_coef_scaling
-                D2 <- init_d2
-
-              }else{
-                D1 <- theta[5] * d1_scaling
-                C2_coef <- theta[6] * c2_coef_scaling
-                D2 <- theta[7] * d2_scaling
-              }
-            }else if(splines_degree > 0){
-
-              C1_coef <- theta[3 + 1:nb1] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                C2_coef <- theta[nb1 + 3 + 1:nb2] * c2_coef_scaling
-                D2 <- init_d2
-              }else{
-                D1 <- theta[nb1 + 4] * d1_scaling
-                C2_coef <- theta[nb1 + 4 + 1:nb2] * c2_coef_scaling
-                D2 <- theta[nb1 + nb2 + 5] * d2_scaling
-              }
-            }
-          }
-        }else{
-          if(scale_horizontal_fix & scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- init_scale_horizontal
-            SCALE_VERTICAL <- init_scale_vertical
-            A1 <- exp(theta[2]) * a1_scaling
-            B1 <- theta[3] * b1_scaling
-
-            if(splines_degree == 0){
-
-              C1_coef <- theta[4] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-
-                D1 <- init_d1
-                A2 <- theta[5] * a2_scaling
-                B2 <- theta[6] * b2_scaling
-                C2_coef <- theta[7] * c2_coef_scaling
-                D2 <- init_d2
-
-              }else{
-
-                D1 <- theta[5] * d1_scaling
-                A2 <- theta[6] * a2_scaling
-                B2 <- theta[7] * b2_scaling
-                C2_coef <- theta[8] * c2_coef_scaling
-                D2 <- theta[9] * d2_scaling
-
-              }
-            }else if(splines_degree > 0){
-
-              C1_coef <- theta[3 + 1:nb1] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-
-                D1 <- init_d1
-                A2 <- theta[nb1 + 4] * a2_scaling
-                B2 <- theta[nb1 + 5] * b2_scaling
-                C2_coef <- theta[nb1 + 5 + 1:nb2] * c2_coef_scaling
-                D2 <- init_d2
-
-              }else{
-
-                D1 <- theta[nb1 + 4] * d1_scaling
-                A2 <- theta[nb1 + 5] * a2_scaling
-                B2 <- theta[nb1 + 6] * b2_scaling
-                C2_coef <- theta[nb1 + 6 + 1:nb2] * c2_coef_scaling
-                D2 <- theta[nb1 + nb2 + 7] * d2_scaling
-
-              }
-            }
-          }else if(!scale_horizontal_fix & !scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- exp(theta[2]) * horizontal_scale_scaling
-            SCALE_VERTICAL <- exp(theta[3]) * vertical_scale_scaling
-            A1 <- exp(theta[4]) * a1_scaling
-            B1 <- theta[5] * b1_scaling
-
-            if(splines_degree == 0){
-
-              C1_coef <- theta[6] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-
-                D1 <- init_d1
-                A2 <- theta[7] * a2_scaling
-                B2 <- theta[8] * b2_scaling
-                C2_coef <- theta[9] * c2_coef_scaling
-                D2 <- init_d2
-
-              }else{
-                D1 <- theta[7] * d1_scaling
-                A2 <- theta[8] * a2_scaling
-                B2 <- theta[9] * b2_scaling
-                C2_coef <- theta[10] * c2_coef_scaling
-                D2 <- theta[11] * d2_scaling
-              }
-            }else if(splines_degree > 0){
-
-              C1_coef <- theta[5 + 1:nb1] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-
-                D1 <- init_d1
-                A2 <- theta[5 + nb1 + 1] * a2_scaling
-                B2 <- theta[5 + nb1 + 2] * b2_scaling
-                C2_coef <- theta[5 + nb1 + 2 + 1:nb2] * c2_coef_scaling
-                D2 <- init_d2
-
-              }else{
-
-                D1 <- theta[nb1 + 6] * d1_scaling
-                A2 <- theta[nb1 + 7] * a2_scaling
-                B2 <- theta[nb1 + 8] * b2_scaling
-                C2_coef <- theta[nb1 + 8 + 1:nb2] * c2_coef_scaling
-                D2 <- theta[nb1 + nb2 + 9] * d2_scaling
-
-              }
-            }
-          }
-        }
-      }else if(beta_fix){
-
-        BETA <- init_beta
-
-        if(a1_fix & b1_fix & a2_fix & b2_fix){
-
-          A1 <- init_a1
-          B1 <- init_b1
-          A2 <- init_a2
-          B2 <- init_b2
-
-          if(scale_horizontal_fix & scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- init_scale_horizontal
-            SCALE_VERTICAL <- init_scale_vertical
-
-            if(splines_degree == 0){
-
-              C1_coef <- theta[1] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-
-                D1 <- init_d1
-                C2_coef <- theta[2] * c2_coef_scaling
-                D2 <- init_d2
-
-              }else{
-
-                D1 <- theta[2] * d1_scaling
-                C2_coef <- theta[3] * c2_coef_scaling
-                D2 <- theta[4] * d2_scaling
-
-              }
-            }else if(splines_degree > 0){
-
-              C1_coef <- theta[1:nb1] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-
-                D1 <- init_d1
-                C2_coef <- theta[nb1 + 1:nb2] * c2_coef_scaling
-                D2 <- init_d2
-
-              }else{
-                D1 <- theta[nb1 + 1] * d1_scaling
-                C2_coef <- theta[nb1 + 1 + 1:nb2] * c2_coef_scaling
-                D2 <- theta[nb1 + nb2 + 2] * d2_scaling
-              }
-            }
-          }else if(!scale_horizontal_fix & !scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- exp(theta[1]) * horizontal_scale_scaling
-            SCALE_VERTICAL <- exp(theta[2]) * vertical_scale_scaling
-
-            if(splines_degree == 0){
-
-              C1_coef <- theta[3] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-
-                D1 <- init_d1
-                C2_coef <- theta[4] * c2_coef_scaling
-                D2 <- init_d2
-
-              }else{
-
-                D1 <- theta[4] * d1_scaling
-                C2_coef <- theta[5] * c2_coef_scaling
-                D2 <- theta[6] * d2_scaling
-
-              }
-            }else if(splines_degree > 0){
-
-              C1_coef <- theta[2 + 1:nb1] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-                D1 <- init_d1
-                C2_coef <- theta[nb1 + 2 + 1:nb2] * c2_coef_scaling
-                D2 <- init_d2
-              }else{
-                D1 <- theta[nb1 + 3] * d1_scaling
-                C2_coef <- theta[nb1 + 3 + 1:nb2] * c2_coef_scaling
-                D2 <- theta[nb1 + nb2 + 4] * d2_scaling
-              }
-            }
-          }
-        }else{
-          if(scale_horizontal_fix & scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- init_scale_horizontal
-            SCALE_VERTICAL <- init_scale_vertical
-            A1 <- exp(theta[1]) * a1_scaling
-            B1 <- theta[2] * b1_scaling
-
-            if(splines_degree == 0){
-
-              C1_coef <- theta[3] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-
-                D1 <- init_d1
-                A2 <- theta[4] * a2_scaling
-                B2 <- theta[5] * b2_scaling
-                C2_coef <- theta[6] * c2_coef_scaling
-                D2 <- init_d2
-
-              }else{
-
-                D1 <- theta[4] * d1_scaling
-                A2 <- theta[5] * a2_scaling
-                B2 <- theta[6] * b2_scaling
-                C2_coef <- theta[7] * c2_coef_scaling
-                D2 <- theta[8] * d2_scaling
-
-              }
-            }else if(splines_degree > 0){
-
-              C1_coef <- theta[2 + 1:nb1] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-
-                D1 <- init_d1
-                A2 <- theta[nb1 + 3] * a2_scaling
-                B2 <- theta[nb1 + 4] * b2_scaling
-                C2_coef <- theta[nb1 + 4 + 1:nb2] * c2_coef_scaling
-                D2 <- init_d2
-
-              }else{
-
-                D1 <- theta[nb1 + 3] * d1_scaling
-                A2 <- theta[nb1 + 4] * a2_scaling
-                B2 <- theta[nb1 + 5] * b2_scaling
-                C2_coef <- theta[nb1 + 5 + 1:nb2] * c2_coef_scaling
-                D2 <- theta[nb1 + nb2 + 6] * d2_scaling
-
-              }
-            }
-          }else if(!scale_horizontal_fix & !scale_vertical_fix){
-
-            SCALE_HORIZONTAL <- exp(theta[1]) * horizontal_scale_scaling
-            SCALE_VERTICAL <- exp(theta[2]) * vertical_scale_scaling
-            A1 <- exp(theta[3]) * a1_scaling
-            B1 <- theta[4] * b1_scaling
-
-            if(splines_degree == 0){
-
-              C1_coef <- theta[5] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-
-                D1 <- init_d1
-                A2 <- theta[6] * a2_scaling
-                B2 <- theta[7] * b2_scaling
-                C2_coef <- theta[8] * c2_coef_scaling
-                D2 <- init_d2
-
-              }else{
-
-                D1 <- theta[6] * d1_scaling
-                A2 <- theta[7] * a2_scaling
-                B2 <- theta[8] * b2_scaling
-                C2_coef <- theta[9] * c2_coef_scaling
-                D2 <- theta[10] * d2_scaling
-
-              }
-            }else if(splines_degree > 0){
-
-              C1_coef <- theta[4 + 1:nb1] * c1_coef_scaling
-
-              if(d1_fix & d2_fix){
-
-                D1 <- init_d1
-                A2 <- theta[nb1 + 5] * a2_scaling
-                B2 <- theta[nb1 + 6] * b2_scaling
-                C2_coef <- theta[nb1 + 6 + 1:nb2] * c2_coef_scaling
-                D2 <- init_d2
-
-              }else{
-                D1 <- theta[nb1 + 5] * d1_scaling
-                A2 <- theta[nb1 + 6] * a2_scaling
-                B2 <- theta[nb1 + 7] * b2_scaling
-                C2_coef <- theta[nb1 + 7 + 1:nb2] * c2_coef_scaling
-                D2 <- theta[nb1 + nb2 + 8] * d2_scaling
-              }
-            }
-          }
-        }
-      }
-    }
+    param <- transformParams(theta, init_beta,
+                             init_scale_horizontal, init_scale_vertical,
+                             init_a1, init_b1, init_c1_coef, init_d1,
+                             init_a2, init_b2, init_c2_coef, init_d2,
+                             beta_fix, scale_horizontal_fix,
+                             scale_vertical_fix,
+                             a1_fix, b1_fix, c1_fix, d1_fix,
+                             a2_fix, b2_fix, c2_fix, d2_fix,
+                             beta_scaling, horizontal_scale_scaling,
+                             vertical_scale_scaling, a1_scaling, b1_scaling,
+                             c1_coef_scaling, d1_scaling,
+                             a2_scaling, b2_scaling,
+                             c2_coef_scaling, d2_scaling,
+                             splines_degree, nb1, nb2)
+
+    BETA <- param$BETA
+    SCALE_HORIZONTAL <- param$SCALE_HORIZONTAL
+    SCALE_VERTICAL <- param$SCALE_VERTICAL
+    A1 <- param$A1
+    B1 <- param$B1
+    C1_coef <- param$C1_coef
+    D1 <- param$D1
+    A2 <- param$A2
+    B2 <- param$B2
+    C2_coef <- param$C2_coef
+    D2 <- param$D2
 
     if(splines_degree == 0){
       C1 <- C1_coef
@@ -1751,232 +1362,68 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
     return(out)
   }
 
-  if(c1_fix & c2_fix){
-    if(d1_fix & d2_fix){
+  init_theta <- prepareInitials(init_beta,
+                                init_scale_horizontal, init_scale_vertical,
+                                init_a1, init_b1, init_c1_coef, init_d1,
+                                init_a2, init_b2, init_c2_coef, init_d2,
+                                beta_fix, scale_horizontal_fix,
+                                scale_vertical_fix,
+                                a1_fix, b1_fix, c1_fix, d1_fix,
+                                a2_fix, b2_fix, c2_fix, d2_fix)
 
-      theta0 <- c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_a2, init_b2)
+  fit <- nlm(NEGLOGLIK, init_theta, hessian = T,
+             print.level = 2, iterlim = iterlim, stepmax = stepmax)
 
-      fit <- nlm(NEGLOGLIK, theta0, hessian = T,
-                 print.level = 2, iterlim = iterlim, stepmax = stepmax)
+  est_param <- transformParams(theta = fit$estimate, init_beta,
+                           init_scale_horizontal, init_scale_vertical,
+                           init_a1, init_b1, init_c1_coef, init_d1,
+                           init_a2, init_b2, init_c2_coef, init_d2,
+                           beta_fix, scale_horizontal_fix,
+                           scale_vertical_fix,
+                           a1_fix, b1_fix, c1_fix, d1_fix,
+                           a2_fix, b2_fix, c2_fix, d2_fix,
+                           beta_scaling, horizontal_scale_scaling,
+                           vertical_scale_scaling, a1_scaling, b1_scaling,
+                           c1_coef_scaling, d1_scaling,
+                           a2_scaling, b2_scaling,
+                           c2_coef_scaling, d2_scaling,
+                           splines_degree, nb1, nb2)
 
-      BETA <- 1 / (1 + exp(-fit$estimate[1] * beta_scaling))
-      SCALE_HORIZONTAL <- exp(fit$estimate[2]) * horizontal_scale_scaling
-      SCALE_VERTICAL <- exp(fit$estimate[3]) * vertical_scale_scaling
-      A1 <- exp(fit$estimate[4]) * a1_scaling
-      B1 <- fit$estimate[5] * b1_scaling
-      C1_coef <- init_c1_coef
-      D1 <- init_d1
+  BETA <- est_param$BETA
+  SCALE_HORIZONTAL <- est_param$SCALE_HORIZONTAL
+  SCALE_VERTICAL <- est_param$SCALE_VERTICAL
+  A1 <- est_param$A1
+  B1 <- est_param$B1
+  C1_coef <- est_param$C1_coef
+  D1 <- est_param$D1
+  A2 <- est_param$A2
+  B2 <- est_param$B2
+  C2_coef <- est_param$C2_coef
+  D2 <- est_param$D2
 
-      A2 <- fit$estimate[6] * a2_scaling
-      B2 <- fit$estimate[7] * b2_scaling
-      C2_coef <- init_c2_coef
-      D2 <- init_d2
+  est_sd <- computeSD(fittedModel = fit,
+                        beta_fix, scale_horizontal_fix,
+                        scale_vertical_fix,
+                        a1_fix, b1_fix, c1_fix, d1_fix,
+                        a2_fix, b2_fix, c2_fix, d2_fix,
+                        beta_scaling, horizontal_scale_scaling,
+                        vertical_scale_scaling, a1_scaling, b1_scaling,
+                        c1_coef_scaling, d1_scaling,
+                        a2_scaling, b2_scaling,
+                        c2_coef_scaling, d2_scaling, nb1, nb2)
 
-      est_gradient <- fit$gradient
-      est_hessian <- fit$hessian
-      j <- diag(c(beta_scaling * exp(-fit$estimate[1] * beta_scaling) / (1 + exp(-fit$estimate[1] * beta_scaling))^2, exp(fit$estimate[2]) * horizontal_scale_scaling, exp(fit$estimate[3]) * vertical_scale_scaling, exp(fit$estimate[4]) * a1_scaling, b1_scaling, a2_scaling, b2_scaling), nrow = length(theta0), ncol = length(theta0))
-      fisher_info<-solve(est_hessian)
-      variance <- j %*% fisher_info %*% t(j)
-      est_sd <- sqrt(diag(variance))
+  results <- prepareResults_mle(fittedModel = fit,
+                            BETA, SCALE_HORIZONTAL, SCALE_VERTICAL,
+                            A1, B1, C1_coef, D1, A2, B2, C2_coef, D2,
+                            est_sd,
+                            beta_fix, scale_horizontal_fix,
+                            scale_vertical_fix,
+                            a1_fix, b1_fix, c1_fix, d1_fix,
+                            a2_fix, b2_fix, c2_fix, d2_fix,
+                            splines_degree, inner_knots1, inner_knots2, nb1, nb2)
 
-      results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate, gradient = fit$gradient,
-                      est_beta = BETA, est_beta_sd = est_sd[1], est_scale_horizontal = SCALE_HORIZONTAL, est_scale_horizontal_sd = est_sd[2],
-                      est_scale_vertical = SCALE_VERTICAL, est_scale_vertical_sd = est_sd[3], est_a1 = A1, est_a1_sd = est_sd[4], est_b1 = B1, est_b1_sd = est_sd[5],
-                      est_c1_coef = C1_coef, est_d1 = D1, est_a2 = A2, est_a2_sd = est_sd[6], est_b2 = B2, est_b2_sd = est_sd[7], est_c2_coef = C2_coef, est_d2 = D2,
-                      splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
-    }
-  }else{
-    if(!beta_fix){
-      if(a1_fix & b1_fix & a2_fix & b2_fix){
-        if(scale_horizontal_fix & scale_vertical_fix){
-          if(d1_fix & d2_fix){
-            fit <- optim(par = c(init_beta, init_c1_coef, init_c2_coef), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }else{
-            fit <- optim(par = c(init_beta, init_c1_coef, init_d1, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }
-        }else{
-          if(d1_fix & d2_fix){
-
-            theta0 <- c(init_beta, init_scale_horizontal, init_scale_vertical, init_c1_coef, init_c2_coef)
-
-            fit <- nlm(NEGLOGLIK, theta0, hessian = hessian,
-                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
-
-            BETA <- 1 / (1 + exp(-fit$estimate[1] * beta_scaling))
-            SCALE_HORIZONTAL <- exp(fit$estimate[2]) * horizontal_scale_scaling
-            SCALE_VERTICAL <- exp(fit$estimate[3]) * vertical_scale_scaling
-            A1 <- init_a1
-            B1 <- init_b1
-            C1_coef <- fit$estimate[3 + 1:length(init_c1_coef)] * c1_coef_scaling
-            D1 <- init_d1
-
-            A2 <- init_a2
-            B2 <- init_b2
-            C2_coef <- fit$estimate[3 + length(init_c1_coef) + 1:length(init_c2_coef)] * c2_coef_scaling
-            D2 <- init_d2
-
-            est_gradient <- fit$gradient
-            est_hessian <- fit$hessian
-            j <- diag(c(beta_scaling * exp(-fit$estimate[1] * beta_scaling) / (1 + exp(-fit$estimate[1] * beta_scaling))^2, exp(fit$estimate[2]) * horizontal_scale_scaling, exp(fit$estimate[3]) * vertical_scale_scaling, rep(c1_coef_scaling, length(init_c1_coef)), rep(c2_coef_scaling, length(init_c2_coef))), nrow = length(theta0), ncol = length(theta0))
-            fisher_info<-solve(est_hessian)
-            variance <- j %*% fisher_info %*% t(j)
-            est_sd <- sqrt(diag(variance))
-
-            results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate, gradient = fit$gradient,
-                            est_beta = BETA, est_beta_sd = est_sd[1], est_scale_horizontal = SCALE_HORIZONTAL, est_scale_horizontal_sd = est_sd[2],
-                            est_scale_vertical = SCALE_VERTICAL, est_scale_vertical_sd = est_sd[3], est_a1 = A1, est_b1 = B1,
-                            est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[3 + 1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_b2 = B2,
-                            est_c2_coef = C2_coef, est_c2_coef_sd = est_sd[3 + length(init_c1_coef) + 1:length(init_c2_coef)], est_d2 = D2,
-                            splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
-
-          }else{
-            fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }
-        }
-      }else{
-        if(scale_horizontal_fix & scale_vertical_fix){
-          if(d1_fix & d2_fix){
-
-            theta0 <- c(init_beta, init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef)
-
-            fit <- nlm(NEGLOGLIK, theta0, hessian = hessian,
-                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
-
-            BETA <- 1 / (1 + exp(-fit$estimate[1] * beta_scaling))
-            SCALE_HORIZONTAL <- init_scale_horizontal
-            SCALE_VERTICAL <- init_scale_vertical
-            A1 <- exp(fit$estimate[2]) * a1_scaling
-            B1 <- fit$estimate[3] * b1_scaling
-            C1_coef <- fit$estimate[3 + 1:length(init_c1_coef)] * c1_coef_scaling
-            D1 <- init_d1
-
-            A2 <- fit$estimate[3 + length(init_c1_coef) + 1] * a2_scaling
-            B2 <- fit$estimate[3 + length(init_c1_coef) + 2] * b2_scaling
-            C2_coef <- fit$estimate[3 + length(init_c1_coef) + 2 + 1:length(init_c2_coef)] * c2_coef_scaling
-            D2 <- init_d2
-
-            est_gradient <- fit$gradient
-            est_hessian <- fit$hessian
-            j <- diag(c(beta_scaling * exp(-fit$estimate[1] * beta_scaling) / (1 + exp(-fit$estimate[1] * beta_scaling))^2, exp(fit$estimate[2]) * a1_scaling, b1_scaling, rep(c1_coef_scaling, length(init_c1_coef)), a2_scaling, b2_scaling, rep(c2_coef_scaling, length(init_c2_coef))), nrow = length(theta0), ncol = length(theta0))
-            fisher_info<-solve(est_hessian)
-            variance <- j %*% fisher_info %*% t(j)
-            est_sd <- sqrt(diag(variance))
-
-            results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate, gradient = fit$gradient,
-                            est_beta = BETA, est_beta_sd = est_sd[1], est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL,
-                            est_a1 = A1, est_a1_sd = est_sd[2], est_b1 = B1, est_b1_sd = est_sd[3],
-                            est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[3 + 1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_a2_sd = est_sd[3 + length(init_c1_coef) + 1],
-                            est_b2 = B2, est_b2_sd = est_sd[3 + length(init_c1_coef) + 2], est_c2_coef = C2_coef, est_c2_coef_sd = est_sd[3 + length(init_c1_coef) + 2 + 1:length(init_c2_coef)], est_d2 = D2,
-                            splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
-
-          }else{
-            fit <- optim(par = c(init_beta, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }
-        }else if(!scale_horizontal_fix & !scale_vertical_fix){
-          if(d1_fix & d2_fix){
-
-            theta0 <- c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef)
-
-            fit <- nlm(NEGLOGLIK, theta0, hessian = hessian,
-                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
-
-            BETA <- 1 / (1 + exp(-fit$estimate[1] * beta_scaling))
-            SCALE_HORIZONTAL <- exp(fit$estimate[2]) * horizontal_scale_scaling
-            SCALE_VERTICAL <- exp(fit$estimate[3]) * vertical_scale_scaling
-            A1 <- exp(fit$estimate[4]) * a1_scaling
-            B1 <- fit$estimate[5] * b1_scaling
-            C1_coef <- fit$estimate[5 + 1:length(init_c1_coef)] * c1_coef_scaling
-            D1 <- init_d1
-
-            A2 <- fit$estimate[5 + length(init_c1_coef) + 1] * a2_scaling
-            B2 <- fit$estimate[5 + length(init_c1_coef) + 2] * b2_scaling
-            C2_coef <- fit$estimate[5 + length(init_c1_coef) + 2 + 1:length(init_c2_coef)] * c2_coef_scaling
-            D2 <- init_d2
-
-            est_gradient <- fit$gradient
-            est_hessian <- fit$hessian
-            j <- diag(c(beta_scaling * exp(-fit$estimate[1] * beta_scaling) / (1 + exp(-fit$estimate[1] * beta_scaling))^2, exp(fit$estimate[2]) * horizontal_scale_scaling, exp(fit$estimate[3]) * vertical_scale_scaling, exp(fit$estimate[4]) * a1_scaling, b1_scaling, rep(c1_coef_scaling, length(init_c1_coef)), a2_scaling, b2_scaling, rep(c2_coef_scaling, length(init_c2_coef))), nrow = length(theta0), ncol = length(theta0))
-            fisher_info<-solve(est_hessian)
-            variance <- j %*% fisher_info %*% t(j)
-            est_sd <- sqrt(diag(variance))
-
-            results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate, gradient = fit$gradient,
-                            est_beta = BETA, est_beta_sd = est_sd[1], est_scale_horizontal = SCALE_HORIZONTAL, est_scale_horizontal_sd = est_sd[2],
-                            est_scale_vertical = SCALE_VERTICAL, est_scale_vertical_sd = est_sd[3],
-                            est_a1 = A1, est_a1_sd = est_sd[4], est_b1 = B1, est_b1_sd = est_sd[5],
-                            est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[5 + 1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_a2_sd = est_sd[5 + length(init_c1_coef) + 1],
-                            est_b2 = B2, est_b2_sd = est_sd[5 + length(init_c1_coef) + 2], est_c2_coef = C2_coef, est_c2_coef_sd = est_sd[5 + length(init_c1_coef) + 2 + 1:length(init_c2_coef)], est_d2 = D2,
-                            splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
-
-          }else{
-            fit <- optim(par = c(init_beta, init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = hessian)
-          }
-        }
-      }
-    }else{
-      if(a1_fix & b1_fix & a2_fix & b2_fix){
-        if(scale_horizontal_fix & scale_vertical_fix){
-          if(d1_fix & d2_fix){
-
-            theta0 <- c(init_c1_coef, init_c2_coef)
-
-            fit <- nlm(NEGLOGLIK, theta0, hessian = hessian,
-                       print.level = 2, iterlim = iterlim, stepmax = stepmax)
-
-            BETA <- init_beta
-            SCALE_HORIZONTAL <- init_scale_horizontal
-            SCALE_VERTICAL <- init_scale_vertical
-            A1 <- init_a1
-            B1 <- init_b1
-            C1_coef <- fit$estimate[1:length(init_c1_coef)] * c1_coef_scaling
-            D1 <- init_d1
-
-            A2 <- init_a2
-            B2 <- init_b2
-            C2_coef <- fit$estimate[length(init_c1_coef) + 1:length(init_c2_coef)] * c2_coef_scaling
-            D2 <- init_d2
-
-            est_gradient <- fit$gradient
-            est_hessian <- fit$hessian
-            j <- diag(c(rep(c1_coef_scaling, length(init_c1_coef)), rep(c2_coef_scaling, length(init_c2_coef))), nrow = length(theta0), ncol = length(theta0))
-            fisher_info<-solve(est_hessian)
-            variance <- j %*% fisher_info %*% t(j)
-            est_sd <- sqrt(diag(variance))
-
-            results <- list(convergence_code = fit$code, iterations = fit$iterations, loglikelihood_value = -fit$minimum, theta = fit$estimate, gradient = fit$gradient,
-                            est_beta = BETA, est_scale_horizontal = SCALE_HORIZONTAL, est_scale_vertical = SCALE_VERTICAL, est_a1 = A1, est_b1 = B1,
-                            est_c1_coef = C1_coef, est_c1_coef_sd = est_sd[1:length(init_c1_coef)], est_d1 = D1, est_a2 = A2, est_b2 = B2,
-                            est_c2_coef = C2_coef, est_c2_coef_sd = est_sd[length(init_c1_coef) + 1:length(init_c2_coef)], est_d2 = D2,
-                            splines_degree = splines_degree, inner_knots1 = inner_knots1, inner_knots2 = inner_knots2)
-
-          }else{
-            fit <- optim(par = c(init_c1_coef, init_d1, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }
-        }else{
-          if(d1_fix & d2_fix){
-            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_c1_coef, init_c2_coef), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }else{
-            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_c1_coef, init_d1, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }
-        }
-      }else{
-        if(scale_horizontal_fix & scale_vertical_fix){
-          if(d1_fix & d2_fix){
-            fit <- optim(par = c(init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }else{
-            fit <- optim(par = c(init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }
-        }else{
-          if(d1_fix & d2_fix){
-            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_a2, init_b2, init_c2_coef), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }else{
-            fit <- optim(par = c(init_scale_horizontal, init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1, init_a2, init_b2, init_c2_coef, init_d2), fn = NEGLOGLIK, control = list(trace = 5, iterlim = iterlim), hessian = T)
-          }
-        }
-      }
-    }
-  }
   return(results)
+
 }
 
 #' Predict values at unsampled locations

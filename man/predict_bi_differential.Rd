@@ -5,8 +5,8 @@
 \title{Predict values at unsampled locations}
 \usage{
 predict_bi_differential(residuals, location, location_new, est_beta,
-est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1, est_d1,
-est_a2, est_b2, est_c2, est_d2, radius, splines_degree,
+est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1_coef, est_d1,
+est_a2, est_b2, est_c2_coef, est_d2, radius, splines_degree,
 inner_knots1, inner_knots2)
 }
 \arguments{
@@ -32,8 +32,9 @@ anisotropy in latitude parameter associated with variable 1.}
 \item{est_b1}{A numeric constant indicating the value for the
 anisotropy in longitude parameter associated with variable 1.}
 
-\item{est_c1}{A numeric vector indicating the values for the
-nonstationary parameters with depth associated with variable 1.}
+\item{est_c1_coef}{A numeric vector indicating the values for the
+splines coefficients for the nonstationary with depth
+parameter c1 associated with variable 1.}
 
 \item{est_d1}{A numeric constant indicating the value for the
 variance parameter from the fully isotropic component associated with variable 1.}
@@ -44,8 +45,9 @@ anisotropy in latitude parameter associated with variable 2.}
 \item{est_b2}{A numeric constant indicating the value for the
 anisotropy in longitude parameter associated with variable 2.}
 
-\item{est_c2}{A numeric vector indicating the values for the
-nonstationary parameters with depth associated with variable 2.}
+\item{est_c2_coef}{A numeric vector indicating the values for the
+splines coefficients for the nonstationary with depth
+parameter c2 associated with variable 2.}
 
 \item{est_d2}{A numeric constant indicating the value for the
 variance parameter from the fully isotropic component associated with variable 2.}

@@ -126,12 +126,14 @@ if(SYNTHETIC_DATA){
                                               init_c1_coef = INIT_C1_COEF, init_d1 = INIT_D1,
                                               init_a2 = INIT_A2, init_b2 = INIT_B2,
                                               init_c2_coef = INIT_C2_COEF, init_d2 = INIT_D2,
+                                              a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                              a2_scaling = 1e-3, b2_scaling = 1e-3,
                                               d1_fix = TRUE, d2_fix = TRUE,
                                               radius = earthRadiusKm,
                                               splines_degree = SPLINES_DEGREE,
                                               inner_knots1 = INNER_KNOTS1,
                                               inner_knots2 = INNER_KNOTS2,
-                                              iterlim = 1000, stepmax = 1, hessian = T)
+                                              iterlim = 5, stepmax = 1, hessian = T)
 
   }else{
 
@@ -146,6 +148,8 @@ if(SYNTHETIC_DATA){
                                                init_c1_coef = theta[5 + 1:length(INIT_C1_COEF)], init_d1 = 0,
                                                init_a2 = theta[5 + length(INIT_C1_COEF) + 1], init_b2 = theta[5 + length(INIT_C1_COEF) + 2],
                                                init_c2_coef = theta[5 + length(INIT_C1_COEF) + 2 + 1:length(INIT_C2_COEF)], init_d2 = 0,
+                                               a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                               a2_scaling = 1e-3, b2_scaling = 1e-3,
                                                c1_fix = TRUE, c2_fix = TRUE, d1_fix = TRUE, d2_fix = TRUE,
                                                radius = earthRadiusKm,
                                                splines_degree = SPLINES_DEGREE,
@@ -295,17 +299,17 @@ if(SYNTHETIC_DATA){
                              bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03,
                              radius = earthRadiusKm)
 
-  emp_variance1 <- diag(emp_cov[1:nrow(locs_insample), 1:nrow(locs_insample)])
-  emp_variance2 <- diag(emp_cov[nrow(locs_insample) + 1:nrow(locs_insample), nrow(locs_insample) + 1:nrow(locs_insample)])
-  emp_covariance12 <- diag(emp_cov[1:nrow(locs_insample), nrow(locs_insample) + 1:nrow(locs_insample)])
-  emp_correlation12 <- emp_covariance12 / sqrt(emp_variance1 * emp_variance2)
+  #emp_variance1 <- diag(emp_cov[1:nrow(locs_insample), 1:nrow(locs_insample)])
+  #emp_variance2 <- diag(emp_cov[nrow(locs_insample) + 1:nrow(locs_insample), nrow(locs_insample) + 1:nrow(locs_insample)])
+  #emp_covariance12 <- diag(emp_cov[1:nrow(locs_insample), nrow(locs_insample) + 1:nrow(locs_insample)])
+  #emp_correlation12 <- emp_covariance12 / sqrt(emp_variance1 * emp_variance2)
 
   INNER_KNOTS1 <- c(50, 100, 300, 500, 700, 1000)
   INNER_KNOTS2 <- c(50, 100, 300, 500, 700, 1000)
 
   SPLINES_DEGREE <- 2
 
-  INIT_BETA = -4.2730123098
+  INIT_BETA = 0
   INIT_SCALE_HORIZONTAL = -5.7331239134
   INIT_SCALE_VERTICAL = 0.26357412
   INIT_A1 = 4.07291428
@@ -324,12 +328,14 @@ if(SYNTHETIC_DATA){
                                             init_c1_coef = INIT_C1_COEF, init_d1 = INIT_D1,
                                             init_a2 = INIT_A2, init_b2 = INIT_B2,
                                             init_c2_coef = INIT_C2_COEF, init_d2 = INIT_D2,
+                                            a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                            a2_scaling = 1e-3, b2_scaling = 1e-3,
                                             d1_fix = TRUE, d2_fix = TRUE,
                                             radius = earthRadiusKm,
                                             splines_degree = SPLINES_DEGREE,
                                             inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2,
                                             w1 = 100, w2 = 50000, w12 = 10,
-                                            iterlim = 1000, stepmax = 1, hessian = T)
+                                            iterlim = 5, stepmax = 1, hessian = T)
 
 }
 
