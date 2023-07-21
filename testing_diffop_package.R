@@ -314,10 +314,10 @@ if(SYNTHETIC_DATA){
   INIT_SCALE_VERTICAL = 0.26357412
   INIT_A1 = 4.07291428
   INIT_B1 = 3.59165191
-  INIT_C1_COEF = c(-0.87653831,0.50746214,0.57719275,0.61521185,0.37327857,0.14017077,-0.02700237,0.0004893,0.071279)
+  INIT_C1_COEF = c(-0.87653831,0.50746214,0.57719275,0.61521185,0.37327857,0.14017077,-0.02700237,0.0004893,0.071279) * 1e-2
   INIT_A2 = 2.55032082
   INIT_B2 = -2.54202768
-  INIT_C2_COEF = c(0.04952738,0.22467233,-0.16542861,-0.04447287,-0.0159132,0.00096767,-0.00318231,0.00404039,-0.00412418)
+  INIT_C2_COEF = c(0.04952738,0.22467233,-0.16542861,-0.04447287,-0.0159132,0.00096767,-0.00318231,0.00404039,-0.00412418) * 1e-1
   INIT_D1 = INIT_D2 = 0
 
   est_params_wls <- est_bi_differential_wls(empirical_values = emp_cov, location = locs_insample,
@@ -330,12 +330,90 @@ if(SYNTHETIC_DATA){
                                             init_c2_coef = INIT_C2_COEF, init_d2 = INIT_D2,
                                             a1_scaling = 1e-3, b1_scaling = 1e-3,
                                             a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                            c1_coef_scaling = 100, c2_coef_scaling = 10,
                                             d1_fix = TRUE, d2_fix = TRUE,
                                             radius = earthRadiusKm,
                                             splines_degree = SPLINES_DEGREE,
                                             inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2,
                                             w1 = 100, w2 = 50000, w12 = 10,
-                                            iterlim = 5, stepmax = 1, hessian = T)
+                                            iterlim = 1000, stepmax = 1, hessian = T)
+
+
+  INNER_KNOTS1 <- c(100, 500, 1000)
+  INNER_KNOTS2 <- c(100, 500, 1000)
+
+  SPLINES_DEGREE = 2
+
+  set.seed(1235)
+  INIT_C1_COEF <- runif(length(INNER_KNOTS1) + SPLINES_DEGREE + 1, -0.1, 0.1)
+
+  set.seed(1236)
+  INIT_C2_COEF <- runif(length(INNER_KNOTS2) + SPLINES_DEGREE + 1, -0.1, 0.1)
+
+  est_params_mle <- est_bi_differential_mle(residuals = Z_insample, location = locs_insample,
+                                            init_beta = INIT_BETA,
+                                            init_scale_horizontal = INIT_SCALE_HORIZONTAL,
+                                            init_scale_vertical = INIT_SCALE_VERTICAL,
+                                            init_a1 = INIT_A1, init_b1 = INIT_B1,
+                                            init_c1_coef = INIT_C1_COEF, init_d1 = INIT_D1,
+                                            init_a2 = INIT_A2, init_b2 = INIT_B2,
+                                            init_c2_coef = INIT_C2_COEF, init_d2 = INIT_D2,
+                                            a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                            a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                            c1_coef_scaling = 100, c2_coef_scaling = 10,
+                                            d1_fix = TRUE, d2_fix = TRUE,
+                                            radius = earthRadiusKm,
+                                            splines_degree = SPLINES_DEGREE,
+                                            inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2,
+                                            iterlim = 1000, stepmax = 1, hessian = T)
+
+  theta = c(0.57567613,-5.69516263,-0.51984935,-6.12412233,3.62736555,0.01179412,0.01975864,0.01902657,0.00096915,0.00123227,0.00034689,1.75901571,-1.69397964,0.01764909,0.03512951,0.0059057,-0.00155626,-0.00072748,-0.00124493)
+
+  est_params_mle2 <- est_bi_differential_mle(residuals = Z_insample, location = locs_insample,
+                                             init_beta = theta[1],
+                                             init_scale_horizontal = theta[2],
+                                             init_scale_vertical = theta[3],
+                                             init_a1 = theta[4], init_b1 = theta[5],
+                                             init_c1_coef = theta[5 + 1:length(INIT_C1_COEF)], init_d1 = 0,
+                                             init_a2 = theta[5 + length(INIT_C1_COEF) + 1], init_b2 = theta[5 + length(INIT_C1_COEF) + 2],
+                                             init_c2_coef = theta[5 + length(INIT_C1_COEF) + 2 + 1:length(INIT_C2_COEF)], init_d2 = 0,
+                                             a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                             a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                             c1_coef_scaling = 100, c2_coef_scaling = 10,
+                                             d1_fix = TRUE, d2_fix = TRUE,
+                                             radius = earthRadiusKm,
+                                             splines_degree = SPLINES_DEGREE,
+                                             inner_knots1 = INNER_KNOTS1,
+                                             inner_knots2 = INNER_KNOTS2,
+                                             iterlim = 1000, stepmax = 1, hessian = T)
+
+  mle_est_cov_mat <- cov_bi_differential(location = locs_insample,
+                                         beta = est_params_mle2$est_beta,
+                                         scale_horizontal = est_params_mle2$est_scale_horizontal,
+                                         scale_vertical = est_params_mle2$est_scale_vertical,
+                                         a1 = est_params_mle2$est_a1,
+                                         b1 = est_params_mle2$est_b1,
+                                         c1_coef = est_params_mle2$est_c1_coef,
+                                         d1 = est_params_mle2$est_d1,
+                                         a2 = est_params_mle2$est_a2,
+                                         b2 = est_params_mle2$est_b2,
+                                         c2_coef = est_params_mle2$est_c2_coef,
+                                         d2 = est_params_mle2$est_d2,
+                                         radius = earthRadiusKm,
+                                         splines_degree = est_params_mle2$splines_degree,
+                                         inner_knots1 = est_params_mle2$knots1,
+                                         inner_knots2 = est_params_mle2$knots2)
+
+  mle_est_variance1 <- diag(mle_est_cov_mat[1:nrow(locs_insample), 1:nrow(locs_insample)])
+  mle_est_variance2 <- diag(mle_est_cov_mat[nrow(locs_insample) + 1:nrow(locs_insample), nrow(locs_insample) + 1:nrow(locs_insample)])
+  mle_est_covariance12 <- diag(mle_est_cov_mat[1:nrow(locs_insample), nrow(locs_insample) + 1:nrow(locs_insample)])
+  mle_est_correlation12 <- mle_est_covariance12 / sqrt(mle_est_variance1 * mle_est_variance2)
+
+  par(mfrow = c(2, 3))
+
+  plot(mle_est_variance1[1:10])
+  plot(mle_est_variance2[1:10])
+  plot(mle_est_correlation12[1:10])
 
 }
 
