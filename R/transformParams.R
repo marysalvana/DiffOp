@@ -13,26 +13,14 @@ transformParams <- function(theta, init_beta,
                             c2_coef_scaling, d2_scaling,
                             splines_degree, nb1, nb2){
 
-  if(c1_fix & c2_fix){
-    if(d1_fix & d2_fix){
+  if(!beta_fix){
 
-      BETA <- 1 / (1 + exp(-theta[1] * beta_scaling))
-      SCALE_HORIZONTAL <- exp(theta[2]) * horizontal_scale_scaling
-      SCALE_VERTICAL <- exp(theta[3]) * vertical_scale_scaling
-      A1 <- exp(theta[4]) * a1_scaling
-      B1 <- theta[5] * b1_scaling
-      C1_coef <- init_c1_coef
-      D1 <- init_d1
-      A2 <- theta[6] * a2_scaling
-      B2 <- theta[7] * b2_scaling
-      C2_coef <- init_c2_coef
-      D2 <- init_d2
+    BETA <- 1 / (1 + exp(-theta[1] * beta_scaling))
 
-    }
-  }else{
-    if(!beta_fix){
+    if(scale_horizontal_fix & scale_vertical_fix){
 
-      BETA <- 1 / (1 + exp(-theta[1] * beta_scaling))
+      SCALE_HORIZONTAL <- init_scale_horizontal
+      SCALE_VERTICAL <- init_scale_vertical
 
       if(a1_fix & b1_fix & a2_fix & b2_fix){
 
@@ -41,183 +29,107 @@ transformParams <- function(theta, init_beta,
         A2 <- init_a2
         B2 <- init_b2
 
-        if(scale_horizontal_fix & scale_vertical_fix){
+        if(c1_fix & c2_fix){
 
-          SCALE_HORIZONTAL <- init_scale_horizontal
-          SCALE_VERTICAL <- init_scale_vertical
+          C1_coef <- init_c1_coef
+          C2_coef <- init_c2_coef
 
-          if(splines_degree == 0){
+          if(d1_fix & d2_fix){
 
-            C1_coef <- theta[2]* c1_coef_scaling
+            D1 <- init_d1
+            D2 <- init_d2
 
-            if(is.null(init_d1) | is.null(init_d2)){
+          }else if(!d1_fix & !d2_fix){
 
-              D1 <- 0
-              C2_coef <- theta[3] * c2_coef_scaling
-              D2 <- 0
+            D1 <- theta[2] * d1_scaling
+            D2 <- theta[3] * d2_scaling
 
-            }else{
+          }
 
-              D1 <- theta[3] * d1_scaling
-              C2_coef <- theta[4] * c2_coef_scaling
-              D2 <- theta[5] * d2_scaling
+        }else if(!c1_fix & !c2_fix){
 
-            }
-          }else if(splines_degree > 0){
+          if(d1_fix & d2_fix){
 
             C1_coef <- theta[1 + 1:nb1] * c1_coef_scaling
+            D1 <- init_d1
 
-            if(d1_fix & d2_fix){
+            C2_coef <- theta[1 + nb1 + 1:nb2] * c2_coef_scaling
+            D2 <- init_d2
 
-              D1 <- init_d1
-              C2_coef <- theta[nb1 + 1 + 1:nb2] * c2_coef_scaling
-              D2 <- init_d2
+          }else if(!d1_fix & !d2_fix){
 
-            }else{
-              D1 <- theta[nb1 + 2] * d1_scaling
-              C2_coef <- theta[nb1 + 2 + 1:nb2] * c2_coef_scaling
-              D2 <- theta[nb1 + nb2 + 3] * d2_scaling
-            }
+            C1_coef <- theta[1 + 1:nb1] * c1_coef_scaling
+            D1 <- theta[1 + nb1 + 1] * d1_scaling
+
+            C2_coef <- theta[1 + nb1 + 1 + 1:nb2] * c2_coef_scaling
+            D2 <- theta[1 + nb1 + 1 + nb2 + 1] * d2_scaling
+
           }
-        }else if(!scale_horizontal_fix & !scale_vertical_fix){
 
-          SCALE_HORIZONTAL <- exp(theta[2]) * horizontal_scale_scaling
-          SCALE_VERTICAL <- exp(theta[3]) * vertical_scale_scaling
-
-          if(splines_degree == 0){
-
-            C1_coef <- theta[4] * c1_coef_scaling
-
-            if(d1_fix & d2_fix){
-
-              D1 <- init_d1
-              C2_coef <- theta[5] * c2_coef_scaling
-              D2 <- init_d2
-
-            }else{
-              D1 <- theta[5] * d1_scaling
-              C2_coef <- theta[6] * c2_coef_scaling
-              D2 <- theta[7] * d2_scaling
-            }
-          }else if(splines_degree > 0){
-
-            C1_coef <- theta[3 + 1:nb1] * c1_coef_scaling
-
-            if(d1_fix & d2_fix){
-              D1 <- init_d1
-              C2_coef <- theta[nb1 + 3 + 1:nb2] * c2_coef_scaling
-              D2 <- init_d2
-            }else{
-              D1 <- theta[nb1 + 4] * d1_scaling
-              C2_coef <- theta[nb1 + 4 + 1:nb2] * c2_coef_scaling
-              D2 <- theta[nb1 + nb2 + 5] * d2_scaling
-            }
-          }
         }
-      }else{
-        if(scale_horizontal_fix & scale_vertical_fix){
 
-          SCALE_HORIZONTAL <- init_scale_horizontal
-          SCALE_VERTICAL <- init_scale_vertical
-          A1 <- exp(theta[2]) * a1_scaling
-          B1 <- theta[3] * b1_scaling
+      }else if(!a1_fix & !b1_fix & !a2_fix & !b2_fix){
 
-          if(splines_degree == 0){
+        if(c1_fix & c2_fix){
 
-            C1_coef <- theta[4] * c1_coef_scaling
+          if(d1_fix & d2_fix){
 
-            if(d1_fix & d2_fix){
+            A1 <- exp(theta[2]) * a1_scaling
+            B1 <- theta[3] * b1_scaling
+            D1 <- init_d1
 
-              D1 <- init_d1
-              A2 <- theta[5] * a2_scaling
-              B2 <- theta[6] * b2_scaling
-              C2_coef <- theta[7] * c2_coef_scaling
-              D2 <- init_d2
+            A2 <- theta[4] * a2_scaling
+            B2 <- theta[5] * b2_scaling
+            D2 <- init_d2
 
-            }else{
+          }else if(!d1_fix & !d2_fix){
 
-              D1 <- theta[5] * d1_scaling
-              A2 <- theta[6] * a2_scaling
-              B2 <- theta[7] * b2_scaling
-              C2_coef <- theta[8] * c2_coef_scaling
-              D2 <- theta[9] * d2_scaling
+            A1 <- exp(theta[2]) * a1_scaling
+            B1 <- theta[3] * b1_scaling
+            D1 <- theta[4] * d1_scaling
 
-            }
-          }else if(splines_degree > 0){
+            A2 <- theta[5] * a2_scaling
+            B2 <- theta[6] * b2_scaling
+            D2 <- theta[7] * d2_scaling
 
+          }
+
+        }else if(!c1_fix & !c2_fix){
+
+          if(d1_fix & d2_fix){
+
+            A1 <- exp(theta[2]) * a1_scaling
+            B1 <- theta[3] * b1_scaling
             C1_coef <- theta[3 + 1:nb1] * c1_coef_scaling
+            D1 <- init_d1
 
-            if(d1_fix & d2_fix){
+            A2 <- theta[3 + nb1 + 1] * a2_scaling
+            B2 <- theta[3 + nb1 + 2] * b2_scaling
+            C2_coef <- theta[3 + nb1 + 2 + 1:nb2] * c2_coef_scaling
+            D2 <- init_d2
 
-              D1 <- init_d1
-              A2 <- theta[nb1 + 4] * a2_scaling
-              B2 <- theta[nb1 + 5] * b2_scaling
-              C2_coef <- theta[nb1 + 5 + 1:nb2] * c2_coef_scaling
-              D2 <- init_d2
+          }else if(!d1_fix & !d2_fix){
 
-            }else{
+            A1 <- exp(theta[2]) * a1_scaling
+            B1 <- theta[3] * b1_scaling
+            C1_coef <- theta[3 + 1:nb1] * c1_coef_scaling
+            D1 <- theta[3 + nb1 + 1] * d1_scaling
 
-              D1 <- theta[nb1 + 4] * d1_scaling
-              A2 <- theta[nb1 + 5] * a2_scaling
-              B2 <- theta[nb1 + 6] * b2_scaling
-              C2_coef <- theta[nb1 + 6 + 1:nb2] * c2_coef_scaling
-              D2 <- theta[nb1 + nb2 + 7] * d2_scaling
+            A2 <- theta[3 + nb1 + 2] * a2_scaling
+            B2 <- theta[3 + nb1 + 3] * b2_scaling
+            C2_coef <- theta[3 + nb1 + 3 + 1:nb2] * c2_coef_scaling
+            D2 <- theta[3 + nb1 + 3 + nb2 + 1] * d1_scaling
 
-            }
           }
-        }else if(!scale_horizontal_fix & !scale_vertical_fix){
 
-          SCALE_HORIZONTAL <- exp(theta[2]) * horizontal_scale_scaling
-          SCALE_VERTICAL <- exp(theta[3]) * vertical_scale_scaling
-          A1 <- exp(theta[4]) * a1_scaling
-          B1 <- theta[5] * b1_scaling
-
-          if(splines_degree == 0){
-
-            C1_coef <- theta[6] * c1_coef_scaling
-
-            if(d1_fix & d2_fix){
-
-              D1 <- init_d1
-              A2 <- theta[7] * a2_scaling
-              B2 <- theta[8] * b2_scaling
-              C2_coef <- theta[9] * c2_coef_scaling
-              D2 <- init_d2
-
-            }else{
-              D1 <- theta[7] * d1_scaling
-              A2 <- theta[8] * a2_scaling
-              B2 <- theta[9] * b2_scaling
-              C2_coef <- theta[10] * c2_coef_scaling
-              D2 <- theta[11] * d2_scaling
-            }
-          }else if(splines_degree > 0){
-
-            C1_coef <- theta[5 + 1:nb1] * c1_coef_scaling
-
-            if(d1_fix & d2_fix){
-
-              D1 <- init_d1
-              A2 <- theta[5 + nb1 + 1] * a2_scaling
-              B2 <- theta[5 + nb1 + 2] * b2_scaling
-              C2_coef <- theta[5 + nb1 + 2 + 1:nb2] * c2_coef_scaling
-              D2 <- init_d2
-
-            }else{
-
-              D1 <- theta[nb1 + 6] * d1_scaling
-              A2 <- theta[nb1 + 7] * a2_scaling
-              B2 <- theta[nb1 + 8] * b2_scaling
-              C2_coef <- theta[nb1 + 8 + 1:nb2] * c2_coef_scaling
-              D2 <- theta[nb1 + nb2 + 9] * d2_scaling
-
-            }
-          }
         }
+
       }
-    }else if(beta_fix){
 
-      BETA <- init_beta
+    }else if(!scale_horizontal_fix & !scale_vertical_fix){
+
+      SCALE_HORIZONTAL <- exp(theta[2]) * horizontal_scale_scaling
+      SCALE_VERTICAL <- exp(theta[3]) * vertical_scale_scaling
 
       if(a1_fix & b1_fix & a2_fix & b2_fix){
 
@@ -226,183 +138,324 @@ transformParams <- function(theta, init_beta,
         A2 <- init_a2
         B2 <- init_b2
 
-        if(scale_horizontal_fix & scale_vertical_fix){
+        if(c1_fix & c2_fix){
 
-          SCALE_HORIZONTAL <- init_scale_horizontal
-          SCALE_VERTICAL <- init_scale_vertical
+          C1_coef <- init_c1_coef
+          C2_coef <- init_c2_coef
 
-          if(splines_degree == 0){
+          if(d1_fix & d2_fix){
 
-            C1_coef <- theta[1] * c1_coef_scaling
+            D1 <- init_d1
+            D2 <- init_d2
 
-            if(d1_fix & d2_fix){
+          }else if(!d1_fix & !d2_fix){
 
-              D1 <- init_d1
-              C2_coef <- theta[2] * c2_coef_scaling
-              D2 <- init_d2
+            D1 <- theta[4] * d1_scaling
+            D2 <- theta[5] * d2_scaling
 
-            }else{
+          }
 
-              D1 <- theta[2] * d1_scaling
-              C2_coef <- theta[3] * c2_coef_scaling
-              D2 <- theta[4] * d2_scaling
+        }else if(!c1_fix & !c2_fix){
 
-            }
-          }else if(splines_degree > 0){
+          if(d1_fix & d2_fix){
+
+            C1_coef <- theta[3 + 1:nb1] * c1_coef_scaling
+            D1 <- init_d1
+
+            C2_coef <- theta[3 + nb1 + 1:nb2] * c2_coef_scaling
+            D2 <- init_d2
+
+          }else if(!d1_fix & !d2_fix){
+
+            C1_coef <- theta[3 + 1:nb1] * c1_coef_scaling
+            D1 <- theta[3 + nb1 + 1] * d1_scaling
+
+            C2_coef <- theta[3 + nb1 + 1 + 1:nb2] * c2_coef_scaling
+            D2 <- theta[3 + nb1 + 1 + nb2 + 1] * d2_scaling
+
+          }
+
+        }
+
+      }else if(!a1_fix & !b1_fix & !a2_fix & !b2_fix){
+
+        if(c1_fix & c2_fix){
+
+          if(d1_fix & d2_fix){
+
+            A1 <- exp(theta[4]) * a1_scaling
+            B1 <- theta[5] * b1_scaling
+            D1 <- init_d1
+
+            A2 <- theta[6] * a2_scaling
+            B2 <- theta[7] * b2_scaling
+            D2 <- init_d2
+
+          }else if(!d1_fix & !d2_fix){
+
+            A1 <- exp(theta[4]) * a1_scaling
+            B1 <- theta[5] * b1_scaling
+            D1 <- theta[6] * d1_scaling
+
+            A2 <- theta[7] * a2_scaling
+            B2 <- theta[8] * b2_scaling
+            D2 <- theta[9] * d2_scaling
+
+          }
+
+        }else if(!c1_fix & !c2_fix){
+
+          if(d1_fix & d2_fix){
+
+            A1 <- exp(theta[4]) * a1_scaling
+            B1 <- theta[5] * b1_scaling
+            C1_coef <- theta[5 + 1:nb1] * c1_coef_scaling
+            D1 <- init_d1
+
+            A2 <- theta[5 + nb1 + 1] * a2_scaling
+            B2 <- theta[5 + nb1 + 2] * b2_scaling
+            C2_coef <- theta[5 + nb1 + 2 + 1:nb2] * c2_coef_scaling
+            D2 <- init_d2
+
+          }else if(!d1_fix & !d2_fix){
+
+            A1 <- exp(theta[4]) * a1_scaling
+            B1 <- theta[5] * b1_scaling
+            C1_coef <- theta[5 + 1:nb1] * c1_coef_scaling
+            D1 <- theta[5 + nb1 + 1] * d1_scaling
+
+            A2 <- theta[5 + nb1 + 2] * a2_scaling
+            B2 <- theta[5 + nb1 + 3] * b2_scaling
+            C2_coef <- theta[5 + nb1 + 3 + 1:nb2] * c2_coef_scaling
+            D2 <- theta[5 + nb1 + 3 + nb2 + 1] * d1_scaling
+
+          }
+
+        }
+
+      }
+
+    }
+
+  }else if(beta_fix){
+
+    BETA <- init_beta
+
+    if(scale_horizontal_fix & scale_vertical_fix){
+
+      SCALE_HORIZONTAL <- init_scale_horizontal
+      SCALE_VERTICAL <- init_scale_vertical
+
+      if(a1_fix & b1_fix & a2_fix & b2_fix){
+
+        A1 <- init_a1
+        B1 <- init_b1
+        A2 <- init_a2
+        B2 <- init_b2
+
+        if(c1_fix & c2_fix){
+
+          C1_coef <- init_c1_coef
+          C2_coef <- init_c2_coef
+
+          if(!d1_fix & !d2_fix){
+
+            D1 <- theta[1] * d1_scaling
+            D2 <- theta[2] * d2_scaling
+
+          }
+
+        }else if(!c1_fix & !c2_fix){
+
+          if(d1_fix & d2_fix){
 
             C1_coef <- theta[1:nb1] * c1_coef_scaling
+            D1 <- init_d1
 
-            if(d1_fix & d2_fix){
+            C2_coef <- theta[nb1 + 1:nb2] * c2_coef_scaling
+            D2 <- init_d2
 
-              D1 <- init_d1
-              C2_coef <- theta[nb1 + 1:nb2] * c2_coef_scaling
-              D2 <- init_d2
+          }else if(!d1_fix & !d2_fix){
 
-            }else{
-              D1 <- theta[nb1 + 1] * d1_scaling
-              C2_coef <- theta[nb1 + 1 + 1:nb2] * c2_coef_scaling
-              D2 <- theta[nb1 + nb2 + 2] * d2_scaling
-            }
+            C1_coef <- theta[1:nb1] * c1_coef_scaling
+            D1 <- theta[nb1 + 1] * d1_scaling
+
+            C2_coef <- theta[nb1 + 1 + 1:nb2] * c2_coef_scaling
+            D2 <- theta[nb1 + 1 + nb2 + 1] * d2_scaling
+
           }
-        }else if(!scale_horizontal_fix & !scale_vertical_fix){
 
-          SCALE_HORIZONTAL <- exp(theta[1]) * horizontal_scale_scaling
-          SCALE_VERTICAL <- exp(theta[2]) * vertical_scale_scaling
-
-          if(splines_degree == 0){
-
-            C1_coef <- theta[3] * c1_coef_scaling
-
-            if(d1_fix & d2_fix){
-
-              D1 <- init_d1
-              C2_coef <- theta[4] * c2_coef_scaling
-              D2 <- init_d2
-
-            }else{
-
-              D1 <- theta[4] * d1_scaling
-              C2_coef <- theta[5] * c2_coef_scaling
-              D2 <- theta[6] * d2_scaling
-
-            }
-          }else if(splines_degree > 0){
-
-            C1_coef <- theta[2 + 1:nb1] * c1_coef_scaling
-
-            if(d1_fix & d2_fix){
-              D1 <- init_d1
-              C2_coef <- theta[nb1 + 2 + 1:nb2] * c2_coef_scaling
-              D2 <- init_d2
-            }else{
-              D1 <- theta[nb1 + 3] * d1_scaling
-              C2_coef <- theta[nb1 + 3 + 1:nb2] * c2_coef_scaling
-              D2 <- theta[nb1 + nb2 + 4] * d2_scaling
-            }
-          }
         }
-      }else{
-        if(scale_horizontal_fix & scale_vertical_fix){
 
-          SCALE_HORIZONTAL <- init_scale_horizontal
-          SCALE_VERTICAL <- init_scale_vertical
-          A1 <- exp(theta[1]) * a1_scaling
-          B1 <- theta[2] * b1_scaling
+      }else if(!a1_fix & !b1_fix & !a2_fix & !b2_fix){
 
-          if(splines_degree == 0){
+        if(c1_fix & c2_fix){
 
-            C1_coef <- theta[3] * c1_coef_scaling
+          if(d1_fix & d2_fix){
 
-            if(d1_fix & d2_fix){
+            A1 <- exp(theta[1]) * a1_scaling
+            B1 <- theta[2] * b1_scaling
+            D1 <- init_d1
 
-              D1 <- init_d1
-              A2 <- theta[4] * a2_scaling
-              B2 <- theta[5] * b2_scaling
-              C2_coef <- theta[6] * c2_coef_scaling
-              D2 <- init_d2
+            A2 <- theta[3] * a2_scaling
+            B2 <- theta[4] * b2_scaling
+            D2 <- init_d2
 
-            }else{
+          }else if(!d1_fix & !d2_fix){
 
-              D1 <- theta[4] * d1_scaling
-              A2 <- theta[5] * a2_scaling
-              B2 <- theta[6] * b2_scaling
-              C2_coef <- theta[7] * c2_coef_scaling
-              D2 <- theta[8] * d2_scaling
+            A1 <- exp(theta[1]) * a1_scaling
+            B1 <- theta[2] * b1_scaling
+            D1 <- theta[3] * d1_scaling
 
-            }
-          }else if(splines_degree > 0){
+            A2 <- theta[4] * a2_scaling
+            B2 <- theta[5] * b2_scaling
+            D2 <- theta[6] * d2_scaling
 
+          }
+
+        }else if(!c1_fix & !c2_fix){
+
+          if(d1_fix & d2_fix){
+
+            A1 <- exp(theta[1]) * a1_scaling
+            B1 <- theta[2] * b1_scaling
             C1_coef <- theta[2 + 1:nb1] * c1_coef_scaling
+            D1 <- init_d1
 
-            if(d1_fix & d2_fix){
+            A2 <- theta[2 + nb1 + 1] * a2_scaling
+            B2 <- theta[2 + nb1 + 2] * b2_scaling
+            C2_coef <- theta[2 + nb1 + 2 + 1:nb2] * c2_coef_scaling
+            D2 <- init_d2
 
-              D1 <- init_d1
-              A2 <- theta[nb1 + 3] * a2_scaling
-              B2 <- theta[nb1 + 4] * b2_scaling
-              C2_coef <- theta[nb1 + 4 + 1:nb2] * c2_coef_scaling
-              D2 <- init_d2
+          }else if(!d1_fix & !d2_fix){
 
-            }else{
+            A1 <- exp(theta[1]) * a1_scaling
+            B1 <- theta[2] * b1_scaling
+            C1_coef <- theta[2 + 1:nb1] * c1_coef_scaling
+            D1 <- theta[2 + nb1 + 1] * d1_scaling
 
-              D1 <- theta[nb1 + 3] * d1_scaling
-              A2 <- theta[nb1 + 4] * a2_scaling
-              B2 <- theta[nb1 + 5] * b2_scaling
-              C2_coef <- theta[nb1 + 5 + 1:nb2] * c2_coef_scaling
-              D2 <- theta[nb1 + nb2 + 6] * d2_scaling
+            A2 <- theta[2 + nb1 + 2] * a2_scaling
+            B2 <- theta[2 + nb1 + 3] * b2_scaling
+            C2_coef <- theta[2 + nb1 + 3 + 1:nb2] * c2_coef_scaling
+            D2 <- theta[2 + nb1 + 3 + nb2 + 1] * d1_scaling
 
-            }
           }
-        }else if(!scale_horizontal_fix & !scale_vertical_fix){
 
-          SCALE_HORIZONTAL <- exp(theta[1]) * horizontal_scale_scaling
-          SCALE_VERTICAL <- exp(theta[2]) * vertical_scale_scaling
-          A1 <- exp(theta[3]) * a1_scaling
-          B1 <- theta[4] * b1_scaling
-
-          if(splines_degree == 0){
-
-            C1_coef <- theta[5] * c1_coef_scaling
-
-            if(d1_fix & d2_fix){
-
-              D1 <- init_d1
-              A2 <- theta[6] * a2_scaling
-              B2 <- theta[7] * b2_scaling
-              C2_coef <- theta[8] * c2_coef_scaling
-              D2 <- init_d2
-
-            }else{
-
-              D1 <- theta[6] * d1_scaling
-              A2 <- theta[7] * a2_scaling
-              B2 <- theta[8] * b2_scaling
-              C2_coef <- theta[9] * c2_coef_scaling
-              D2 <- theta[10] * d2_scaling
-
-            }
-          }else if(splines_degree > 0){
-
-            C1_coef <- theta[4 + 1:nb1] * c1_coef_scaling
-
-            if(d1_fix & d2_fix){
-
-              D1 <- init_d1
-              A2 <- theta[nb1 + 5] * a2_scaling
-              B2 <- theta[nb1 + 6] * b2_scaling
-              C2_coef <- theta[nb1 + 6 + 1:nb2] * c2_coef_scaling
-              D2 <- init_d2
-
-            }else{
-              D1 <- theta[nb1 + 5] * d1_scaling
-              A2 <- theta[nb1 + 6] * a2_scaling
-              B2 <- theta[nb1 + 7] * b2_scaling
-              C2_coef <- theta[nb1 + 7 + 1:nb2] * c2_coef_scaling
-              D2 <- theta[nb1 + nb2 + 8] * d2_scaling
-            }
-          }
         }
+
       }
+
+    }else if(!scale_horizontal_fix & !scale_vertical_fix){
+
+      SCALE_HORIZONTAL <- exp(theta[1]) * horizontal_scale_scaling
+      SCALE_VERTICAL <- exp(theta[2]) * vertical_scale_scaling
+
+      if(a1_fix & b1_fix & a2_fix & b2_fix){
+
+        A1 <- init_a1
+        B1 <- init_b1
+        A2 <- init_a2
+        B2 <- init_b2
+
+        if(c1_fix & c2_fix){
+
+          C1_coef <- init_c1_coef
+          C2_coef <- init_c2_coef
+
+          if(d1_fix & d2_fix){
+
+            D1 <- init_d1
+            D2 <- init_d2
+
+          }else if(!d1_fix & !d2_fix){
+
+            D1 <- theta[3] * d1_scaling
+            D2 <- theta[4] * d2_scaling
+
+          }
+
+        }else if(!c1_fix & !c2_fix){
+
+          if(d1_fix & d2_fix){
+
+            C1_coef <- theta[2 + 1:nb1] * c1_coef_scaling
+            D1 <- init_d1
+
+            C2_coef <- theta[2 + nb1 + 1:nb2] * c2_coef_scaling
+            D2 <- init_d2
+
+          }else if(!d1_fix & !d2_fix){
+
+            C1_coef <- theta[2 + 1:nb1] * c1_coef_scaling
+            D1 <- theta[2 + nb1 + 1] * d1_scaling
+
+            C2_coef <- theta[2 + nb1 + 1 + 1:nb2] * c2_coef_scaling
+            D2 <- theta[2 + nb1 + 1 + nb2 + 1] * d2_scaling
+
+          }
+
+        }
+
+      }else if(!a1_fix & !b1_fix & !a2_fix & !b2_fix){
+
+        if(c1_fix & c2_fix){
+
+          if(d1_fix & d2_fix){
+
+            A1 <- exp(theta[3]) * a1_scaling
+            B1 <- theta[4] * b1_scaling
+            D1 <- init_d1
+
+            A2 <- theta[5] * a2_scaling
+            B2 <- theta[6] * b2_scaling
+            D2 <- init_d2
+
+          }else if(!d1_fix & !d2_fix){
+
+            A1 <- exp(theta[3]) * a1_scaling
+            B1 <- theta[4] * b1_scaling
+            D1 <- theta[5] * d1_scaling
+
+            A2 <- theta[6] * a2_scaling
+            B2 <- theta[7] * b2_scaling
+            D2 <- theta[8] * d2_scaling
+
+          }
+
+        }else if(!c1_fix & !c2_fix){
+
+          if(d1_fix & d2_fix){
+
+            A1 <- exp(theta[3]) * a1_scaling
+            B1 <- theta[4] * b1_scaling
+            C1_coef <- theta[4 + 1:nb1] * c1_coef_scaling
+            D1 <- init_d1
+
+            A2 <- theta[4 + nb1 + 1] * a2_scaling
+            B2 <- theta[4 + nb1 + 2] * b2_scaling
+            C2_coef <- theta[4 + nb1 + 2 + 1:nb2] * c2_coef_scaling
+            D2 <- init_d2
+
+          }else if(!d1_fix & !d2_fix){
+
+            A1 <- exp(theta[3]) * a1_scaling
+            B1 <- theta[4] * b1_scaling
+            C1_coef <- theta[4 + 1:nb1] * c1_coef_scaling
+            D1 <- theta[4 + nb1 + 1] * d1_scaling
+
+            A2 <- theta[4 + nb1 + 2] * a2_scaling
+            B2 <- theta[4 + nb1 + 3] * b2_scaling
+            C2_coef <- theta[4 + nb1 + 3 + 1:nb2] * c2_coef_scaling
+            D2 <- theta[4 + nb1 + 3 + nb2 + 1] * d1_scaling
+
+          }
+
+        }
+
+      }
+
     }
+
   }
 
   param <-  list(BETA = BETA, SCALE_HORIZONTAL = SCALE_HORIZONTAL,
