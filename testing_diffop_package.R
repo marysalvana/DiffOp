@@ -4,6 +4,7 @@ library(DiffOp, lib.loc = "/project/jun/msalvana/R/x86_64-pc-linux-gnu-library/4
 SYNTHETIC_DATA = T
 PLOTTING = F
 PREDICTION = F
+STEP = 2
 
 if(SYNTHETIC_DATA){
 
@@ -114,9 +115,7 @@ if(SYNTHETIC_DATA){
   set.seed(1236)
   INIT_C2_COEF <- runif(length(INNER_KNOTS2) + SPLINES_DEGREE + 1, -0.1, 0.1)
 
-  RERUN = T
-
-  if(!RERUN){
+  if(STEP == 1){
 
     est_params_mle <- est_bi_differential_mle(residuals = Z, location = loc3d,
                                               init_beta = INIT_BETA,
@@ -135,7 +134,38 @@ if(SYNTHETIC_DATA){
                                               inner_knots2 = INNER_KNOTS2,
                                               iterlim = 5, stepmax = 1, hessian = T)
 
-  }else{
+  }else if(STEP == 2){
+
+    theta = c(0.57567613,-5.69516263,-0.51984935,-6.12412233,3.62736555,0.01179412,0.01975864,0.01902657,0.00096915,0.00123227,0.00034689,1.75901571,-1.69397964,0.01764909,0.03512951,0.0059057,-0.00155626,-0.00072748,-0.00124493)
+
+    start_time = Sys.time()
+
+    est_params_mle2 <- est_bi_differential_mle(residuals = Z, location = loc3d,
+                                               init_beta = theta[1],
+                                               init_scale_horizontal = theta[2],
+                                               init_scale_vertical = theta[3],
+                                               init_a1 = theta[4], init_b1 = theta[5],
+                                               init_c1_coef = theta[5 + 1:length(INIT_C1_COEF)], init_d1 = 0,
+                                               init_a2 = theta[5 + length(INIT_C1_COEF) + 1], init_b2 = theta[5 + length(INIT_C1_COEF) + 2],
+                                               init_c2_coef = theta[5 + length(INIT_C1_COEF) + 2 + 1:length(INIT_C2_COEF)], init_d2 = 0,
+                                               a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                               a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                               d1_fix = TRUE, d2_fix = TRUE,
+                                               radius = earthRadiusKm,
+                                               splines_degree = SPLINES_DEGREE,
+                                               inner_knots1 = INNER_KNOTS1,
+                                               inner_knots2 = INNER_KNOTS2,
+                                               iterlim = 1000, stepmax = 1, hessian = T)
+
+    print(est_params_mle2)
+
+    end_time = Sys.time()
+
+    TOTAL_TIME <- as.numeric(end_time - start_time, units = "secs")
+
+    print(TOTAL_TIME)
+
+  }else if(STEP == 3){
 
     theta = c(-0.86196686,-4.1648521,-1.39985347,-3.48921176,0.01208163,-6.04237337,-5.85853677,-0.79101908,2.94078691,-0.75344884,-1.30514771,-0.04817469,-0.02415194,-2.12378123,-1.71960218,2.90215174,-0.3172772,-3.07458465,-2.53639316)
 
@@ -151,7 +181,7 @@ if(SYNTHETIC_DATA){
                                                init_c2_coef = theta[5 + length(INIT_C1_COEF) + 2 + 1:length(INIT_C2_COEF)], init_d2 = 0,
                                                a1_scaling = 1e-3, b1_scaling = 1e-3,
                                                a2_scaling = 1e-3, b2_scaling = 1e-3,
-                                               d1_fix = TRUE, d2_fix = TRUE,
+                                               c1_fix = TRUE, c2_fix = TRUE, d1_fix = TRUE, d2_fix = TRUE,
                                                radius = earthRadiusKm,
                                                splines_degree = SPLINES_DEGREE,
                                                inner_knots1 = INNER_KNOTS1,
