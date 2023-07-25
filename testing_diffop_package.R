@@ -139,6 +139,8 @@ if(SYNTHETIC_DATA){
 
     theta = c(-0.86196686,-4.1648521,-1.39985347,-3.48921176,0.01208163,-6.04237337,-5.85853677,-0.79101908,2.94078691,-0.75344884,-1.30514771,-0.04817469,-0.02415194,-2.12378123,-1.71960218,2.90215174,-0.3172772,-3.07458465,-2.53639316)
 
+    start_time = Sys.time()
+
     est_params_mle2 <- est_bi_differential_mle(residuals = Z, location = loc3d,
                                                init_beta = theta[1],
                                                init_scale_horizontal = theta[2],
@@ -149,7 +151,7 @@ if(SYNTHETIC_DATA){
                                                init_c2_coef = theta[5 + length(INIT_C1_COEF) + 2 + 1:length(INIT_C2_COEF)], init_d2 = 0,
                                                a1_scaling = 1e-3, b1_scaling = 1e-3,
                                                a2_scaling = 1e-3, b2_scaling = 1e-3,
-                                               c1_fix = TRUE, c2_fix = TRUE, d1_fix = TRUE, d2_fix = TRUE,
+                                               d1_fix = TRUE, d2_fix = TRUE,
                                                radius = earthRadiusKm,
                                                splines_degree = SPLINES_DEGREE,
                                                inner_knots1 = INNER_KNOTS1,
@@ -157,6 +159,12 @@ if(SYNTHETIC_DATA){
                                                iterlim = 1000, stepmax = 1, hessian = T)
 
     print(est_params_mle2)
+
+    end_time = Sys.time()
+
+    TOTAL_TIME <- as.numeric(end_time - start_time, units = "secs")
+
+    print(TOTAL_TIME)
 
   }
 
