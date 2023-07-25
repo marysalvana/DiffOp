@@ -1,7 +1,7 @@
 library(DiffOp, lib.loc = "/project/jun/msalvana/R/x86_64-pc-linux-gnu-library/4.2/")
 #library(DiffOp)
 
-SYNTHETIC_DATA = F
+SYNTHETIC_DATA = T
 
 if(SYNTHETIC_DATA){
 
@@ -137,7 +137,6 @@ if(SYNTHETIC_DATA){
 
   }else{
 
-    theta = c(-0.62974117,-4.12387248,-1.35632716,-3.86085051,0.0120121,-6.1526825,-5.63067144,-0.67988251,2.63699104,-0.67474937,-1.17650398,-0.0458907,-0.02159446,-2.03764979,-1.56692038,2.62100262,-0.28790217,-2.77460515,-2.23372887)
     theta = c(-0.86196686,-4.1648521,-1.39985347,-3.48921176,0.01208163,-6.04237337,-5.85853677,-0.79101908,2.94078691,-0.75344884,-1.30514771,-0.04817469,-0.02415194,-2.12378123,-1.71960218,2.90215174,-0.3172772,-3.07458465,-2.53639316)
 
     est_params_mle2 <- est_bi_differential_mle(residuals = Z, location = loc3d,
@@ -160,6 +159,8 @@ if(SYNTHETIC_DATA){
     print(est_params_mle2)
 
   }
+
+  PREDICTION = F
 
   ####### PREDICTION #######
 

@@ -5,7 +5,7 @@
 #SBATCH --time=23:00:00
 #SBATCH -o %j.out
 #SBATCH -e %j.err
-##SBATCH --mem=200GB
+#SBATCH --mem=8GB
 
 #SBATCH --cpus-per-task=20
 #SBATCH -n 1
