@@ -410,6 +410,8 @@ if(SYNTHETIC_DATA){
   theta = c(0.57567613,-5.69516263,-0.51984935,-6.12412233,3.62736555,0.01179412,0.01975864,0.01902657,0.00096915,0.00123227,0.00034689,1.75901571,-1.69397964,0.01764909,0.03512951,0.0059057,-0.00155626,-0.00072748,-0.00124493)
   theta = c(1.08373168,-5.19697084,1.24939036,-6.12444966,3.79151517,0.0015247,0.00278431,0.00194067,-0.00021252,0.0001094,-1.04e-06,0.31124783,-0.49576085,0.00349771,0.00604168,0.00103295,0.00058106,-0.00030204,0.00010712)
 
+  theta = c(-2.72335058,-4.04891894,-2.43912031,0.34833882,5.27893558,33.49184804,15.02170639,-1.60910506,-0.5476678,1.37227605,0.03239472,-0.01908227,2.60217129,9.79330568,2.10364412,-0.43244807,0.58014037,-0.33336509)
+
   est_params_mle2 <- est_bi_differential_mle(residuals = Z_insample, location = locs_insample,
                                              init_beta = theta[1],
                                              init_scale_horizontal = theta[2],
@@ -422,6 +424,25 @@ if(SYNTHETIC_DATA){
                                              a2_scaling = 1e-3, b2_scaling = 1e-3,
                                              c1_coef_scaling = 100, c2_coef_scaling = 10,
                                              d1_fix = TRUE, d2_fix = TRUE,
+                                             radius = earthRadiusKm,
+                                             splines_degree = SPLINES_DEGREE,
+                                             inner_knots1 = INNER_KNOTS1,
+                                             inner_knots2 = INNER_KNOTS2,
+                                             iterlim = 1000, stepmax = 1, hessian = T)
+
+  theta = c(-2.72335058,-4.04891894,-2.43912031,0.34833882,5.27893558,33.49184804,15.02170639,-1.60910506,-0.5476678,1.37227605,0.03239472,-0.01908227,2.60217129,9.79330568,2.10364412,-0.43244807,0.58014037,-0.33336509)
+
+  est_params_mle2 <- est_bi_differential_mle(residuals = Z_insample, location = locs_insample,
+                                             init_beta = 0.7471995,
+                                             init_scale_horizontal = theta[1],
+                                             init_scale_vertical = theta[2],
+                                             init_a1 = theta[3], init_b1 = theta[4],
+                                             init_c1_coef = theta[4 + 1:length(INIT_C1_COEF)], init_d1 = 0,
+                                             init_a2 = theta[4 + length(INIT_C1_COEF) + 1], init_b2 = theta[4 + length(INIT_C1_COEF) + 2],
+                                             init_c2_coef = theta[4 + length(INIT_C1_COEF) + 2 + 1:length(INIT_C2_COEF)], init_d2 = 0,
+                                             a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                             a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                             beta_fix = TRUE, d1_fix = TRUE, d2_fix = TRUE,
                                              radius = earthRadiusKm,
                                              splines_degree = SPLINES_DEGREE,
                                              inner_knots1 = INNER_KNOTS1,
