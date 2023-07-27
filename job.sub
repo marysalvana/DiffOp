@@ -7,8 +7,8 @@
 #SBATCH -e %j.err
 #SBATCH --mem=8GB
 
-#SBATCH --cpus-per-task=20
-#SBATCH -n 1
+#SBATCH --cpus-per-task=1
+#SBATCH --ntasks=1 
 
 echo "Starting at `date`"
 echo "Running on hosts: $SLURM_NODELIST"
