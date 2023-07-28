@@ -364,6 +364,9 @@ if(SYNTHETIC_DATA){
   if(MODEL == 'B4'){
 
     if(STEP == 1){
+
+      start_time = Sys.time()
+
       est_params_mle <- est_bi_differential_mle(residuals = Z_insample, location = locs_insample,
                                                 init_beta = INIT_BETA,
                                                 init_scale_horizontal = INIT_SCALE_HORIZONTAL,
@@ -382,6 +385,12 @@ if(SYNTHETIC_DATA){
                                                 iterlim = 1000, stepmax = 1, hessian = T)
 
       print(est_params_mle)
+
+      end_time = Sys.time()
+
+      TOTAL_TIME <- as.numeric(end_time - start_time, units = "secs")
+
+      print(TOTAL_TIME)
 
     }else if(STEP == 2){
 
