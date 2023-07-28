@@ -411,6 +411,8 @@ if(SYNTHETIC_DATA){
 
     if(STEP == 1){
 
+      start_time = Sys.time()
+
       est_params_mle <- est_bi_differential_mle(residuals = Z_insample, location = locs_insample,
                                                 init_beta = 1,
                                                 init_scale_horizontal = exp(-4.5),
@@ -432,12 +434,18 @@ if(SYNTHETIC_DATA){
                                                 iterlim = 1000, stepmax = 1, hessian = T)
       print(est_params_mle)
 
+      end_time = Sys.time()
+
+      TOTAL_TIME <- as.numeric(end_time - start_time, units = "secs")
+
+      print(TOTAL_TIME)
+
     }else if(STEP == 2){
 
       theta = c(-4.5, -0.12490163, 0.87215125,-1.23722843,0.64253503,0.91872335,0.77176668,-0.01379812,0.08096983,-0.01675213,-0.52312691,0.37771119,0.13158042,0.19086266,0.02772741,0.01351954,-0.00075524,0.00723768)
 
       est_params_mle2 <- est_bi_differential_mle(residuals = Z_insample, location = locs_insample,
-                                                 init_beta = 1,
+                                                 init_beta = 0,
                                                  init_scale_horizontal = theta[1],
                                                  init_scale_vertical = theta[2],
                                                  init_a1 = theta[3], init_b1 = theta[4],
