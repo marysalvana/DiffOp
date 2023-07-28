@@ -1,6 +1,6 @@
 Package: DiffOp
 Version: 1.0.0
-Date: 2023-07-01
+Date: 2023-07-21
 Title: Nonstationary Spatial Cross-Covariance Functions Based 
   on the Differential Operators Approach in 3D
 Description: An R package that implements a flexible multivariate 

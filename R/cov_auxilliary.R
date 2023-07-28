@@ -946,7 +946,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
 
     cholmat <- tryCatch(chol(cov_mat), error = function(a) numeric(0))
     if(length(cholmat) == 0){
-      return(Inf)
+      return(9999999999)
     }
 
     Sigma_inv <- solve(cov_mat)
