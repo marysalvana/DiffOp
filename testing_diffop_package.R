@@ -366,6 +366,8 @@ if(SYNTHETIC_DATA){
                                                 w1 = 100, w2 = 50000, w12 = 10,
                                                 iterlim = 1000, stepmax = 1, hessian = T)
 
+      print(est_params_wls)
+
       end_time = Sys.time()
 
       TOTAL_TIME <- as.numeric(end_time - start_time, units = "secs")
