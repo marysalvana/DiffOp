@@ -331,25 +331,6 @@ if(SYNTHETIC_DATA){
   INIT_C2_COEF = c(0.04952738,0.22467233,-0.16542861,-0.04447287,-0.0159132,0.00096767,-0.00318231,0.00404039,-0.00412418) * 1e-1
   INIT_D1 = INIT_D2 = 0
 
-  #est_params_wls <- est_bi_differential_wls(empirical_values = emp_cov, location = locs_insample,
-  #                                          init_beta = INIT_BETA,
-  #                                          init_scale_horizontal = INIT_SCALE_HORIZONTAL,
-  #                                          init_scale_vertical = INIT_SCALE_VERTICAL,
-  #                                          init_a1 = INIT_A1, init_b1 = INIT_B1,
-  #                                          init_c1_coef = INIT_C1_COEF, init_d1 = INIT_D1,
-  #                                          init_a2 = INIT_A2, init_b2 = INIT_B2,
-  #                                          init_c2_coef = INIT_C2_COEF, init_d2 = INIT_D2,
-  #                                          a1_scaling = 1e-3, b1_scaling = 1e-3,
-  #                                          a2_scaling = 1e-3, b2_scaling = 1e-3,
-  #                                          c1_coef_scaling = 100, c2_coef_scaling = 10,
-  #                                          d1_fix = TRUE, d2_fix = TRUE,
-  #                                          radius = earthRadiusKm,
-  #                                          splines_degree = SPLINES_DEGREE,
-  #                                          inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2,
-  #                                          w1 = 100, w2 = 50000, w12 = 10,
-  #                                          iterlim = 1000, stepmax = 1, hessian = T)
-
-
   INNER_KNOTS1 <- c(100, 500, 1000)
   INNER_KNOTS2 <- c(100, 500, 1000)
 
@@ -364,6 +345,34 @@ if(SYNTHETIC_DATA){
   if(MODEL == 'B4'){
 
     if(STEP == 1){
+
+      start_time = Sys.time()
+
+      est_params_wls <- est_bi_differential_wls(empirical_values = emp_cov, location = locs_insample,
+                                                init_beta = INIT_BETA,
+                                                init_scale_horizontal = INIT_SCALE_HORIZONTAL,
+                                                init_scale_vertical = INIT_SCALE_VERTICAL,
+                                                init_a1 = INIT_A1, init_b1 = INIT_B1,
+                                                init_c1_coef = INIT_C1_COEF, init_d1 = INIT_D1,
+                                                init_a2 = INIT_A2, init_b2 = INIT_B2,
+                                                init_c2_coef = INIT_C2_COEF, init_d2 = INIT_D2,
+                                                a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                                a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                                c1_coef_scaling = 1, c2_coef_scaling = 1,
+                                                d1_fix = TRUE, d2_fix = TRUE,
+                                                radius = earthRadiusKm,
+                                                splines_degree = SPLINES_DEGREE,
+                                                inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2,
+                                                w1 = 100, w2 = 50000, w12 = 10,
+                                                iterlim = 1000, stepmax = 1, hessian = T)
+
+      end_time = Sys.time()
+
+      TOTAL_TIME <- as.numeric(end_time - start_time, units = "secs")
+
+      print(TOTAL_TIME)
+
+    }else if(STEP == 2){
 
       start_time = Sys.time()
 
@@ -392,7 +401,7 @@ if(SYNTHETIC_DATA){
 
       print(TOTAL_TIME)
 
-    }else if(STEP == 2){
+    }else if(STEP == 3){
 
       est_params_mle2 <- est_bi_differential_mle(residuals = Z_insample, location = locs_insample,
                                                  init_beta = theta[1],
