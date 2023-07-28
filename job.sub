@@ -3,8 +3,8 @@
 #SBATCH -J DiffOp
 
 #SBATCH --time=23:00:00
-#SBATCH -o %j.out
-#SBATCH -e %j.err
+#SBATCH -o output/%j.out
+#SBATCH -e output/%j.err
 #SBATCH --mem=8GB
 
 #SBATCH --cpus-per-task=1
