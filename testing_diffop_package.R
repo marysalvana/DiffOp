@@ -4,7 +4,7 @@ library(DiffOp, lib.loc = "/project/jun/msalvana/R/x86_64-pc-linux-gnu-library/4
 SYNTHETIC_DATA = F
 PLOTTING = F
 PREDICTION = F
-STEP = 2
+STEP = 4
 
 MODEL = 'B4'
 
@@ -437,6 +437,10 @@ if(SYNTHETIC_DATA){
 
     }else if(STEP == 4){
 
+      theta = c(1.03972639,-5.66479371,0.2911288,-8.85096929,-1.47280739,-0.46454095,-0.57258837,-0.58508205,0.16243594,-0.17179618,0.05120143,-2.58653586,0.82049371,-0.10241494,-0.14038746,-0.03101238,0.0182301,-0.01723787,0.00711267)
+
+      start_time = Sys.time()
+
       est_params_mle2 <- est_bi_differential_mle(residuals = Z_insample, location = locs_insample,
                                                  init_beta = theta[1],
                                                  init_scale_horizontal = theta[2],
@@ -456,6 +460,12 @@ if(SYNTHETIC_DATA){
                                                  iterlim = 1000, stepmax = 1, hessian = T)
 
       print(est_params_mle2)
+
+      end_time = Sys.time()
+
+      TOTAL_TIME <- as.numeric(end_time - start_time, units = "secs")
+
+      print(TOTAL_TIME)
 
     }
 
