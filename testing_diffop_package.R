@@ -4,7 +4,7 @@ library(DiffOp, lib.loc = "/project/jun/msalvana/R/x86_64-pc-linux-gnu-library/4
 SYNTHETIC_DATA = F
 PLOTTING = F
 PREDICTION = F
-STEP = 1
+STEP = 2
 
 MODEL = 'B4'
 
@@ -376,6 +376,38 @@ if(SYNTHETIC_DATA){
 
     }else if(STEP == 2){
 
+      theta = c(0.65039524,-5.66869104,0.28788554,-8.84956122,2.02716144,-0.46517942,-0.57593977,-0.58438745,0.15685358,-0.07646982,-0.05234434,-2.5944556,0.83123065,-0.10272596,-0.14077153,-0.03123879,0.01838804,-0.01754337,0.00923058)
+
+      start_time = Sys.time()
+
+      est_params_wls <- est_bi_differential_wls(empirical_values = emp_cov, location = locs_insample,
+                                                init_beta = theta[1],
+                                                init_scale_horizontal = theta[2],
+                                                init_scale_vertical = theta[3],
+                                                init_a1 = theta[4], init_b1 = theta[5],
+                                                init_c1_coef = theta[5 + 1:length(INIT_C1_COEF)], init_d1 = 0,
+                                                init_a2 = theta[5 + length(INIT_C1_COEF) + 1], init_b2 = theta[5 + length(INIT_C1_COEF) + 2],
+                                                init_c2_coef = theta[5 + length(INIT_C1_COEF) + 2 + 1:length(INIT_C2_COEF)], init_d2 = 0,
+                                                a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                                a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                                c1_coef_scaling = 1, c2_coef_scaling = 1,
+                                                d1_fix = TRUE, d2_fix = TRUE,
+                                                radius = earthRadiusKm,
+                                                splines_degree = SPLINES_DEGREE,
+                                                inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2,
+                                                w1 = 100, w2 = 50000, w12 = 10,
+                                                iterlim = 1000, stepmax = 1, hessian = T)
+
+      print(est_params_wls)
+
+      end_time = Sys.time()
+
+      TOTAL_TIME <- as.numeric(end_time - start_time, units = "secs")
+
+      print(TOTAL_TIME)
+
+    }else if(STEP == 3){
+
       start_time = Sys.time()
 
       est_params_mle <- est_bi_differential_mle(residuals = Z_insample, location = locs_insample,
@@ -403,7 +435,7 @@ if(SYNTHETIC_DATA){
 
       print(TOTAL_TIME)
 
-    }else if(STEP == 3){
+    }else if(STEP == 4){
 
       est_params_mle2 <- est_bi_differential_mle(residuals = Z_insample, location = locs_insample,
                                                  init_beta = theta[1],
@@ -465,7 +497,7 @@ if(SYNTHETIC_DATA){
       theta = c(-4.5, -0.12490163, 0.87215125,-1.23722843,0.64253503,0.91872335,0.77176668,-0.01379812,0.08096983,-0.01675213,-0.52312691,0.37771119,0.13158042,0.19086266,0.02772741,0.01351954,-0.00075524,0.00723768)
 
       est_params_mle2 <- est_bi_differential_mle(residuals = Z_insample, location = locs_insample,
-                                                 init_beta = 0,
+                                                 init_beta = 1,
                                                  init_scale_horizontal = theta[1],
                                                  init_scale_vertical = theta[2],
                                                  init_a1 = theta[3], init_b1 = theta[4],
