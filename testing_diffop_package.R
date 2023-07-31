@@ -4,7 +4,7 @@ library(DiffOp, lib.loc = "/project/jun/msalvana/R/x86_64-pc-linux-gnu-library/4
 SYNTHETIC_DATA = F
 PLOTTING = F
 PREDICTION = F
-STEP = 4
+STEP = 2
 
 MODEL = 'B4'
 
@@ -380,67 +380,6 @@ if(SYNTHETIC_DATA){
 
       start_time = Sys.time()
 
-      est_params_wls <- est_bi_differential_wls(empirical_values = emp_cov, location = locs_insample,
-                                                init_beta = theta[1],
-                                                init_scale_horizontal = theta[2],
-                                                init_scale_vertical = theta[3],
-                                                init_a1 = theta[4], init_b1 = theta[5],
-                                                init_c1_coef = theta[5 + 1:length(INIT_C1_COEF)], init_d1 = 0,
-                                                init_a2 = theta[5 + length(INIT_C1_COEF) + 1], init_b2 = theta[5 + length(INIT_C1_COEF) + 2],
-                                                init_c2_coef = theta[5 + length(INIT_C1_COEF) + 2 + 1:length(INIT_C2_COEF)], init_d2 = 0,
-                                                a1_scaling = 1e-3, b1_scaling = 1e-3,
-                                                a2_scaling = 1e-3, b2_scaling = 1e-3,
-                                                c1_coef_scaling = 1, c2_coef_scaling = 1,
-                                                d1_fix = TRUE, d2_fix = TRUE,
-                                                radius = earthRadiusKm,
-                                                splines_degree = SPLINES_DEGREE,
-                                                inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2,
-                                                w1 = 100, w2 = 50000, w12 = 10,
-                                                iterlim = 1000, stepmax = 1, hessian = T)
-
-      print(est_params_wls)
-
-      end_time = Sys.time()
-
-      TOTAL_TIME <- as.numeric(end_time - start_time, units = "secs")
-
-      print(TOTAL_TIME)
-
-    }else if(STEP == 3){
-
-      start_time = Sys.time()
-
-      est_params_mle <- est_bi_differential_mle(residuals = Z_insample, location = locs_insample,
-                                                init_beta = INIT_BETA,
-                                                init_scale_horizontal = INIT_SCALE_HORIZONTAL,
-                                                init_scale_vertical = INIT_SCALE_VERTICAL,
-                                                init_a1 = INIT_A1, init_b1 = INIT_B1,
-                                                init_c1_coef = INIT_C1_COEF, init_d1 = INIT_D1,
-                                                init_a2 = INIT_A2, init_b2 = INIT_B2,
-                                                init_c2_coef = INIT_C2_COEF, init_d2 = INIT_D2,
-                                                a1_scaling = 1e-3, b1_scaling = 1e-3,
-                                                a2_scaling = 1e-3, b2_scaling = 1e-3,
-                                                c1_coef_scaling = 1, c2_coef_scaling = 1,
-                                                d1_fix = TRUE, d2_fix = TRUE,
-                                                radius = earthRadiusKm,
-                                                splines_degree = SPLINES_DEGREE,
-                                                inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2,
-                                                iterlim = 1000, stepmax = 1, hessian = T)
-
-      print(est_params_mle)
-
-      end_time = Sys.time()
-
-      TOTAL_TIME <- as.numeric(end_time - start_time, units = "secs")
-
-      print(TOTAL_TIME)
-
-    }else if(STEP == 4){
-
-      theta = c(1.03972639,-5.66479371,0.2911288,-8.85096929,-1.47280739,-0.46454095,-0.57258837,-0.58508205,0.16243594,-0.17179618,0.05120143,-2.58653586,0.82049371,-0.10241494,-0.14038746,-0.03101238,0.0182301,-0.01723787,0.00711267)
-
-      start_time = Sys.time()
-
       est_params_mle2 <- est_bi_differential_mle(residuals = Z_insample, location = locs_insample,
                                                  init_beta = theta[1],
                                                  init_scale_horizontal = theta[2],
@@ -451,7 +390,7 @@ if(SYNTHETIC_DATA){
                                                  init_c2_coef = theta[5 + length(INIT_C1_COEF) + 2 + 1:length(INIT_C2_COEF)], init_d2 = 0,
                                                  a1_scaling = 1e-3, b1_scaling = 1e-3,
                                                  a2_scaling = 1e-3, b2_scaling = 1e-3,
-                                                 c1_coef_scaling = 100, c2_coef_scaling = 10,
+                                                 c1_coef_scaling = 1, c2_coef_scaling = 1,
                                                  d1_fix = TRUE, d2_fix = TRUE,
                                                  radius = earthRadiusKm,
                                                  splines_degree = SPLINES_DEGREE,
