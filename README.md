@@ -94,6 +94,8 @@ INIT_C1_COEF <- runif(length(INNER_KNOTS1) + SPLINES_DEGREE + 1, -0.1, 0.1)
 set.seed(1236)
 INIT_C2_COEF <- runif(length(INNER_KNOTS2) + SPLINES_DEGREE + 1, -0.1, 0.1)
 
+#Fitting a stationary model
+
 est_params_mle <- est_bi_differential_mle(residuals = Z,
                                           location = loc3d, init_beta = 0,
                                           init_scale_horizontal = log(0.1),
@@ -112,9 +114,29 @@ est_params_mle <- est_bi_differential_mle(residuals = Z,
                                           inner_knots1 = INNER_KNOTS1,
                                           inner_knots2 = INNER_KNOTS2,
                                           iterlim = 1000, stepmax = 1, hessian = F)
+
+#Fitting a nonstationary model, such that we fix the scale_horizontal and scale_vertical
+#  parameters to the estimates above. 
+
+est_params_mle <- est_bi_differential_mle(residuals = Z,
+                                          location = loc3d, init_beta = 0,
+                                          init_scale_horizontal = log(0.004154042),
+                                          init_scale_vertical = log(0.3120303),
+                                          init_a1 = INIT_A1, init_b1 = INIT_B1,
+                                          init_c1_coef = rep(0, 6), init_d1 = INIT_D1,
+                                          init_a2 = INIT_A2, init_b2 = INIT_B2,
+                                          init_c2_coef = rep(0, 6), init_d2 = INIT_D2,
+                                          a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                          a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                          scale_horizontal_fix = T, scale_vertical_fix = T,
+                                          a1_fix = T, b1_fix = T, a2_fix = T, b2_fix = T,
+                                          d1_fix = T, d2_fix = T, radius = earthRadiusKm,
+                                          splines_degree = SPLINES_DEGREE,
+                                          inner_knots1 = INNER_KNOTS1,
+                                          inner_knots2 = INNER_KNOTS2,
+                                          iterlim = 1000, stepmax = 1, hessian = F)
 ```
 
-Save the R codes in a file named `testing_diffop_package.R`.
 ---
 
 ## How to install the DiffOp package
