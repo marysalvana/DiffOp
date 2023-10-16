@@ -970,7 +970,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
                                 a1_fix, b1_fix, c1_fix, d1_fix,
                                 a2_fix, b2_fix, c2_fix, d2_fix)
 
-  fit <- nlm(NEGLOGLIK, init_theta, hessian = T,
+  fit <- nlm(NEGLOGLIK, init_theta, hessian = hessian,
              print.level = 2, iterlim = iterlim, stepmax = stepmax)
 
   est_param <- transformParams(theta = fit$estimate, init_beta,
