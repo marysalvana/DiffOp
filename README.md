@@ -154,7 +154,78 @@ Save the job script in a file named `job.sub`.
 
 ## Sample R codes using the DiffOp package
 
+```
+library(DiffOp)
 
+library(dplyr)
+
+x <- seq(0, 1, length.out = 10)
+y <- seq(0, 1, length.out = 10)
+loc2d <- expand.grid(x, y) %>% as.matrix()
+
+depth <- seq(0, 1, length.out = 10)
+loc3d <- cbind(rep(loc2d[, 1], each = length(depth)),
+               rep(loc2d[, 2], each = length(depth)), depth)
+
+earthRadiusKm = 6371
+BETA = 0.5
+SCALE_HORIZONTAL = 0.03
+SCALE_VERTICAL = 0.3
+A1 = A2 = 0.00001
+B1 = B2 = 0.00001
+C1 <- sin((loc3d[, 3] + 0.1) * pi / 0.5)
+C2 <- cos((loc3d[, 3] + 0.1) * pi / 0.5)
+D1 = D2 = 0
+
+cov_mat <- cov_bi_differential(location = loc3d, beta = BETA,
+                               scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL,
+                               a1 = A1, b1 = B1, c1 = C1, d1 = D1, a2 = A2, b2 = B2, c2 = C2, d2 = D2,
+                               radius = earthRadiusKm)
+
+library(MASS)
+
+set.seed(1234)
+Z <- mvrnorm(1, mu = rep(0, ncol(cov_mat)), Sigma = cov_mat)
+Z1 <- Z[1:nrow(loc3d)]
+Z2 <- Z[nrow(loc3d) + 1:nrow(loc3d)]
+
+INIT_BETA = 0
+INIT_SCALE_HORIZONTAL = log(0.02)
+INIT_SCALE_VERTICAL = log(0.2)
+INIT_A1 = INIT_A2 = 0
+INIT_B1 = INIT_B2 = 0
+INIT_D1 = INIT_D2 = 0
+
+INNER_KNOTS1 <- c(0.1, 0.5, 0.9)
+INNER_KNOTS2 <- c(0.1, 0.5, 0.9)
+
+SPLINES_DEGREE = 2
+
+set.seed(1235)
+INIT_C1_COEF <- runif(length(INNER_KNOTS1) + SPLINES_DEGREE + 1, -0.1, 0.1)
+
+set.seed(1236)
+INIT_C2_COEF <- runif(length(INNER_KNOTS2) + SPLINES_DEGREE + 1, -0.1, 0.1)
+
+est_params_mle <- est_bi_differential_mle(residuals = Z,
+                                          location = loc3d, init_beta = 0,
+                                          init_scale_horizontal = log(0.1),
+                                          init_scale_vertical = log(0.1),
+                                          init_a1 = INIT_A1, init_b1 = INIT_B1,
+                                          init_c1_coef = rep(0, 6), init_d1 = 1,
+                                          init_a2 = INIT_A2, init_b2 = INIT_B2,
+                                          init_c2_coef = rep(0, 6), init_d2 = 1,
+                                          a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                          a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                          beta_fix = T, #scale_horizontal_fix = T, scale_vertical_fix = T,
+                                          a1_fix = T, b1_fix = T, a2_fix = T, b2_fix = T,
+                                          c1_fix = T, c2_fix = T,
+                                          d1_fix = TRUE, d2_fix = TRUE, radius = earthRadiusKm,
+                                          splines_degree = SPLINES_DEGREE,
+                                          inner_knots1 = INNER_KNOTS1,
+                                          inner_knots2 = INNER_KNOTS2,
+                                          iterlim = 1000, stepmax = 1, hessian = F)
+```
 
 Save the R codes in a file named `testing_diffop_package.R`.
 
