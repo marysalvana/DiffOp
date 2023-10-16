@@ -30,6 +30,16 @@ A copy of the GNU General Public License, version 3, is available at
 ---
 
 ## How to install the DiffOp package
+
+To install the package:
+
+* Clone the DiffOp package from [here](https://github.com/marysalvana/DiffOp).
+* Build the package by running the following commands on the terminal: `R CMD build DiffOp`. A `.tar.gz` file will appear with filename `DiffOp_1.0.0.tar.gz`.
+* Install the package by running the following commands on the terminal: `R CMD INSTALL DiffOp_1.0.0.tar.gz`. The package is ready to be used in `R` and will be loaded when you run the code `library(DiffOp)` in `R`.
+
+---
+
+## How to install the DiffOp package
 1. Install the necessary software:
     - `R`:
         * For Apple silicon (M1/M2) Macs, make sure you installed the `R` binary for Apple silicon arm64. You can download [R-4.3.1-arm64.pkg](https://cran.r-project.org/bin/macosx/) from CRAN.
