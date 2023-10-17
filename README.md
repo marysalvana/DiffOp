@@ -142,7 +142,7 @@ est_params_mle <- est_bi_differential_mle(residuals = Z,
 ```
 data("argo_ref_loc1")
 
-ind_pred <- 1501:2500
+ind_pred <- c(1:50, 1551:2500)
 
 loc3d <- cbind(argo_ref_loc1$Longitude, argo_ref_loc1$Latitude,
                argo_ref_loc1$Pressure)
