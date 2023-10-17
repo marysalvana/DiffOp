@@ -40,6 +40,7 @@ To install the package:
 ---
 
 ## Sample R codes using the DiffOp package
+### Synthetic data generation and model fitting
 
 ```
 library(DiffOp)
@@ -135,6 +136,11 @@ est_params_mle <- est_bi_differential_mle(residuals = Z,
                                           inner_knots1 = INNER_KNOTS1,
                                           inner_knots2 = INNER_KNOTS2,
                                           iterlim = 1000, stepmax = 1, hessian = F)
+```
+
+### Argo data analysis and model fitting
+```
+data("argo_ref_loc1")
 ```
 
 ---
