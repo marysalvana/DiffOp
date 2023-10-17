@@ -141,6 +141,54 @@ est_params_mle <- est_bi_differential_mle(residuals = Z,
 ### Argo data analysis and model fitting
 ```
 data("argo_ref_loc1")
+
+ind_pred <- 1501:2500
+
+loc3d <- cbind(argo_ref_loc1$Longitude, argo_ref_loc1$Latitude,
+               argo_ref_loc1$Pressure)
+locs_insample <- loc3d[-ind_pred, ]
+locs_outsample <- loc3d[ind_pred, ]
+
+Z_insample <- c(argo_ref_loc1$TemperatureResiduals[-ind_pred],
+                argo_ref_loc1$SalinityResiduals[-ind_pred])
+Z_outsample <- c(argo_ref_loc1$TemperatureResiduals[ind_pred],
+                 argo_ref_loc1$SalinityResiduals[ind_pred])
+
+earthRadiusKm = 6371
+
+INIT_BETA = 0
+INIT_SCALE_HORIZONTAL = log(0.1)
+INIT_SCALE_VERTICAL = log(0.1)
+INIT_A1 = INIT_A2 = 0
+INIT_B1 = INIT_B2 = 0
+INIT_D1 = INIT_D2 = 0
+
+INNER_KNOTS1 <- c(50, 100, 300, 500, 700, 1000)
+INNER_KNOTS2 <- c(50, 100, 300, 500, 700, 1000)
+
+SPLINES_DEGREE = 2
+
+INIT_C1_COEF <- rep(0, length(INNER_KNOTS1) + SPLINES_DEGREE + 1)
+INIT_C2_COEF <- rep(0, length(INNER_KNOTS2) + SPLINES_DEGREE + 1)
+
+est_params_mle <- est_bi_differential_mle(residuals = Z_insample,
+                                          location = locs_insample, init_beta = 0,
+                                          init_scale_horizontal = INIT_SCALE_HORIZONTAL,
+                                          init_scale_vertical = INIT_SCALE_VERTICAL,
+                                          init_a1 = INIT_A1, init_b1 = INIT_B1,
+                                          init_c1_coef = INIT_C1_COEF, init_d1 = 1,
+                                          init_a2 = INIT_A2, init_b2 = INIT_B2,
+                                          init_c2_coef = INIT_C2_COEF, init_d2 = 1,
+                                          a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                          a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                          beta_fix = T, #scale_horizontal_fix = T, scale_vertical_fix = T,
+                                          a1_fix = T, b1_fix = T, a2_fix = T, b2_fix = T,
+                                          c1_fix = T, c2_fix = T, radius = earthRadiusKm,
+                                          splines_degree = SPLINES_DEGREE,
+                                          inner_knots1 = INNER_KNOTS1,
+                                          inner_knots2 = INNER_KNOTS2,
+                                          iterlim = 1000, stepmax = 1, hessian = F)
+
 ```
 
 ---
