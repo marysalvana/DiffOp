@@ -35,7 +35,7 @@ To install the package:
 
 * Clone the DiffOp package from [here](https://github.com/marysalvana/DiffOp) by running the following commands on the terminal: `git clone https://github.com/marysalvana/DiffOp.git`.
 * Build the package by running the following commands on the terminal: `R CMD build DiffOp`. A `.tar.gz` file will appear with filename `DiffOp_1.0.0.tar.gz`.
-* Install the package by running the following commands on the terminal: `R CMD INSTALL DiffOp_1.0.0.tar.gz`. The package is ready to be used in `R` and will be loaded when you run the code `library(DiffOp)` in `R`.
+* Install the package by running the following commands on the terminal: `R CMD INSTALL DiffOp_1.0.0.tar.gz` or `R CMD INSTALL DiffOp_1.0.0.tar.gz --library=/home/salvanmo/R/x86_64-pc-linux-gnu-library/3.6/` when need to install in specific directory. The package is ready to be used in `R` and will be loaded when you run the code `library(DiffOp)` in `R`.
 
 ---
 
