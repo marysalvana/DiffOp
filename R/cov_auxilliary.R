@@ -892,13 +892,17 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
                                     a2_scaling = 1, b2_scaling = 1,
                                     c2_coef_scaling = 1, d2_scaling = 1,
                                     radius, splines_degree = 2,
-                                    inner_knots1, inner_knots2,
+                                    inner_knots1 = NULL, inner_knots2 = NULL,
                                     iterlim = 2000, stepmax = 1, hessian = TRUE){
 
-  basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
-  nb1 <- ncol(basis1)
-  basis2 <- bsplineBasis(location[, 3], splines_degree, inner_knots2)
-  nb2 <- ncol(basis2)
+  if(splines_degree == 0){
+    nb1 <- nb2 <- 1
+  }else{
+    basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
+    nb1 <- ncol(basis1)
+    basis2 <- bsplineBasis(location[, 3], splines_degree, inner_knots2)
+    nb2 <- ncol(basis2)
+  }
 
   NEGLOGLIK <- function(theta){
 
