@@ -340,10 +340,15 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
   PRES2 <- matrix(location[, 3], nrow(location), nrow(location), byrow = T)
 
   if(!is.null(splines_degree)){
-    basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
-    nb1 <- ncol(basis1)
-    basis2 <- bsplineBasis(location[, 3], splines_degree, inner_knots2)
-    nb2 <- ncol(basis2)
+
+    if(splines_degree == 0){
+      nb1 <- nb2 <- 1
+    }else{
+      basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
+      nb1 <- ncol(basis1)
+      basis2 <- bsplineBasis(location[, 3], splines_degree, inner_knots2)
+      nb2 <- ncol(basis2)
+    }
 
     if(splines_degree == 0){
       c1 <- c1_coef
@@ -947,6 +952,8 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
                                    scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL,
                                    a1 = A1, b1 = B1, c1 = C1, d1 = D1, a2 = A2, b2 = B2, c2 = C2, d2 = D2,
                                    radius = radius)
+
+    diag(cov_mat) <- diag(cov_mat) + 1e-4
 
     cholmat <- tryCatch(chol(cov_mat), error = function(a) numeric(0))
     if(length(cholmat) == 0){

@@ -163,6 +163,22 @@ INIT_A1 = INIT_A2 = 0
 INIT_B1 = INIT_B2 = 0
 INIT_D1 = INIT_D2 = 0
 
+est_params_mle_step1 <- est_bi_differential_mle(residuals = Z_insample,
+                                          location = locs_insample, init_beta = INIT_BETA,
+                                          init_scale_horizontal = INIT_SCALE_HORIZONTAL,
+                                          init_scale_vertical = INIT_SCALE_VERTICAL,
+                                          init_a1 = INIT_A1, init_b1 = INIT_B1,
+                                          init_c1_coef = 1, init_d1 = 0,
+                                          init_a2 = INIT_A2, init_b2 = INIT_B2,
+                                          init_c2_coef = 1, init_d2 = 0,
+                                          beta_fix = T, scale_horizontal_fix = F, scale_vertical_fix = F,
+                                          a1_fix = F, b1_fix = F, a2_fix = F, b2_fix = F,
+                                          c1_fix = F, c2_fix = F,
+                                          d1_fix = T, d2_fix = T, radius = earthRadiusKm,
+                                          radius = earthRadiusKm,
+                                          splines_degree = 0,
+                                          iterlim = 1000, stepmax = 1, hessian = F)
+
 INNER_KNOTS1 <- c(50, 100, 300, 500, 700, 1000)
 INNER_KNOTS2 <- c(50, 100, 300, 500, 700, 1000)
 
