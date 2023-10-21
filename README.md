@@ -174,7 +174,7 @@ est_params_mle_step1 <- est_bi_differential_mle(residuals = Z_insample,
                                           beta_fix = T, scale_horizontal_fix = F, scale_vertical_fix = F,
                                           a1_fix = F, b1_fix = F, a2_fix = F, b2_fix = F,
                                           c1_fix = F, c2_fix = F,
-                                          d1_fix = T, d2_fix = T, radius = earthRadiusKm,
+                                          d1_fix = T, d2_fix = T,
                                           radius = earthRadiusKm,
                                           splines_degree = 0,
                                           iterlim = 1000, stepmax = 1, hessian = F)
