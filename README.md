@@ -156,7 +156,7 @@ Z_outsample <- c(argo_ref_loc1$TemperatureResiduals[ind_pred],
 
 earthRadiusKm = 6371
 
-INIT_BETA = 0
+INIT_BETA = 0.9
 INIT_SCALE_HORIZONTAL = log(0.1)
 INIT_SCALE_VERTICAL = log(0.1)
 INIT_A1 = INIT_A2 = 0
@@ -164,13 +164,15 @@ INIT_B1 = INIT_B2 = 0
 INIT_D1 = INIT_D2 = 0
 
 est_params_mle_step1 <- est_bi_differential_mle(residuals = Z_insample,
-                                          location = locs_insample, init_beta = INIT_BETA,
+                                          location = locs_insample, init_beta = 0,
                                           init_scale_horizontal = INIT_SCALE_HORIZONTAL,
                                           init_scale_vertical = INIT_SCALE_VERTICAL,
                                           init_a1 = INIT_A1, init_b1 = INIT_B1,
                                           init_c1_coef = 1, init_d1 = 0,
                                           init_a2 = INIT_A2, init_b2 = INIT_B2,
                                           init_c2_coef = 1, init_d2 = 0,
+                                          a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                          a2_scaling = 1e-3, b2_scaling = 1e-3,
                                           beta_fix = T, scale_horizontal_fix = F, scale_vertical_fix = F,
                                           a1_fix = F, b1_fix = F, a2_fix = F, b2_fix = F,
                                           c1_fix = F, c2_fix = F,
@@ -184,22 +186,24 @@ INNER_KNOTS2 <- c(50, 100, 300, 500, 700, 1000)
 
 SPLINES_DEGREE = 2
 
-INIT_C1_COEF <- rep(0, length(INNER_KNOTS1) + SPLINES_DEGREE + 1)
-INIT_C2_COEF <- rep(0, length(INNER_KNOTS2) + SPLINES_DEGREE + 1)
+set.seed(1234)
+INIT_C1_COEF <- runif(length(INNER_KNOTS1) + SPLINES_DEGREE + 1, -0.01, 0.01)
+set.seed(1235)
+INIT_C2_COEF <- runif(length(INNER_KNOTS2) + SPLINES_DEGREE + 1, -0.01, 0.01)
 
-est_params_mle <- est_bi_differential_mle(residuals = Z_insample,
-                                          location = locs_insample, init_beta = 0,
+est_params_mle_step2 <- est_bi_differential_mle(residuals = Z_insample,
+                                          location = locs_insample, init_beta = INIT_BETA,
                                           init_scale_horizontal = INIT_SCALE_HORIZONTAL,
                                           init_scale_vertical = INIT_SCALE_VERTICAL,
                                           init_a1 = INIT_A1, init_b1 = INIT_B1,
-                                          init_c1_coef = INIT_C1_COEF, init_d1 = 1,
+                                          init_c1_coef = INIT_C1_COEF, init_d1 = 0,
                                           init_a2 = INIT_A2, init_b2 = INIT_B2,
-                                          init_c2_coef = INIT_C2_COEF, init_d2 = 1,
+                                          init_c2_coef = INIT_C2_COEF, init_d2 = 0,
                                           a1_scaling = 1e-3, b1_scaling = 1e-3,
                                           a2_scaling = 1e-3, b2_scaling = 1e-3,
-                                          beta_fix = T, #scale_horizontal_fix = T, scale_vertical_fix = T,
+                                          beta_fix = F, scale_horizontal_fix = T, scale_vertical_fix = T,
                                           a1_fix = T, b1_fix = T, a2_fix = T, b2_fix = T,
-                                          c1_fix = T, c2_fix = T, radius = earthRadiusKm,
+                                          d1_fix = T, d2_fix = T, radius = earthRadiusKm,
                                           splines_degree = SPLINES_DEGREE,
                                           inner_knots1 = INNER_KNOTS1,
                                           inner_knots2 = INNER_KNOTS2,
