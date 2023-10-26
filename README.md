@@ -181,8 +181,8 @@ est_params_mle_step1 <- est_bi_differential_mle(residuals = Z_insample,
                                           splines_degree = 0,
                                           iterlim = 1000, stepmax = 1, hessian = F)
 
-INNER_KNOTS1 <- seq(100, 2000, by = 100)
-INNER_KNOTS2 <- seq(100, 2000, by = 100)
+INNER_KNOTS1 <- seq(100, 1900, by = 100)
+INNER_KNOTS2 <- seq(100, 1900, by = 100)
 
 SPLINES_DEGREE = 1
 
