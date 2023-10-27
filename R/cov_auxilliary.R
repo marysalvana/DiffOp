@@ -1011,7 +1011,8 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
   C2_coef <- est_param$C2_coef
   D2 <- est_param$D2
 
-  est_sd <- computeSD(fittedModel = fit,
+  if(hessian){
+    est_sd <- computeSD(fittedModel = fit,
                         beta_fix, scale_horizontal_fix,
                         scale_vertical_fix,
                         a1_fix, b1_fix, c1_fix, d1_fix,
@@ -1022,15 +1023,25 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
                         a2_scaling, b2_scaling,
                         c2_coef_scaling, d2_scaling, nb1, nb2)
 
-  results <- prepareResults_mle(fittedModel = fit,
-                            BETA, SCALE_HORIZONTAL, SCALE_VERTICAL,
-                            A1, B1, C1_coef, D1, A2, B2, C2_coef, D2,
-                            est_sd,
-                            beta_fix, scale_horizontal_fix,
-                            scale_vertical_fix,
-                            a1_fix, b1_fix, c1_fix, d1_fix,
-                            a2_fix, b2_fix, c2_fix, d2_fix,
-                            splines_degree, inner_knots1, inner_knots2, nb1, nb2)
+    results <- prepareResults_mle(fittedModel = fit,
+                                  BETA, SCALE_HORIZONTAL, SCALE_VERTICAL,
+                                  A1, B1, C1_coef, D1, A2, B2, C2_coef, D2,
+                                  beta_fix, scale_horizontal_fix,
+                                  scale_vertical_fix,
+                                  a1_fix, b1_fix, c1_fix, d1_fix,
+                                  a2_fix, b2_fix, c2_fix, d2_fix,
+                                  splines_degree, inner_knots1, inner_knots2, nb1, nb2,
+                                  est_sd)
+  }else{
+    results <- prepareResults_mle(fittedModel = fit,
+                                  BETA, SCALE_HORIZONTAL, SCALE_VERTICAL,
+                                  A1, B1, C1_coef, D1, A2, B2, C2_coef, D2,
+                                  beta_fix, scale_horizontal_fix,
+                                  scale_vertical_fix,
+                                  a1_fix, b1_fix, c1_fix, d1_fix,
+                                  a2_fix, b2_fix, c2_fix, d2_fix,
+                                  splines_degree, inner_knots1, inner_knots2, nb1, nb2)
+  }
 
   return(results)
 
