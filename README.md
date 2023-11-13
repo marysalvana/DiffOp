@@ -89,11 +89,14 @@ INNER_KNOTS2 <- c(0.1, 0.5, 0.9)
 
 SPLINES_DEGREE = 2
 
+no_of_c1_coef = length(INNER_KNOTS1) + SPLINES_DEGREE + 1
+no_of_c2_coef = length(INNER_KNOTS2) + SPLINES_DEGREE + 1
+
 set.seed(1235)
-INIT_C1_COEF <- runif(length(INNER_KNOTS1) + SPLINES_DEGREE + 1, -0.1, 0.1)
+INIT_C1_COEF <- runif(no_of_c1_coef, -0.1, 0.1)
 
 set.seed(1236)
-INIT_C2_COEF <- runif(length(INNER_KNOTS2) + SPLINES_DEGREE + 1, -0.1, 0.1)
+INIT_C2_COEF <- runif(no_of_c2_coef, -0.1, 0.1)
 
 #Fitting a stationary model
 
@@ -211,6 +214,31 @@ est_params_mle_step2 <- est_bi_differential_mle(residuals = Z_insample,
                                                 inner_knots1 = INNER_KNOTS1,
                                                 inner_knots2 = INNER_KNOTS2,
                                                 iterlim = 1000, stepmax = 1, hessian = F)
+
+#When optimization stops because of the prompt "Maximum step size exceeded 5 consecutive times.", just run the MLE again from the last parameter values as starting point. 
+
+for(ll in 1:100){
+  theta <- est_params_mle_step2$theta
+  est_params_mle_step2 <- est_bi_differential_mle(residuals = Z_insample,
+                                                  location = locs_insample, init_beta = theta[1],
+                                                  init_scale_horizontal = exp(-3.83390116),
+                                                  init_scale_vertical = exp(-4.16732256),
+                                                  init_a1 = exp(0.56104165) * 1e-3, init_b1 = -2.32394637 * 1e-3,
+                                                  init_c1_coef = theta[1 + 1:no_of_c1_coef], init_d1 = 0,
+                                                  init_a2 = -0.41063635 * 1e-3, init_b2 = 0.03174884 * 1e-3,
+                                                  init_c2_coef = theta[1 + no_of_c1_coef + 1:no_of_c2_coef], init_d2 = 0,
+                                                  a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                                  a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                                  scale_horizontal_fix = T, scale_vertical_fix = T,
+                                                  a1_fix = T, b1_fix = T, a2_fix = T, b2_fix = T,
+                                                  d1_fix = T, d2_fix = T, radius = earthRadiusKm,
+                                                  splines_degree = SPLINES_DEGREE,
+                                                  inner_knots1 = INNER_KNOTS1,
+                                                  inner_knots2 = INNER_KNOTS2,
+                                                  iterlim = 1000, stepmax = 1, hessian = F)
+
+}
+
 
 ```
 
