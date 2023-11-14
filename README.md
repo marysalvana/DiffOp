@@ -205,8 +205,6 @@ est_params_mle_step2 <- est_bi_differential_mle(residuals = Z_insample,
                                                 init_c1_coef = INIT_C1_COEF, init_d1 = 0,
                                                 init_a2 = -0.41063635 * 1e-3, init_b2 = 0.03174884 * 1e-3,
                                                 init_c2_coef = INIT_C2_COEF, init_d2 = 0,
-                                                a1_scaling = 1e-3, b1_scaling = 1e-3,
-                                                a2_scaling = 1e-3, b2_scaling = 1e-3,
                                                 beta_fix = T,
                                                 scale_horizontal_fix = T, scale_vertical_fix = T,
                                                 a1_fix = T, b1_fix = T, a2_fix = T, b2_fix = T,
@@ -228,8 +226,6 @@ for(ll in 1:100){
                                                   init_c1_coef = theta[1:no_of_c1_coef], init_d1 = 0,
                                                   init_a2 = -0.41063635 * 1e-3, init_b2 = 0.03174884 * 1e-3,
                                                   init_c2_coef = theta[no_of_c1_coef + 1:no_of_c2_coef], init_d2 = 0,
-                                                  a1_scaling = 1e-3, b1_scaling = 1e-3,
-                                                  a2_scaling = 1e-3, b2_scaling = 1e-3,
                                                   beta_fix = T,
                                                   scale_horizontal_fix = T, scale_vertical_fix = T,
                                                   a1_fix = T, b1_fix = T, a2_fix = T, b2_fix = T,
@@ -268,8 +264,31 @@ cov_mat <- cov_bi_differential(location = locs_insample, beta = 0.99,
                                inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2)
 
 plot(diag(cov_mat[1:50, 1:50]))
-plot(diag(cov_mat[950 + 1:50, 950 + 1:50]))
-plot(diag(cov_mat[1:50, 950 + 1:50]) / sqrt(diag(cov_mat[1:50, 1:50]) * diag(cov_mat[950 + 1:50, 950 + 1:50])))
+plot(diag(cov_mat[1500 + 1:50, 1500 + 1:50]))
+plot(diag(cov_mat[1:50, 1500 + 1:50]) / sqrt(diag(cov_mat[1:50, 1:50]) * diag(cov_mat[1500 + 1:50, 1500 + 1:50])))
+
+###### MLE STEP #3: JOINT PARAMETER ESTIMATION
+
+theta = c(4.58680804,9.06484545,6.07384379,0.81598494,0.11169022,-0.04040436,-0.02262184,-0.00719334,0.00176212,0.0010312,0.00395534,0.00107244,4.9483514,4.90614151,2.86628645,1.06431288,0.37332928,-0.26995082,-0.05196849,0.0182373,-0.00057591,0.00082715,0.00250821,-0.00298685)
+
+INIT_C1_COEF = theta[1:no_of_c1_coef]
+INIT_C2_COEF = theta[no_of_c1_coef + 1:no_of_c2_coef]
+
+est_params_mle_step3 <- est_bi_differential_mle(residuals = Z_insample,
+                                                location = locs_insample, init_beta = 6,
+                                                init_scale_horizontal = -3.83390116,
+                                                init_scale_vertical = -4.16732256,
+                                                init_a1 = 0.56104165, init_b1 = -2.32394637,
+                                                init_c1_coef = INIT_C1_COEF, init_d1 = 0,
+                                                init_a2 = -0.41063635, init_b2 = 0.03174884,
+                                                init_c2_coef = INIT_C2_COEF, init_d2 = 0,
+                                                a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                                a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                                d1_fix = T, d2_fix = T, radius = earthRadiusKm,
+                                                splines_degree = SPLINES_DEGREE,
+                                                inner_knots1 = INNER_KNOTS1,
+                                                inner_knots2 = INNER_KNOTS2,
+                                                iterlim = 1000, stepmax = 1, hessian = F)
 
 ```
 
