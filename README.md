@@ -275,7 +275,7 @@ INIT_C1_COEF = theta[1:no_of_c1_coef]
 INIT_C2_COEF = theta[no_of_c1_coef + 1:no_of_c2_coef]
 
 est_params_mle_step3 <- est_bi_differential_mle(residuals = Z_insample,
-                                                location = locs_insample, init_beta = 6,
+                                                location = locs_insample, init_beta = 5,
                                                 init_scale_horizontal = -3.83390116,
                                                 init_scale_vertical = -4.16732256,
                                                 init_a1 = 0.56104165, init_b1 = -2.32394637,
