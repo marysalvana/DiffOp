@@ -167,7 +167,7 @@ INIT_B1 = INIT_B2 = 0
 INIT_D1 = INIT_D2 = 0
 
 est_params_mle_step1 <- est_bi_differential_mle(residuals = Z_insample,
-                                          location = locs_insample, init_beta = 0,
+                                          location = locs_insample, init_beta = 1,
                                           init_scale_horizontal = INIT_SCALE_HORIZONTAL,
                                           init_scale_vertical = INIT_SCALE_VERTICAL,
                                           init_a1 = INIT_A1, init_b1 = INIT_B1,
@@ -198,14 +198,13 @@ set.seed(1235)
 INIT_C2_COEF <- runif(no_of_c2_coef, -0.01, 0.01)
 
 est_params_mle_step2 <- est_bi_differential_mle(residuals = Z_insample,
-                                                location = locs_insample, init_beta = 0.99,
-                                                init_scale_horizontal = exp(-3.83390116),
-                                                init_scale_vertical = exp(-4.16732256),
-                                                init_a1 = exp(0.56104165) * 1e-3, init_b1 = -2.32394637 * 1e-3,
+                                                location = locs_insample, init_beta = 5,
+                                                init_scale_horizontal = exp(-3.11236305),
+                                                init_scale_vertical = exp(-3.75414498),
+                                                init_a1 = exp(-0.18288436) * 1e-3, init_b1 = 1.09451742 * 1e-3,
                                                 init_c1_coef = INIT_C1_COEF, init_d1 = 0,
-                                                init_a2 = -0.41063635 * 1e-3, init_b2 = 0.03174884 * 1e-3,
+                                                init_a2 = 0.1962705 * 1e-3, init_b2 = -0.01708648 * 1e-3,
                                                 init_c2_coef = INIT_C2_COEF, init_d2 = 0,
-                                                beta_fix = T,
                                                 scale_horizontal_fix = T, scale_vertical_fix = T,
                                                 a1_fix = T, b1_fix = T, a2_fix = T, b2_fix = T,
                                                 d1_fix = T, d2_fix = T, radius = earthRadiusKm,
@@ -219,14 +218,13 @@ est_params_mle_step2 <- est_bi_differential_mle(residuals = Z_insample,
 for(ll in 1:100){
   theta <- est_params_mle_step2$theta
   est_params_mle_step2 <- est_bi_differential_mle(residuals = Z_insample,
-                                                  location = locs_insample, init_beta = 0.99,
-                                                  init_scale_horizontal = exp(-3.83390116),
-                                                  init_scale_vertical = exp(-4.16732256),
-                                                  init_a1 = exp(0.56104165) * 1e-3, init_b1 = -2.32394637 * 1e-3,
-                                                  init_c1_coef = theta[1:no_of_c1_coef], init_d1 = 0,
-                                                  init_a2 = -0.41063635 * 1e-3, init_b2 = 0.03174884 * 1e-3,
-                                                  init_c2_coef = theta[no_of_c1_coef + 1:no_of_c2_coef], init_d2 = 0,
-                                                  beta_fix = T,
+                                                  location = locs_insample, init_beta = theta[1],
+                                                  init_scale_horizontal = exp(-3.11236305),
+                                                  init_scale_vertical = exp(-3.75414498),
+                                                  init_a1 = exp(-0.18288436) * 1e-3, init_b1 = 1.09451742 * 1e-3,
+                                                  init_c1_coef = theta[1 + 1:no_of_c1_coef], init_d1 = 0,
+                                                  init_a2 = 0.1962705 * 1e-3, init_b2 = -0.01708648 * 1e-3,
+                                                  init_c2_coef = theta[1 + no_of_c1_coef + 1:no_of_c2_coef], init_d2 = 0,
                                                   scale_horizontal_fix = T, scale_vertical_fix = T,
                                                   a1_fix = T, b1_fix = T, a2_fix = T, b2_fix = T,
                                                   d1_fix = T, d2_fix = T, radius = earthRadiusKm,
@@ -253,12 +251,12 @@ plot(c1[1:50])
 plot(c2[1:50])
 
 #Plotting the marginal variances and colocated correlations using MLE values when BETA is not estimated
-cov_mat <- cov_bi_differential(location = locs_insample, beta = 0.99,
-                               scale_horizontal = exp(-3.83390116), 
-                               scale_vertical = exp(-4.16732256),
-                               a1 = exp(0.56104165) * 1e-3, b1 = -2.32394637 * 1e-3, 
+cov_mat <- cov_bi_differential(location = locs_insample, beta = 2 / (1 + exp(-theta[1])) - 1,
+                               scale_horizontal = exp(-3.11236305), 
+                               scale_vertical = exp(-3.75414498),
+                               a1 = exp(-0.18288436) * 1e-3, b1 = 1.09451742 * 1e-3, 
                                c1_coef = c1_coef, d1 = 0,
-                               a2 = -0.41063635 * 1e-3, b2 = 0.03174884 * 1e-3, 
+                               a2 = 0.1962705 * 1e-3, b2 = -0.01708648 * 1e-3, 
                                c2_coef = c2_coef, d2 = 0,
                                radius = earthRadiusKm, splines_degree = SPLINES_DEGREE,
                                inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2)
