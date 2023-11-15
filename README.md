@@ -242,8 +242,8 @@ nb1 <- ncol(basis1)
 basis2 <- bsplineBasis(locs_insample[, 3], SPLINES_DEGREE, INNER_KNOTS1)
 nb2 <- ncol(basis2)
 
-c1_coef = theta[1:no_of_c1_coef]
-c2_coef = theta[no_of_c1_coef + 1:no_of_c2_coef]
+c1_coef = theta[1 + 1:no_of_c1_coef]
+c2_coef = theta[1 + no_of_c1_coef + 1:no_of_c2_coef]
 
 c1 <- basis1 %*% matrix(c1_coef, ncol = 1)
 c2 <- basis2 %*% matrix(c2_coef, ncol = 1)
