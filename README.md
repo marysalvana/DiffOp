@@ -252,12 +252,12 @@ plot(c1[1:50])
 plot(c2[1:50])
 
 #Plotting the marginal variances and colocated correlations using MLE values when BETA is not estimated
-cov_mat <- cov_bi_differential(location = locs_insample, beta = 2 / (1 + exp(-theta[1])) - 1,
+cov_mat <- cov_bi_differential(location = locs_insample, beta = 1,
                                scale_horizontal = exp(-3.11236305), 
-                               scale_vertical = exp(-3.75414498),
-                               a1 = exp(-0.18288436) * 1e-3, b1 = 1.09451742 * 1e-3, 
+                               scale_vertical = exp(theta[1]),
+                               a1 = 0, b1 = 0,
                                c1_coef = c1_coef, d1 = 0,
-                               a2 = 0.1962705 * 1e-3, b2 = -0.01708648 * 1e-3, 
+                               a2 = 0, b2 = 0,
                                c2_coef = c2_coef, d2 = 0,
                                radius = earthRadiusKm, splines_degree = SPLINES_DEGREE,
                                inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2)
