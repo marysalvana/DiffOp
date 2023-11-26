@@ -193,19 +193,20 @@ no_of_c1_coef = length(INNER_KNOTS1) + SPLINES_DEGREE + 1
 no_of_c2_coef = length(INNER_KNOTS2) + SPLINES_DEGREE + 1
 
 set.seed(1234)
-INIT_C1_COEF <- runif(no_of_c1_coef, -0.01, 0.01)
+INIT_C1_COEF <- runif(no_of_c1_coef, -4, 4)
 set.seed(1235)
-INIT_C2_COEF <- runif(no_of_c2_coef, -0.01, 0.01)
+INIT_C2_COEF <- runif(no_of_c2_coef, -4, 4)
 
 est_params_mle_step2 <- est_bi_differential_mle(residuals = Z_insample,
-                                                location = locs_insample, init_beta = 5,
+                                                location = locs_insample, init_beta = 0,
                                                 init_scale_horizontal = exp(-3.11236305),
-                                                init_scale_vertical = exp(-3.75414498),
-                                                init_a1 = exp(-0.18288436) * 1e-3, init_b1 = 1.09451742 * 1e-3,
+                                                init_scale_vertical = -3.75414498,
+                                                init_a1 = 0, init_b1 = 0,
                                                 init_c1_coef = INIT_C1_COEF, init_d1 = 0,
-                                                init_a2 = 0.1962705 * 1e-3, init_b2 = -0.01708648 * 1e-3,
+                                                init_a2 = 0, init_b2 = 0,
                                                 init_c2_coef = INIT_C2_COEF, init_d2 = 0,
-                                                scale_horizontal_fix = T, scale_vertical_fix = T,
+                                                beta_fix = T,
+                                                scale_horizontal_fix = T, scale_vertical_fix = F,
                                                 a1_fix = T, b1_fix = T, a2_fix = T, b2_fix = T,
                                                 d1_fix = T, d2_fix = T, radius = earthRadiusKm,
                                                 splines_degree = SPLINES_DEGREE,
@@ -218,21 +219,21 @@ est_params_mle_step2 <- est_bi_differential_mle(residuals = Z_insample,
 for(ll in 1:100){
   theta <- est_params_mle_step2$theta
   est_params_mle_step2 <- est_bi_differential_mle(residuals = Z_insample,
-                                                  location = locs_insample, init_beta = theta[1],
+                                                  location = locs_insample, init_beta = 0,
                                                   init_scale_horizontal = exp(-3.11236305),
-                                                  init_scale_vertical = exp(-3.75414498),
-                                                  init_a1 = exp(-0.18288436) * 1e-3, init_b1 = 1.09451742 * 1e-3,
+                                                  init_scale_vertical = theta[1],
+                                                  init_a1 = 0, init_b1 = 0,
                                                   init_c1_coef = theta[1 + 1:no_of_c1_coef], init_d1 = 0,
-                                                  init_a2 = 0.1962705 * 1e-3, init_b2 = -0.01708648 * 1e-3,
+                                                  init_a2 = 0, init_b2 = 0,
                                                   init_c2_coef = theta[1 + no_of_c1_coef + 1:no_of_c2_coef], init_d2 = 0,
-                                                  scale_horizontal_fix = T, scale_vertical_fix = T,
+                                                  beta_fix = T,
+                                                  scale_horizontal_fix = T, scale_vertical_fix = F,
                                                   a1_fix = T, b1_fix = T, a2_fix = T, b2_fix = T,
                                                   d1_fix = T, d2_fix = T, radius = earthRadiusKm,
                                                   splines_degree = SPLINES_DEGREE,
                                                   inner_knots1 = INNER_KNOTS1,
                                                   inner_knots2 = INNER_KNOTS2,
                                                   iterlim = 1000, stepmax = 1, hessian = F)
-  
 }
 
 #Plotting the c1 and c2 functions using MLE values when BETA is not estimated
