@@ -145,7 +145,7 @@ est_params_mle <- est_bi_differential_mle(residuals = Z,
 ```
 data("argo_ref_loc1")
 
-ind_pred <- c(1:50, 1551:2500)
+ind_pred <- 1:50
 
 loc3d <- cbind(argo_ref_loc1$Longitude, argo_ref_loc1$Latitude,
                argo_ref_loc1$Pressure)
@@ -216,6 +216,8 @@ est_params_mle_step2 <- est_bi_differential_mle(residuals = Z_insample,
 
 #When optimization stops because of the prompt "Maximum step size exceeded 5 consecutive times.", just run the MLE again from the last parameter values as starting point. 
 
+theta = c(0.23007337,-6.32609215,2.26555344,0.53293427,0.65316327,0.47183072,0.74479939,-1.58372243,-0.88918217,0.09310385,0.1114813,0.16532703,-0.07239835,-0.11218514,-0.14882934,-0.13306325,0.128212,0.04194192,-0.0648904,-0.02101291,-0.01829493,0.07032543,-0.03063398,-0.01355103,0.00168753)
+
 for(ll in 1:100){
   theta <- est_params_mle_step2$theta
   est_params_mle_step2 <- est_bi_differential_mle(residuals = Z_insample,
@@ -263,31 +265,69 @@ cov_mat <- cov_bi_differential(location = locs_insample, beta = 1,
                                inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2)
 
 plot(diag(cov_mat[1:50, 1:50]))
-plot(diag(cov_mat[1500 + 1:50, 1500 + 1:50]))
-plot(diag(cov_mat[1:50, 1500 + 1:50]) / sqrt(diag(cov_mat[1:50, 1:50]) * diag(cov_mat[1500 + 1:50, 1500 + 1:50])))
-
-###### MLE STEP #3: JOINT PARAMETER ESTIMATION
-
-theta = c(4.58680804,9.06484545,6.07384379,0.81598494,0.11169022,-0.04040436,-0.02262184,-0.00719334,0.00176212,0.0010312,0.00395534,0.00107244,4.9483514,4.90614151,2.86628645,1.06431288,0.37332928,-0.26995082,-0.05196849,0.0182373,-0.00057591,0.00082715,0.00250821,-0.00298685)
-
-INIT_C1_COEF = theta[1:no_of_c1_coef]
-INIT_C2_COEF = theta[no_of_c1_coef + 1:no_of_c2_coef]
+plot(diag(cov_mat[2450 + 1:50, 2450 + 1:50]))
+plot(diag(cov_mat[1:50, 2450 + 1:50]) / sqrt(diag(cov_mat[1:50, 1:50]) * diag(cov_mat[2450 + 1:50, 2450 + 1:50])))
 
 est_params_mle_step3 <- est_bi_differential_mle(residuals = Z_insample,
-                                                location = locs_insample, init_beta = 5,
-                                                init_scale_horizontal = -3.83390116,
-                                                init_scale_vertical = -4.16732256,
-                                                init_a1 = 0.56104165, init_b1 = -2.32394637,
-                                                init_c1_coef = INIT_C1_COEF, init_d1 = 0,
-                                                init_a2 = -0.41063635, init_b2 = 0.03174884,
-                                                init_c2_coef = INIT_C2_COEF, init_d2 = 0,
-                                                a1_scaling = 1e-3, b1_scaling = 1e-3,
-                                                a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                                location = locs_insample, init_beta = 1,
+                                                init_scale_horizontal = exp(-3.11236305),
+                                                init_scale_vertical = theta[1],
+                                                init_a1 = 0, init_b1 = 0,
+                                                init_c1_coef = theta[1 + 1:no_of_c1_coef], init_d1 = 0,
+                                                init_a2 = 0, init_b2 = 0,
+                                                init_c2_coef = theta[1 + no_of_c1_coef + 1:no_of_c2_coef], init_d2 = 0,
+                                                beta_fix = T,
+                                                scale_horizontal_fix = T, scale_vertical_fix = F,
+                                                a1_fix = T, b1_fix = T, a2_fix = T, b2_fix = T,
                                                 d1_fix = T, d2_fix = T, radius = earthRadiusKm,
                                                 splines_degree = SPLINES_DEGREE,
                                                 inner_knots1 = INNER_KNOTS1,
                                                 inner_knots2 = INNER_KNOTS2,
                                                 iterlim = 1000, stepmax = 1, hessian = F)
+
+for(ll in 1:100){
+  theta <- est_params_mle_step3$theta
+  est_params_mle_step3 <- est_bi_differential_mle(residuals = Z_insample,
+                                                  location = locs_insample, init_beta = 1,
+                                                  init_scale_horizontal = exp(-3.11236305),
+                                                  init_scale_vertical = theta[1],
+                                                  init_a1 = 0, init_b1 = 0,
+                                                  init_c1_coef = theta[1 + 1:no_of_c1_coef], init_d1 = 0,
+                                                  init_a2 = 0, init_b2 = 0,
+                                                  init_c2_coef = theta[1 + no_of_c1_coef + 1:no_of_c2_coef], init_d2 = 0,
+                                                  beta_fix = T,
+                                                  scale_horizontal_fix = T, scale_vertical_fix = F,
+                                                  a1_fix = T, b1_fix = T, a2_fix = T, b2_fix = T,
+                                                  d1_fix = T, d2_fix = T, radius = earthRadiusKm,
+                                                  splines_degree = SPLINES_DEGREE,
+                                                  inner_knots1 = INNER_KNOTS1,
+                                                  inner_knots2 = INNER_KNOTS2,
+                                                  iterlim = 1000, stepmax = 1, hessian = F)
+  
+}
+
+c1_coef = theta[1 + 1:no_of_c1_coef]
+c2_coef = theta[1 + no_of_c1_coef + 1:no_of_c2_coef]
+
+c1 <- basis1 %*% matrix(c1_coef, ncol = 1)
+c2 <- basis2 %*% matrix(c2_coef, ncol = 1)
+plot(c1[1:50])
+plot(c2[1:50])
+
+#Plotting the marginal variances and colocated correlations using MLE values when BETA is not estimated
+cov_mat <- cov_bi_differential(location = locs_insample, beta = 1,
+                               scale_horizontal = exp(-3.11236305), 
+                               scale_vertical = exp(theta[1]),
+                               a1 = 0, b1 = 0,
+                               c1_coef = c1_coef, d1 = 0,
+                               a2 = 0, b2 = 0,
+                               c2_coef = c2_coef, d2 = 0,
+                               radius = earthRadiusKm, splines_degree = SPLINES_DEGREE,
+                               inner_knots1 = INNER_KNOTS1, inner_knots2 = INNER_KNOTS2)
+
+plot(diag(cov_mat[1:50, 1:50]))
+plot(diag(cov_mat[2450 + 1:50, 2450 + 1:50]))
+plot(diag(cov_mat[1:50, 2450 + 1:50]) / sqrt(diag(cov_mat[1:50, 1:50]) * diag(cov_mat[2450 + 1:50, 2450 + 1:50])))
 
 ```
 
