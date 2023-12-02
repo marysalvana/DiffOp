@@ -285,6 +285,8 @@ est_params_mle_step3 <- est_bi_differential_mle(residuals = Z_insample,
                                                 inner_knots2 = INNER_KNOTS2,
                                                 iterlim = 1000, stepmax = 1, hessian = F)
 
+theta = c(0.21772112,-6.31371709,2.26079917,0.65465982,0.69462169,0.48813674,0.74496263,-1.58737371,-0.90051984,0.09055384,0.13868718,0.1675015,-0.07370263,-0.80400007,0.28395557,0.03499888,0.05125029,0.03182939,0.02715794,-0.04775821,0.12488736,-0.013939,-0.02279462,-0.02816342,0.01209895)
+
 for(ll in 1:100){
   theta <- est_params_mle_step3$theta
   est_params_mle_step3 <- est_bi_differential_mle(residuals = Z_insample,
