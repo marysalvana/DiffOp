@@ -361,8 +361,6 @@ for(ll in 1:100){
                                                   a1_scaling = 1e-3, b1_scaling = 1e-3,
                                                   a2_scaling = 1e-3, b2_scaling = 1e-3,
                                                   beta_fix = T,
-                                                  scale_horizontal_fix = T, scale_vertical_fix = F,
-                                                  a1_fix = T, b1_fix = T, a2_fix = T, b2_fix = T,
                                                   d1_fix = T, d2_fix = T, radius = earthRadiusKm,
                                                   splines_degree = SPLINES_DEGREE,
                                                   inner_knots1 = INNER_KNOTS1,
