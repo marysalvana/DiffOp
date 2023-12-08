@@ -371,7 +371,7 @@ for(ll in 1:100){
   
 }
 
-theta = c(-3.56852105,0.06297733,-4.93412326,-0.87264164,-6.50539489,2.54441658,0.79528461,0.75173088,0.51504711,1.02221857,-2.32680017,-0.14542068,-0.12728781,0.06551308,-0.01373007,0.00400759,-0.02001583,0.19538341,-1.34676813,0.51916011,0.0478104,0.05899792,0.03996861,0.0406108,-0.0649515,0.01179598,0.00258257,0.00013801,-0.00050382,-5.665e-05)
+theta = c(-3.48527854,0.24169356,-4.92278845,-0.72326213,-6.79419858,2.66599146,0.64186052,0.59032403,0.46862795,0.6973586,-1.49856207,-0.11336609,-0.10788059,0.05508508,-0.01320305,0.00441382,-0.01147506,0.1660411,-1.34784128,0.51991251,0.04017273,0.04797895,0.03415032,0.03293791,-0.06478336,0.00859539,0.00214539,0.00118551,-0.00171117,9.54e-05)
 
 for(ll in 1:100){
   theta <- est_params_mle_step4$theta
@@ -417,6 +417,44 @@ cov_mat <- cov_bi_differential(location = locs_insample, beta = 1,
 plot(diag(cov_mat[1:50, 1:50]))
 plot(diag(cov_mat[2450 + 1:50, 2450 + 1:50]))
 plot(diag(cov_mat[1:50, 2450 + 1:50]) / sqrt(diag(cov_mat[1:50, 1:50]) * diag(cov_mat[2450 + 1:50, 2450 + 1:50])))
+
+
+est_params_mle_step5 <- est_bi_differential_mle(residuals = Z_insample,
+                                                location = locs_insample, init_beta = 3,
+                                                init_scale_horizontal = theta[1],
+                                                init_scale_vertical = theta[2],
+                                                init_a1 = theta[3], init_b1 = theta[4],
+                                                init_c1_coef = theta[4 + 1:no_of_c1_coef], init_d1 = 0,
+                                                init_a2 = theta[4 + no_of_c1_coef + 1], init_b2 = theta[4 + no_of_c1_coef + 2],
+                                                init_c2_coef = theta[4 + no_of_c1_coef + 2 + 1:no_of_c2_coef], init_d2 = 0,
+                                                a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                                a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                                d1_fix = T, d2_fix = T, radius = earthRadiusKm,
+                                                splines_degree = SPLINES_DEGREE,
+                                                inner_knots1 = INNER_KNOTS1,
+                                                inner_knots2 = INNER_KNOTS2,
+                                                iterlim = 1000, stepmax = 1, hessian = F)
+
+for(ll in 1:100){
+  theta <- est_params_mle_step5$theta
+  est_params_mle_step5 <- est_bi_differential_mle(residuals = Z_insample,
+                                                  location = locs_insample, init_beta = theta[1],
+                                                  init_scale_horizontal = theta[2],
+                                                  init_scale_vertical = theta[3],
+                                                  init_a1 = theta[4], init_b1 = theta[5],
+                                                  init_c1_coef = theta[5 + 1:no_of_c1_coef], init_d1 = 0,
+                                                  init_a2 = theta[5 + no_of_c1_coef + 1], init_b2 = theta[5 + no_of_c1_coef + 2],
+                                                  init_c2_coef = theta[5 + no_of_c1_coef + 2 + 1:no_of_c2_coef], init_d2 = 0,
+                                                  a1_scaling = 1e-3, b1_scaling = 1e-3,
+                                                  a2_scaling = 1e-3, b2_scaling = 1e-3,
+                                                  d1_fix = T, d2_fix = T, radius = earthRadiusKm,
+                                                  splines_degree = SPLINES_DEGREE,
+                                                  inner_knots1 = INNER_KNOTS1,
+                                                  inner_knots2 = INNER_KNOTS2,
+                                                  iterlim = 1000, stepmax = 1, hessian = F)
+  
+}
+
 
 ```
 
