@@ -143,19 +143,75 @@ est_params_mle <- est_bi_differential_mle(residuals = Z,
 
 ### Argo data analysis and model fitting
 ```
-data("argo_ref_loc1")
 
 ind_pred <- 1:50
 
-loc3d <- cbind(argo_ref_loc1$Longitude, argo_ref_loc1$Latitude,
-               argo_ref_loc1$Pressure)
+Ref_Loc = 1
+
+if(Ref_Loc == 1){
+  loc3d <- cbind(argo_ref_loc1$Longitude, argo_ref_loc1$Latitude,
+                 argo_ref_loc1$Pressure)
+
+  Z_insample <- c(argo_ref_loc1$TemperatureResiduals[-ind_pred],
+                argo_ref_loc1$SalinityResiduals[-ind_pred])
+
+  Z_outsample <- c(argo_ref_loc1$TemperatureResiduals[ind_pred],
+                 argo_ref_loc1$SalinityResiduals[ind_pred])
+
+}else if(Ref_Loc == 2){
+  loc3d <- cbind(argo_ref_loc2$Longitude, argo_ref_loc2$Latitude,
+                 argo_ref_loc2$Pressure)
+
+  Z_insample <- c(argo_ref_loc2$TemperatureResiduals[-ind_pred],
+                argo_ref_loc2$SalinityResiduals[-ind_pred])
+
+  Z_outsample <- c(argo_ref_loc2$TemperatureResiduals[ind_pred],
+                 argo_ref_loc2$SalinityResiduals[ind_pred])
+
+}else if(Ref_Loc == 3){
+  loc3d <- cbind(argo_ref_loc3$Longitude, argo_ref_loc3$Latitude,
+                 argo_ref_loc3$Pressure)
+
+  Z_insample <- c(argo_ref_loc3$TemperatureResiduals[-ind_pred],
+                argo_ref_loc3$SalinityResiduals[-ind_pred])
+
+  Z_outsample <- c(argo_ref_loc3$TemperatureResiduals[ind_pred],
+                 argo_ref_loc3$SalinityResiduals[ind_pred])
+
+}else if(Ref_Loc == 4){
+  loc3d <- cbind(argo_ref_loc4$Longitude, argo_ref_loc4$Latitude,
+                 argo_ref_loc4$Pressure)
+
+  Z_insample <- c(argo_ref_loc4$TemperatureResiduals[-ind_pred],
+                argo_ref_loc4$SalinityResiduals[-ind_pred])
+
+  Z_outsample <- c(argo_ref_loc4$TemperatureResiduals[ind_pred],
+                 argo_ref_loc4$SalinityResiduals[ind_pred])
+
+}else if(Ref_Loc == 5){
+  loc3d <- cbind(argo_ref_loc5$Longitude, argo_ref_loc5$Latitude,
+                 argo_ref_loc5$Pressure)
+
+  Z_insample <- c(argo_ref_loc5$TemperatureResiduals[-ind_pred],
+                argo_ref_loc5$SalinityResiduals[-ind_pred])
+
+  Z_outsample <- c(argo_ref_loc5$TemperatureResiduals[ind_pred],
+                 argo_ref_loc5$SalinityResiduals[ind_pred])
+
+}else if(Ref_Loc == 6){
+  loc3d <- cbind(argo_ref_loc6$Longitude, argo_ref_loc6$Latitude,
+                 argo_ref_loc6$Pressure)
+
+  Z_insample <- c(argo_ref_loc6$TemperatureResiduals[-ind_pred],
+                argo_ref_loc6$SalinityResiduals[-ind_pred])
+
+  Z_outsample <- c(argo_ref_loc6$TemperatureResiduals[ind_pred],
+                 argo_ref_loc6$SalinityResiduals[ind_pred])
+
+}
+
 locs_insample <- loc3d[-ind_pred, ]
 locs_outsample <- loc3d[ind_pred, ]
-
-Z_insample <- c(argo_ref_loc1$TemperatureResiduals[-ind_pred],
-                argo_ref_loc1$SalinityResiduals[-ind_pred])
-Z_outsample <- c(argo_ref_loc1$TemperatureResiduals[ind_pred],
-                 argo_ref_loc1$SalinityResiduals[ind_pred])
 
 earthRadiusKm = 6371
 
