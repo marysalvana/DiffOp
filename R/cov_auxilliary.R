@@ -955,7 +955,10 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
 
     diag(cov_mat) <- diag(cov_mat) + 1e-4
 
-    L <- t(chol(cov_mat))
+    L <- tryCatch(t(chol(cov_mat)), error = function(a) numeric(0))
+    if(length(L) == 0){
+      return(9999999999)
+    }
 
     log.det.cov <- 2*sum(log(diag(L)))
     z.new <- forwardsolve(L, residuals)
