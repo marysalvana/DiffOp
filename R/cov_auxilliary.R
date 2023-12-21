@@ -955,17 +955,14 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
 
     diag(cov_mat) <- diag(cov_mat) + 1e-4
 
-    cholmat <- tryCatch(chol(cov_mat), error = function(a) numeric(0))
-    if(length(cholmat) == 0){
-      return(9999999999)
-    }
+    L <- t(chol(cov_mat))
 
-    Sigma_inv <- solve(cov_mat)
-    Sigma_log_det <- 2 * sum(log(diag(t(cholmat))))
+    log.det.cov <- 2*sum(log(diag(L)))
+    z.new <- forwardsolve(L, residuals)
+    inner.prod <- sum(z.new^2)
 
-    out1 <- .5 * as.numeric(as.matrix(t(residuals) %*% Sigma_inv %*% residuals))
-    out2 <- .5 * nrow(location) * 2 * log(2 * pi) + .5 * Sigma_log_det
-    out <- out1 + out2
+    #Computing the negative Gaussian log-likelihood
+    out <- 0.5*inner.prod + 0.5*log.det.cov + 0.5*nrow(location)*log(2*pi)*2
 
     cat(c("negloglik: ", round(out, 4)), '\n')
 
