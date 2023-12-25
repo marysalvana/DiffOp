@@ -72,6 +72,9 @@ transformParams <- function(theta, init_beta,
 
         if(c1_fix & c2_fix){
 
+          C1_coef <- init_c1_coef
+          C2_coef <- init_c2_coef
+
           if(d1_fix & d2_fix){
 
             A1 <- exp(theta[2]) * a1_scaling
