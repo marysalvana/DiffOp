@@ -1,10 +1,10 @@
 h_new <- function(scale_horizontal_space, scale_vertical_space,
-              lat1d, lon1d, pres1, lat2d, lon2d, pres2, radius){
-  return(scale_horizontal_space^2 * calculateDistance(lat1d, lon1d, lat2d, lon2d, radius)^2 +
+              lat1d, lon1d, pres1, lat2d, lon2d, pres2, radius_of_sphere){
+  return(scale_horizontal_space^2 * calculateDistance(lat1d, lon1d, lat2d, lon2d, radius_of_sphere)^2 +
            scale_vertical_space^2 * (pres1 - pres2)^2)
 }
 
-h1 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius){
+h1 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius_of_sphere){
 
   lat1r = deg2rad(lat1d)
   lon1r = deg2rad(lon1d)
@@ -13,12 +13,12 @@ h1 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius){
   L = lat1r - lat2r
   l = lon1r - lon2r
 
-  con = 4 * scale_horizontal_space^2 * radius^2
+  con = 4 * scale_horizontal_space^2 * radius_of_sphere^2
 
   return (con * (sin(L / 2) * cos(L / 2) - sin(lat1r) * cos(lat2r) * (sin(l / 2))^2))
 }
 
-h3 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius){
+h3 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius_of_sphere){
 
   lat1r = deg2rad(lat1d)
   lon1r = deg2rad(lon1d)
@@ -26,12 +26,12 @@ h3 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius){
   lon2r = deg2rad(lon2d)
   l = lon1r - lon2r
 
-  con = 4 * scale_horizontal_space^2 * radius^2
+  con = 4 * scale_horizontal_space^2 * radius_of_sphere^2
 
   return(con * sin(l / 2) * cos(l / 2))
 }
 
-h33 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius){
+h33 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius_of_sphere){
 
   lat1r = deg2rad(lat1d)
   lon1r = deg2rad(lon1d)
@@ -39,12 +39,12 @@ h33 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius){
   lon2r = deg2rad(lon2d)
   l = lon1r - lon2r
 
-  con = 2 * scale_horizontal_space^2 * radius^2
+  con = 2 * scale_horizontal_space^2 * radius_of_sphere^2
 
   return(con * ((cos(l / 2))^2 - (sin(l / 2))^2))
 }
 
-h12 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius){
+h12 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius_of_sphere){
 
   lat1r = deg2rad(lat1d)
   lon1r = deg2rad(lon1d)
@@ -53,12 +53,12 @@ h12 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius){
   L = lat1r - lat2r
   l = lon1r - lon2r
 
-  con = 4 * scale_horizontal_space^2 * radius^2
+  con = 4 * scale_horizontal_space^2 * radius_of_sphere^2
 
   return (con * (-(cos(L / 2))^2 / 2 + (sin(L / 2))^2 / 2 + sin(lat1r) * sin(lat2r) * (sin(l / 2))^2))
 }
 
-h13 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius){
+h13 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius_of_sphere){
 
   lat1r = deg2rad(lat1d)
   lon1r = deg2rad(lon1d)
@@ -66,7 +66,7 @@ h13 <- function(scale_horizontal_space, lat1d, lon1d, lat2d, lon2d, radius){
   lon2r = deg2rad(lon2d)
   l = lon1r - lon2r
 
-  con = 4 * scale_horizontal_space^2 * radius^2
+  con = 4 * scale_horizontal_space^2 * radius_of_sphere^2
 
   return (-con * sin(lat1r) * sin(l / 2) * cos(l / 2))
 }
@@ -79,7 +79,7 @@ h44 <- function(scale_vertical_space){
   return(2 * scale_vertical_space^2)
 }
 
-C1 <- function(stationary_param, nonstationary_param1, nonstationary_param2, lat1d, lon1d, pres1, lat2d, lon2d, pres2, radius){
+C1 <- function(stationary_param, nonstationary_param1, nonstationary_param2, lat1d, lon1d, pres1, lat2d, lon2d, pres2, radius_of_sphere){
 
   a1 = stationary_param[3]
   b1 = stationary_param[4]
@@ -91,10 +91,10 @@ C1 <- function(stationary_param, nonstationary_param1, nonstationary_param2, lat
   c1 = nonstationary_param1
   c2 = nonstationary_param2
 
-  H = h_new(stationary_param[1], stationary_param[2], lat1d, lon1d, pres1, lat2d, lon2d, pres2, radius);
-  H1 = h1(stationary_param[1], lat1d, lon1d, lat2d, lon2d, radius);
-  H2 = h1(stationary_param[1], lat2d, lon1d, lat1d, lon2d, radius);
-  H3 = h3(stationary_param[1], lat1d, lon1d, lat2d, lon2d, radius);
+  H = h_new(stationary_param[1], stationary_param[2], lat1d, lon1d, pres1, lat2d, lon2d, pres2, radius_of_sphere);
+  H1 = h1(stationary_param[1], lat1d, lon1d, lat2d, lon2d, radius_of_sphere);
+  H2 = h1(stationary_param[1], lat2d, lon1d, lat1d, lon2d, radius_of_sphere);
+  H3 = h3(stationary_param[1], lat1d, lon1d, lat2d, lon2d, radius_of_sphere);
   H4 = h4(stationary_param[2], pres1, pres2);
 
   return(0.25 * (a1 * a2 * H1 * H2 - b1 * b2 * H3^2 - c1 * c2 * H4^2 - a1 * b2 * H1 * H3
@@ -102,7 +102,7 @@ C1 <- function(stationary_param, nonstationary_param1, nonstationary_param2, lat
                  - b1 * c2 * H3 * H4 - b2 * c1 * H3 * H4) + H * d1 * d2)
 }
 
-C2 <- function(stationary_param, nonstationary_param1, nonstationary_param2, lat1d, lon1d, pres1, lat2d, lon2d, pres2, radius){
+C2 <- function(stationary_param, nonstationary_param1, nonstationary_param2, lat1d, lon1d, pres1, lat2d, lon2d, pres2, radius_of_sphere){
 
   a1 = stationary_param[3]
   b1 = stationary_param[4]
@@ -116,16 +116,16 @@ C2 <- function(stationary_param, nonstationary_param1, nonstationary_param2, lat
   c1 = nonstationary_param1
   c2 = nonstationary_param2
 
-  H12 = h12(stationary_param[1], lat1d, lon1d, lat2d, lon2d, radius)
-  H13 = h13(stationary_param[1], lat1d, lon1d, lat2d, lon2d, radius)
-  H23 = h13(stationary_param[1], lat2d, lon1d, lat1d, lon2d, radius)
-  H33 = h33(stationary_param[1], lat1d, lon1d, lat2d, lon2d, radius)
+  H12 = h12(stationary_param[1], lat1d, lon1d, lat2d, lon2d, radius_of_sphere)
+  H13 = h13(stationary_param[1], lat1d, lon1d, lat2d, lon2d, radius_of_sphere)
+  H23 = h13(stationary_param[1], lat2d, lon1d, lat1d, lon2d, radius_of_sphere)
+  H33 = h33(stationary_param[1], lat1d, lon1d, lat2d, lon2d, radius_of_sphere)
   H44 = h44(stationary_param[2])
 
   return(-0.5 * (a1 * a2 * H12 - b1 * b2 * H33 - c1 * c2 * H44 - a1 * b2 * H13 + a2 * b1 * H23) + 2 * nu * d1 * d2)
 }
 
-uni_differential <- function(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius){
+uni_differential <- function(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius_of_sphere){
 
   sigma_square = PARAM[1]
   SCALE_HORIZONTAL_SPACE = PARAM[2]
@@ -147,7 +147,7 @@ uni_differential <- function(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, L
   con = 1.0 / con
   con = sigma_square * con
 
-  expr <- sqrt(h_new(SCALE_HORIZONTAL_SPACE, SCALE_VERTICAL_SPACE, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius))
+  expr <- sqrt(h_new(SCALE_HORIZONTAL_SPACE, SCALE_VERTICAL_SPACE, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius_of_sphere))
 
   STATIONARY_PARAM <- c(SCALE_HORIZONTAL_SPACE, SCALE_VERTICAL_SPACE, a1, b1, d1, a2, b2, d2, smoothness)
 
@@ -155,9 +155,9 @@ uni_differential <- function(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, L
   f_prime <- expr^(smoothness - 2) * besselK(expr, smoothness - 2)
 
   C1_val <- C1(stationary_param = STATIONARY_PARAM, nonstationary_param1 = c1, nonstationary_param2 = c2,
-               lat1d = LAT1D, lon1d = LON1D, pres1 = PRES1, lat2d = LAT2D, lon2d = LON2D, pres2 = PRES2, radius)
+               lat1d = LAT1D, lon1d = LON1D, pres1 = PRES1, lat2d = LAT2D, lon2d = LON2D, pres2 = PRES2, radius_of_sphere)
   C2_val <- C2(stationary_param = STATIONARY_PARAM, nonstationary_param1 = c1, nonstationary_param2 = c2,
-               lat1d = LAT1D, lon1d = LON1D, pres1 = PRES1, lat2d = LAT2D, lon2d = LON2D, pres2 = PRES2, radius)
+               lat1d = LAT1D, lon1d = LON1D, pres1 = PRES1, lat2d = LAT2D, lon2d = LON2D, pres2 = PRES2, radius_of_sphere)
 
   val <- con * (C1_val * f_prime + C2_val * f + d1 * d2 * (expr^2 * f_prime + 2 * (smoothness - 1) * f))
   diag(val) <- con * (diag(C1_val) + diag(C2_val)) + sigma_square * d1 * d2
@@ -181,7 +181,7 @@ uni_differential <- function(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, L
 #' \eqn{\lambda_{v}}, respectively, which control the degree of smoothing.
 #'
 #' @usage compute_emp_cov(location, variable1_residuals, variable2_residuals,
-#' bandwidth_horizontal, bandwidth_vertical, radius)
+#' bandwidth_horizontal, bandwidth_vertical, radius_of_sphere)
 #'
 #' @param location An \eqn{n \times 3} matrix of coordinates.
 #' @param variable1_residuals A numeric vector of variable 1 residuals.
@@ -190,7 +190,7 @@ uni_differential <- function(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, L
 #' in the horizontal direction.
 #' @param bandwidth_vertical A numeric constant parameter for the bandwidth
 #' in the vertical direction.
-#' @param radius A numeric constant indicating the radius of the sphere.
+#' @param radius_of_sphere A numeric constant indicating the radius of the sphere.
 #'
 #' @return A matrix of dimension \eqn{2 n \times 2 n}.
 #'
@@ -210,11 +210,11 @@ uni_differential <- function(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, L
 #' variable1_residuals = argo_ref_loc1$TemperatureResiduals,
 #' variable2_residuals = argo_ref_loc1$SalinityResiduals,
 #' bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03,
-#' radius = earthRadiusKm)}
+#' radius_of_sphere = earthRadiusKm)}
 #'
 #'
 #' @export
-compute_emp_cov <- function(location, variable1_residuals, variable2_residuals, bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03, radius){
+compute_emp_cov <- function(location, variable1_residuals, variable2_residuals, bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03, radius_of_sphere){
   LAT1D <- matrix(location[, 2], nrow(location), nrow(location), byrow = F)
   LON1D <- matrix(location[, 1], nrow(location), nrow(location), byrow = F)
   PRES1 <- matrix(location[, 3], nrow(location), nrow(location), byrow = F)
@@ -222,7 +222,7 @@ compute_emp_cov <- function(location, variable1_residuals, variable2_residuals, 
   LON2D <- matrix(location[, 1], nrow(location), nrow(location), byrow = T)
   PRES2 <- matrix(location[, 3], nrow(location), nrow(location), byrow = T)
 
-  dist0 <- sqrt(h_new(bandwidth_horizontal, bandwidth_vertical, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius))
+  dist0 <- sqrt(h_new(bandwidth_horizontal, bandwidth_vertical, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius_of_sphere))
   kernel <- exp(-dist0)
   kernel_sum <- rowSums(kernel)
 
@@ -264,8 +264,8 @@ compute_emp_cov <- function(location, variable1_residuals, variable2_residuals, 
 #' the relevant sphere is the Earth with \eqn{R=6,371} km.
 #'
 #' @usage cov_bi_differential(location, beta, scale_horizontal, scale_vertical,
-#' a1, b1, c1, d1, a2, b2, c2, d2, radius, splines_degree,
-#' inner_knots1, inner_knots2, c1_coef, c2_coef)
+#' a1, b1, c1, d1, a2, b2, c2, d2, radius_of_sphere, splines_degree,
+#' inner_knots1, inner_knots2)
 #'
 #' @param location An \eqn{n \times 3} matrix of coordinates.
 #' @param beta A numeric constant indicating the colocated correlation parameter.
@@ -278,18 +278,16 @@ compute_emp_cov <- function(location, variable1_residuals, variable2_residuals, 
 #' @param a2 A numeric constant indicating the anisotropy in latitude parameter associated with variable 2.
 #' @param b2 A numeric constant indicating the anisotropy in longitude parameter associated with variable 2.
 #' @param c2 A numeric vector indicating the nonstationary parameters with depth associated with variable 2.
+#' if splines_degree > 0, this is A numeric vector indicating the splines coefficients for the
+#' nonstationary with depth parameter c1 associated with variable 1.
 #' @param d2 A numeric constant indicating the variance parameter from the fully isotropic component associated with variable 2.
-#' @param radius A numeric constant indicating the radius of the sphere.
+#' @param radius_of_sphere A numeric constant indicating the radius of the sphere.
 #' @param splines_degree A number indicating the degree of the splines when
 #' using splines to characterize the nonstationary parameters c1 and c2.
 #' @param inner_knots1 A vector of knot locations for variable 1 when using splines to
 #' characterize c1.
 #' @param inner_knots2 A vector of knot locations for variable 2 when using splines to
 #' characterize c2.
-#' @param c1_coef A numeric vector indicating the splines coefficients for the
-#' nonstationary with depth parameter c1 associated with variable 1.
-#' @param c2_coef A numeric vector indicating the splines coefficients for the
-#' nonstationary with depth parameter c2 associated with variable 2.
 #'
 #' @useDynLib DiffOp, .registration=TRUE
 #'
@@ -326,11 +324,11 @@ compute_emp_cov <- function(location, variable1_residuals, variable2_residuals, 
 #'                                scale_vertical = SCALE_VERTICAL,
 #'                                a1 = A1, b1 = B1, c1 = C1, d1 = D1,
 #'                                a2 = A2, b2 = B2, c2 = C2, d2 = D2,
-#'                                radius = earthRadiusKm)
+#'                                radius_of_sphere = earthRadiusKm)
 #'
 #'
 #' @export
-cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical, a1, b1, c1 = NULL, d1, a2, b2, c2 = NULL, d2, radius, splines_degree = NULL, inner_knots1 = NULL, inner_knots2 = NULL, c1_coef = NULL, c2_coef = NULL){
+cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical, a1, b1, c1, d1, a2, b2, c2, d2, radius_of_sphere, splines_degree = 0, inner_knots1 = NULL, inner_knots2 = NULL){
 
   LAT1D <- matrix(location[, 2], nrow(location), nrow(location), byrow = F)
   LON1D <- matrix(location[, 1], nrow(location), nrow(location), byrow = F)
@@ -339,24 +337,14 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
   LON2D <- matrix(location[, 1], nrow(location), nrow(location), byrow = T)
   PRES2 <- matrix(location[, 3], nrow(location), nrow(location), byrow = T)
 
-  if(!is.null(splines_degree)){
+  if(splines_degree > 0){
+    basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
+    nb1 <- ncol(basis1)
+    basis2 <- bsplineBasis(location[, 3], splines_degree, inner_knots2)
+    nb2 <- ncol(basis2)
 
-    if(splines_degree == 0){
-      nb1 <- nb2 <- 1
-    }else{
-      basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
-      nb1 <- ncol(basis1)
-      basis2 <- bsplineBasis(location[, 3], splines_degree, inner_knots2)
-      nb2 <- ncol(basis2)
-    }
-
-    if(splines_degree == 0){
-      c1 <- c1_coef
-      c2 <- c2_coef
-    }else if(splines_degree > 0){
-      c1 <- basis1 %*% matrix(c1_coef, ncol = 1)
-      c2 <- basis2 %*% matrix(c2_coef, ncol = 1)
-    }
+    c1 <- basis1 %*% matrix(c1, ncol = 1)
+    c2 <- basis2 %*% matrix(c2, ncol = 1)
   }
 
   fd_eval_mat_loc1 <- matrix(c1, nrow(location), nrow(location), byrow = F)
@@ -367,15 +355,15 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 
   PARAM <- c(1, scale_horizontal, scale_vertical, 2, a1, b1, d1, a1, b1, d1)
 
-  cov_val <- uni_differential(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius)
+  cov_val <- uni_differential(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius_of_sphere)
 
   PARAM <- c(1, scale_horizontal, scale_vertical, 2, a2, b2, d2, a2, b2, d2)
 
-  cov_val2 <- uni_differential(PARAM, fd_eval2_mat_loc1, fd_eval2_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius)
+  cov_val2 <- uni_differential(PARAM, fd_eval2_mat_loc1, fd_eval2_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius_of_sphere)
 
   PARAM <- c(beta, scale_horizontal, scale_vertical, 2, a1, b1, d1, a2, b2, d2)
 
-  cov_val3 <- uni_differential(PARAM, fd_eval_mat_loc1, fd_eval2_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius)
+  cov_val3 <- uni_differential(PARAM, fd_eval_mat_loc1, fd_eval2_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius_of_sphere)
 
   Sigma <- rbind(cbind(cov_val, cov_val3), cbind(t(cov_val3), cov_val2))
 
@@ -396,14 +384,14 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' weight assigned to component \eqn{(i,j)} of this least squares problem.
 #'
 #' @usage est_bi_differential_wls(empirical_values, location, init_beta, init_scale_horizontal,
-#' init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1,
-#' init_a2, init_b2, init_c2_coef, init_d2,
+#' init_scale_vertical, init_a1, init_b1, init_c1, init_d1,
+#' init_a2, init_b2, init_c2, init_d2,
 #' beta_fix, scale_horizontal_fix, scale_vertical_fix,
 #' a1_fix, b1_fix, c1_fix, d1_fix, a2_fix, b2_fix, c2_fix, d2_fix,
 #' beta_scaling, horizontal_scale_scaling, vertical_scale_scaling,
-#' a1_scaling, b1_scaling, c1_coef_scaling, d1_scaling,
-#' a2_scaling, b2_scaling, c2_coef_scaling, d2_scaling,
-#' radius, splines_degree, inner_knots1, inner_knots2,
+#' a1_scaling, b1_scaling, c1_scaling, d1_scaling,
+#' a2_scaling, b2_scaling, c2_scaling, d2_scaling,
+#' radius_of_sphere, splines_degree, inner_knots1, inner_knots2,
 #' w1, w2, w12, iterlim, stepmax, hessian)
 #'
 #' @param empirical_values A matrix of dimension \eqn{2 n \times 2 n} containing
@@ -419,7 +407,7 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' anisotropy in latitude parameter associated with variable 1.
 #' @param init_b1 A numeric constant indicating the initial value for the
 #' anisotropy in longitude parameter associated with variable 1.
-#' @param init_c1_coef A numeric vector indicating the initial value for the
+#' @param init_c1 A numeric vector indicating the initial value for the
 #' splines coefficients for the nonstationary with depth parameter c1
 #' associated with variable 1.
 #' @param init_d1 A numeric constant indicating the initial value for the
@@ -428,7 +416,7 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' anisotropy in latitude parameter associated with variable 2.
 #' @param init_b2 A numeric constant indicating the initial value for the
 #' anisotropy in longitude parameter associated with variable 2.
-#' @param init_c2_coef A numeric vector indicating the initial value for the
+#' @param init_c2 A numeric vector indicating the initial value for the
 #' splines coefficients for the nonstationary with depth parameter c2
 #' associated with variable 12.
 #' @param init_d2 A numeric constant indicating the initial value for the
@@ -457,7 +445,7 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' anisotropy in latitude parameter associated with variable 1.
 #' @param b1_scaling A numeric constant indicating the scaling applied to the
 #' anisotropy in longitude parameter associated with variable 1.
-#' @param c1_coef_scaling A numeric constant indicating the scaling
+#' @param c1_scaling A numeric constant indicating the scaling
 #' applied to the splines coefficients for the nonstationary with depth
 #' parameter c1 associated with variable 1.
 #' @param d1_scaling A numeric constant indicating the scaling applied to the
@@ -466,12 +454,12 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' anisotropy in latitude parameter associated with variable 2.
 #' @param b2_scaling A numeric constant indicating the scaling applied to the
 #' anisotropy in longitude parameter associated with variable 2.
-#' @param c2_coef_scaling A numeric constant indicating the scaling
+#' @param c2_scaling A numeric constant indicating the scaling
 #' applied to the splines coefficients for the nonstationary with depth
 #' parameter c2 associated with variable 2.
 #' @param d2_scaling A numeric constant indicating the scaling applied to the
 #' variance parameter from the fully isotropic component associated with variable 2.
-#' @param radius A numeric constant indicating the radius of the sphere.
+#' @param radius_of_sphere A numeric constant indicating the radius of the sphere.
 #' @param splines_degree A number indicating the degree of the splines.
 #' @param inner_knots1 A vector of knot locations for variable 1.
 #' @param inner_knots2 A vector of knot locations for variable 2.
@@ -508,7 +496,7 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' variable1_residuals = argo_ref_loc1$TemperatureResiduals,
 #' variable2_residuals = argo_ref_loc1$SalinityResiduals,
 #' bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03,
-#' radius = earthRadiusKm)}
+#' radius_of_sphere = earthRadiusKm)}
 #'
 #' INNER_KNOTS1 <- c(0.1, 0.5, 0.9)
 #' INNER_KNOTS2 <- c(0.1, 0.5, 0.9)
@@ -533,13 +521,13 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #'                                  init_scale_horizontal = INIT_SCALE_HORIZONTAL,
 #'                                  init_scale_vertical = INIT_SCALE_VERTICAL,
 #'                                  init_a1 = INIT_A1, init_b1 = INIT_B1,
-#'                                  init_c1_coef = INIT_C1, init_d1 = INIT_D1,
+#'                                  init_c1 = INIT_C1, init_d1 = INIT_D1,
 #'                                  init_a2 = INIT_A2, init_b2 = INIT_B2,
-#'                                  init_c2_coef = INIT_C2, init_d2 = INIT_D2,
+#'                                  init_c2 = INIT_C2, init_d2 = INIT_D2,
 #'                                  d1_fix = TRUE, d2_fix = TRUE,
 #'                                  a1_scaling = 1e-3, b1_scaling = 1e-3,
 #'                                  a2_scaling = 1e-3, b2_scaling = 1e-3,
-#'                                  radius = earthRadiusKm,
+#'                                  radius_of_sphere = earthRadiusKm,
 #'                                  splines_degree = SPLINES_DEGREE,
 #'                                  inner_knots1 = INNER_KNOTS1,
 #'                                  inner_knots2 = INNER_KNOTS2,
@@ -549,8 +537,8 @@ cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical
 #' @export
 est_bi_differential_wls <- function(empirical_values, location, init_beta,
                                     init_scale_horizontal, init_scale_vertical,
-                                    init_a1, init_b1, init_c1_coef, init_d1,
-                                    init_a2, init_b2, init_c2_coef, init_d2,
+                                    init_a1, init_b1, init_c1, init_d1,
+                                    init_a2, init_b2, init_c2, init_d2,
                                     beta_fix = F, scale_horizontal_fix = F,
                                     scale_vertical_fix = F,
                                     a1_fix = F, b1_fix = F,
@@ -560,18 +548,22 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
                                     beta_scaling = 1, horizontal_scale_scaling = 1,
                                     vertical_scale_scaling = 1,
                                     a1_scaling = 1, b1_scaling = 1,
-                                    c1_coef_scaling = 1, d1_scaling = 1,
+                                    c1_scaling = 1, d1_scaling = 1,
                                     a2_scaling = 1, b2_scaling = 1,
-                                    c2_coef_scaling = 1, d2_scaling = 1,
-                                    radius, splines_degree = 2,
+                                    c2_scaling = 1, d2_scaling = 1,
+                                    radius_of_sphere, splines_degree = 0,
                                     inner_knots1, inner_knots2,
                                     w1 = 1, w2 = 1, w12 = 1,
                                     iterlim = 2000, stepmax = 1, hessian = TRUE){
 
-  basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
-  nb1 <- ncol(basis1)
-  basis2 <- bsplineBasis(location[, 3], splines_degree, inner_knots2)
-  nb2 <- ncol(basis2)
+  if(splines_degree > 0){
+    basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
+    nb1 <- ncol(basis1)
+    basis2 <- bsplineBasis(location[, 3], splines_degree, inner_knots2)
+    nb2 <- ncol(basis2)
+  }else{
+    nb1 <- nb2 <- 1
+  }
 
   NEGLOGLIK <- function(theta){
 
@@ -579,17 +571,17 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
 
     param <- transformParams(theta, init_beta,
                              init_scale_horizontal, init_scale_vertical,
-                             init_a1, init_b1, init_c1_coef, init_d1,
-                             init_a2, init_b2, init_c2_coef, init_d2,
+                             init_a1, init_b1, init_c1, init_d1,
+                             init_a2, init_b2, init_c2, init_d2,
                              beta_fix, scale_horizontal_fix,
                              scale_vertical_fix,
                              a1_fix, b1_fix, c1_fix, d1_fix,
                              a2_fix, b2_fix, c2_fix, d2_fix,
                              beta_scaling, horizontal_scale_scaling,
                              vertical_scale_scaling, a1_scaling, b1_scaling,
-                             c1_coef_scaling, d1_scaling,
+                             c1_scaling, d1_scaling,
                              a2_scaling, b2_scaling,
-                             c2_coef_scaling, d2_scaling,
+                             c2_scaling, d2_scaling,
                              splines_degree, nb1, nb2)
 
     BETA <- param$BETA
@@ -597,25 +589,19 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
     SCALE_VERTICAL <- param$SCALE_VERTICAL
     A1 <- param$A1
     B1 <- param$B1
-    C1_coef <- param$C1_coef
+    C1 <- param$C1
     D1 <- param$D1
     A2 <- param$A2
     B2 <- param$B2
-    C2_coef <- param$C2_coef
+    C2 <- param$C2
     D2 <- param$D2
-
-    if(splines_degree == 0){
-      C1 <- C1_coef
-      C2 <- C2_coef
-    }else if(splines_degree > 0){
-      C1 <- basis1 %*% matrix(C1_coef, ncol = 1)
-      C2 <- basis2 %*% matrix(C2_coef, ncol = 1)
-    }
 
     cov_mat <- cov_bi_differential(location = location, beta = BETA,
                                    scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL,
                                    a1 = A1, b1 = B1, c1 = C1, d1 = D1, a2 = A2, b2 = B2, c2 = C2, d2 = D2,
-                                   radius = radius)
+                                   radius_of_sphere = radius_of_sphere,
+                                   splines_degree = splines_degree,
+                                   inner_knots1 = inner_knots1, inner_knots2 = inner_knots1)
 
     covariance1 <- cov_mat[1:nrow(location), 1:nrow(location)]
     covariance2 <- cov_mat[nrow(location) + 1:nrow(location), nrow(location) + 1:nrow(location)]
@@ -635,8 +621,8 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
 
   init_theta <- prepareInitials(init_beta,
                                 init_scale_horizontal, init_scale_vertical,
-                                init_a1, init_b1, init_c1_coef, init_d1,
-                                init_a2, init_b2, init_c2_coef, init_d2,
+                                init_a1, init_b1, init_c1, init_d1,
+                                init_a2, init_b2, init_c2, init_d2,
                                 beta_fix, scale_horizontal_fix,
                                 scale_vertical_fix,
                                 a1_fix, b1_fix, c1_fix, d1_fix,
@@ -647,17 +633,17 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
 
   est_param <- transformParams(theta = fit$estimate, init_beta,
                                init_scale_horizontal, init_scale_vertical,
-                               init_a1, init_b1, init_c1_coef, init_d1,
-                               init_a2, init_b2, init_c2_coef, init_d2,
+                               init_a1, init_b1, init_c1, init_d1,
+                               init_a2, init_b2, init_c2, init_d2,
                                beta_fix, scale_horizontal_fix,
                                scale_vertical_fix,
                                a1_fix, b1_fix, c1_fix, d1_fix,
                                a2_fix, b2_fix, c2_fix, d2_fix,
                                beta_scaling, horizontal_scale_scaling,
                                vertical_scale_scaling, a1_scaling, b1_scaling,
-                               c1_coef_scaling, d1_scaling,
+                               c1_scaling, d1_scaling,
                                a2_scaling, b2_scaling,
-                               c2_coef_scaling, d2_scaling,
+                               c2_scaling, d2_scaling,
                                splines_degree, nb1, nb2)
 
   BETA <- est_param$BETA
@@ -665,11 +651,11 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
   SCALE_VERTICAL <- est_param$SCALE_VERTICAL
   A1 <- est_param$A1
   B1 <- est_param$B1
-  C1_coef <- est_param$C1_coef
+  C1 <- est_param$C1
   D1 <- est_param$D1
   A2 <- est_param$A2
   B2 <- est_param$B2
-  C2_coef <- est_param$C2_coef
+  C2 <- est_param$C2
   D2 <- est_param$D2
 
   est_sd <- computeSD(fittedModel = fit,
@@ -679,13 +665,13 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
                       a2_fix, b2_fix, c2_fix, d2_fix,
                       beta_scaling, horizontal_scale_scaling,
                       vertical_scale_scaling, a1_scaling, b1_scaling,
-                      c1_coef_scaling, d1_scaling,
+                      c1_scaling, d1_scaling,
                       a2_scaling, b2_scaling,
-                      c2_coef_scaling, d2_scaling, nb1, nb2)
+                      c2_scaling, d2_scaling, nb1, nb2)
 
   results <- prepareResults_wls(fittedModel = fit,
                                 BETA, SCALE_HORIZONTAL, SCALE_VERTICAL,
-                                A1, B1, C1_coef, D1, A2, B2, C2_coef, D2,
+                                A1, B1, C1, D1, A2, B2, C2, D2,
                                 est_sd,
                                 beta_fix, scale_horizontal_fix,
                                 scale_vertical_fix,
@@ -714,14 +700,14 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
 #' is the vector of residuals such that \eqn{\mathbf{Z}(\mathbf{s}) = \{ Z_1 (\mathbf{s}), Z_2 (\mathbf{s})\}^{\top}}.
 #'
 #' @usage est_bi_differential_mle(residuals, location, init_beta, init_scale_horizontal,
-#' init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1,
-#' init_a2, init_b2, init_c2_coef, init_d2,
+#' init_scale_vertical, init_a1, init_b1, init_c1, init_d1,
+#' init_a2, init_b2, init_c2, init_d2,
 #' beta_fix, scale_horizontal_fix, scale_vertical_fix,
 #' a1_fix, b1_fix, c1_fix, d1_fix, a2_fix, b2_fix, c2_fix, d2_fix,
 #' beta_scaling, horizontal_scale_scaling, vertical_scale_scaling,
-#' a1_scaling, b1_scaling, c1_coef_scaling, d1_scaling,
-#' a2_scaling, b2_scaling, c2_coef_scaling, d2_scaling,
-#' radius, splines_degree, inner_knots1, inner_knots2, iterlim, stepmax, hessian)
+#' a1_scaling, b1_scaling, c1_scaling, d1_scaling,
+#' a2_scaling, b2_scaling, c2_scaling, d2_scaling,
+#' radius_of_sphere, splines_degree, inner_knots1, inner_knots2, iterlim, stepmax, hessian)
 #'
 #' @param residuals A \eqn{2 n} vector of residuals with
 #' variable 1 and 2 residuals appended next to each other.
@@ -736,7 +722,7 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
 #' anisotropy in latitude parameter associated with variable 1.
 #' @param init_b1 A numeric constant indicating the initial value for the
 #' anisotropy in longitude parameter associated with variable 1.
-#' @param init_c1_coef A numeric vector indicating the initial value for the
+#' @param init_c1 A numeric vector indicating the initial value for the
 #' splines coefficients for the nonstationary with depth parameter c1
 #' associated with variable 1.
 #' @param init_d1 A numeric constant indicating the initial value for the
@@ -745,7 +731,7 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
 #' anisotropy in latitude parameter associated with variable 2.
 #' @param init_b2 A numeric constant indicating the initial value for the
 #' anisotropy in longitude parameter associated with variable 2.
-#' @param init_c2_coef A numeric vector indicating the initial value for the
+#' @param init_c2 A numeric vector indicating the initial value for the
 #' splines coefficients for the nonstationary with depth parameter c2
 #' associated with variable 2.
 #' @param init_d2 A numeric constant indicating the initial value for the
@@ -774,7 +760,7 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
 #' anisotropy in latitude parameter associated with variable 1.
 #' @param b1_scaling A numeric constant indicating the scaling applied to the
 #' anisotropy in longitude parameter associated with variable 1.
-#' @param c1_coef_scaling A numeric constant indicating the scaling
+#' @param c1_scaling A numeric constant indicating the scaling
 #' applied to the splines coefficients for the nonstationary with depth
 #' parameter c1 associated with variable 1.
 #' @param d1_scaling A numeric constant indicating the scaling applied to the
@@ -783,12 +769,12 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
 #' anisotropy in latitude parameter associated with variable 2.
 #' @param b2_scaling A numeric constant indicating the scaling applied to the
 #' anisotropy in longitude parameter associated with variable 2.
-#' @param c2_coef_scaling A numeric constant indicating the scaling
+#' @param c2_scaling A numeric constant indicating the scaling
 #' applied to the splines coefficients for the nonstationary with depth
 #' parameter c2 associated with variable 2.
 #' @param d2_scaling A numeric constant indicating the scaling applied to the
 #' variance parameter from the fully isotropic component associated with variable 2.
-#' @param radius A numeric constant indicating the radius of the sphere.
+#' @param radius_of_sphere A numeric constant indicating the radius of the sphere.
 #' @param splines_degree A number indicating the degree of the splines.
 #' @param inner_knots1 A vector of inner knot locations for variable 1.
 #' @param inner_knots2 A vector of inner knot locations for variable 2.
@@ -834,7 +820,7 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
 #'                                scale_vertical = SCALE_VERTICAL,
 #'                                a1 = A1, b1 = B1, c1 = C1, d1 = D1,
 #'                                a2 = A2, b2 = B2, c2 = C2, d2 = D2,
-#'                                radius = earthRadiusKm)
+#'                                radius_of_sphere = earthRadiusKm)
 #'
 #'
 #' library(MASS)
@@ -866,13 +852,13 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
 #'                                  init_scale_horizontal = INIT_SCALE_HORIZONTAL,
 #'                                  init_scale_vertical = INIT_SCALE_VERTICAL,
 #'                                  init_a1 = INIT_A1, init_b1 = INIT_B1,
-#'                                  init_c1_coef = INIT_C1, init_d1 = INIT_D1,
+#'                                  init_c1 = INIT_C1, init_d1 = INIT_D1,
 #'                                  init_a2 = INIT_A2, init_b2 = INIT_B2,
-#'                                  init_c2_coef = INIT_C2, init_d2 = INIT_D2,
+#'                                  init_c2 = INIT_C2, init_d2 = INIT_D2,
 #'                                  d1_fix = TRUE, d2_fix = TRUE,
 #'                                  a1_scaling = 1e-3, b1_scaling = 1e-3,
 #'                                  a2_scaling = 1e-3, b2_scaling = 1e-3,
-#'                                  radius = earthRadiusKm,
+#'                                  radius_of_sphere = earthRadiusKm,
 #'                                  splines_degree = SPLINES_DEGREE,
 #'                                  inner_knots1 = INNER_KNOTS1,
 #'                                  inner_knots2 = INNER_KNOTS2,
@@ -882,8 +868,8 @@ est_bi_differential_wls <- function(empirical_values, location, init_beta,
 #' @export
 est_bi_differential_mle <- function(residuals, location, init_beta,
                                     init_scale_horizontal, init_scale_vertical,
-                                    init_a1, init_b1, init_c1_coef, init_d1,
-                                    init_a2, init_b2, init_c2_coef, init_d2,
+                                    init_a1, init_b1, init_c1, init_d1,
+                                    init_a2, init_b2, init_c2, init_d2,
                                     beta_fix = F, scale_horizontal_fix = F,
                                     scale_vertical_fix = F,
                                     a1_fix = F, b1_fix = F,
@@ -893,20 +879,20 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
                                     beta_scaling = 1, horizontal_scale_scaling = 1,
                                     vertical_scale_scaling = 1,
                                     a1_scaling = 1, b1_scaling = 1,
-                                    c1_coef_scaling = 1, d1_scaling = 1,
+                                    c1_scaling = 1, d1_scaling = 1,
                                     a2_scaling = 1, b2_scaling = 1,
-                                    c2_coef_scaling = 1, d2_scaling = 1,
-                                    radius, splines_degree = 2,
+                                    c2_scaling = 1, d2_scaling = 1,
+                                    radius_of_sphere, splines_degree = 0,
                                     inner_knots1 = NULL, inner_knots2 = NULL,
                                     iterlim = 2000, stepmax = 1, hessian = TRUE){
 
-  if(splines_degree == 0){
-    nb1 <- nb2 <- 1
-  }else{
+  if(splines_degree > 0){
     basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
     nb1 <- ncol(basis1)
     basis2 <- bsplineBasis(location[, 3], splines_degree, inner_knots2)
     nb2 <- ncol(basis2)
+  }else{
+    nb1 <- nb2 <- 1
   }
 
   NEGLOGLIK <- function(theta){
@@ -915,17 +901,17 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
 
     param <- transformParams(theta, init_beta,
                              init_scale_horizontal, init_scale_vertical,
-                             init_a1, init_b1, init_c1_coef, init_d1,
-                             init_a2, init_b2, init_c2_coef, init_d2,
+                             init_a1, init_b1, init_c1, init_d1,
+                             init_a2, init_b2, init_c2, init_d2,
                              beta_fix, scale_horizontal_fix,
                              scale_vertical_fix,
                              a1_fix, b1_fix, c1_fix, d1_fix,
                              a2_fix, b2_fix, c2_fix, d2_fix,
                              beta_scaling, horizontal_scale_scaling,
                              vertical_scale_scaling, a1_scaling, b1_scaling,
-                             c1_coef_scaling, d1_scaling,
+                             c1_scaling, d1_scaling,
                              a2_scaling, b2_scaling,
-                             c2_coef_scaling, d2_scaling,
+                             c2_scaling, d2_scaling,
                              splines_degree, nb1, nb2)
 
     BETA <- param$BETA
@@ -933,25 +919,19 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
     SCALE_VERTICAL <- param$SCALE_VERTICAL
     A1 <- param$A1
     B1 <- param$B1
-    C1_coef <- param$C1_coef
+    C1 <- param$C1
     D1 <- param$D1
     A2 <- param$A2
     B2 <- param$B2
-    C2_coef <- param$C2_coef
+    C2 <- param$C2
     D2 <- param$D2
-
-    if(splines_degree == 0){
-      C1 <- C1_coef
-      C2 <- C2_coef
-    }else if(splines_degree > 0){
-      C1 <- basis1 %*% matrix(C1_coef, ncol = 1)
-      C2 <- basis2 %*% matrix(C2_coef, ncol = 1)
-    }
 
     cov_mat <- cov_bi_differential(location = location, beta = BETA,
                                    scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL,
                                    a1 = A1, b1 = B1, c1 = C1, d1 = D1, a2 = A2, b2 = B2, c2 = C2, d2 = D2,
-                                   radius = radius)
+                                   radius_of_sphere = radius_of_sphere,
+                                   splines_degree = splines_degree,
+                                   inner_knots1 = inner_knots1, inner_knots2 = inner_knots1)
 
     diag(cov_mat) <- diag(cov_mat) + 1e-4
 
@@ -974,8 +954,8 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
 
   init_theta <- prepareInitials(init_beta,
                                 init_scale_horizontal, init_scale_vertical,
-                                init_a1, init_b1, init_c1_coef, init_d1,
-                                init_a2, init_b2, init_c2_coef, init_d2,
+                                init_a1, init_b1, init_c1, init_d1,
+                                init_a2, init_b2, init_c2, init_d2,
                                 beta_fix, scale_horizontal_fix,
                                 scale_vertical_fix,
                                 a1_fix, b1_fix, c1_fix, d1_fix,
@@ -986,17 +966,17 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
 
   est_param <- transformParams(theta = fit$estimate, init_beta,
                            init_scale_horizontal, init_scale_vertical,
-                           init_a1, init_b1, init_c1_coef, init_d1,
-                           init_a2, init_b2, init_c2_coef, init_d2,
+                           init_a1, init_b1, init_c1, init_d1,
+                           init_a2, init_b2, init_c2, init_d2,
                            beta_fix, scale_horizontal_fix,
                            scale_vertical_fix,
                            a1_fix, b1_fix, c1_fix, d1_fix,
                            a2_fix, b2_fix, c2_fix, d2_fix,
                            beta_scaling, horizontal_scale_scaling,
                            vertical_scale_scaling, a1_scaling, b1_scaling,
-                           c1_coef_scaling, d1_scaling,
+                           c1_scaling, d1_scaling,
                            a2_scaling, b2_scaling,
-                           c2_coef_scaling, d2_scaling,
+                           c2_scaling, d2_scaling,
                            splines_degree, nb1, nb2)
 
   BETA <- est_param$BETA
@@ -1004,11 +984,11 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
   SCALE_VERTICAL <- est_param$SCALE_VERTICAL
   A1 <- est_param$A1
   B1 <- est_param$B1
-  C1_coef <- est_param$C1_coef
+  C1 <- est_param$C1
   D1 <- est_param$D1
   A2 <- est_param$A2
   B2 <- est_param$B2
-  C2_coef <- est_param$C2_coef
+  C2 <- est_param$C2
   D2 <- est_param$D2
 
   if(hessian){
@@ -1019,13 +999,13 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
                         a2_fix, b2_fix, c2_fix, d2_fix,
                         beta_scaling, horizontal_scale_scaling,
                         vertical_scale_scaling, a1_scaling, b1_scaling,
-                        c1_coef_scaling, d1_scaling,
+                        c1_scaling, d1_scaling,
                         a2_scaling, b2_scaling,
-                        c2_coef_scaling, d2_scaling, nb1, nb2)
+                        c2_scaling, d2_scaling, nb1, nb2)
 
     results <- prepareResults_mle(fittedModel = fit,
                                   BETA, SCALE_HORIZONTAL, SCALE_VERTICAL,
-                                  A1, B1, C1_coef, D1, A2, B2, C2_coef, D2,
+                                  A1, B1, C1, D1, A2, B2, C2, D2,
                                   beta_fix, scale_horizontal_fix,
                                   scale_vertical_fix,
                                   a1_fix, b1_fix, c1_fix, d1_fix,
@@ -1035,7 +1015,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
   }else{
     results <- prepareResults_mle(fittedModel = fit,
                                   BETA, SCALE_HORIZONTAL, SCALE_VERTICAL,
-                                  A1, B1, C1_coef, D1, A2, B2, C2_coef, D2,
+                                  A1, B1, C1, D1, A2, B2, C2, D2,
                                   beta_fix, scale_horizontal_fix,
                                   scale_vertical_fix,
                                   a1_fix, b1_fix, c1_fix, d1_fix,
@@ -1050,8 +1030,8 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
 #' Predict values at unsampled locations
 #'
 #' @usage predict_bi_differential(residuals, location, location_new, est_beta,
-#' est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1_coef, est_d1,
-#' est_a2, est_b2, est_c2_coef, est_d2, radius, splines_degree,
+#' est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1, est_d1,
+#' est_a2, est_b2, est_c2, est_d2, radius_of_sphere, splines_degree,
 #' inner_knots1, inner_knots2)
 #'
 #' @param residuals A \eqn{2 n} vector of residuals with
@@ -1068,7 +1048,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
 #' anisotropy in latitude parameter associated with variable 1.
 #' @param est_b1 A numeric constant indicating the value for the
 #' anisotropy in longitude parameter associated with variable 1.
-#' @param est_c1_coef A numeric vector indicating the values for the
+#' @param est_c1 A numeric vector indicating the values for the
 #' splines coefficients for the nonstationary with depth
 #' parameter c1 associated with variable 1.
 #' @param est_d1 A numeric constant indicating the value for the
@@ -1077,12 +1057,12 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
 #' anisotropy in latitude parameter associated with variable 2.
 #' @param est_b2 A numeric constant indicating the value for the
 #' anisotropy in longitude parameter associated with variable 2.
-#' @param est_c2_coef A numeric vector indicating the values for the
+#' @param est_c2 A numeric vector indicating the values for the
 #' splines coefficients for the nonstationary with depth
 #' parameter c2 associated with variable 2.
 #' @param est_d2 A numeric constant indicating the value for the
 #' variance parameter from the fully isotropic component associated with variable 2.
-#' @param radius A numeric constant indicating the radius of the sphere.
+#' @param radius_of_sphere A numeric constant indicating the radius of the sphere.
 #' @param splines_degree A number indicating the degree of the splines.
 #' @param inner_knots1 A vector of inner knot locations for variable 1.
 #' @param inner_knots2 A vector of inner knot locations for variable 2.
@@ -1094,7 +1074,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
 #' @author Mary Lai Salvana \email{yourlainess@gmail.com}
 #'
 #' @export
-predict_bi_differential <- function(residuals, location, location_new, est_beta, est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1_coef, est_d1, est_a2, est_b2, est_c2_coef, est_d2, radius, splines_degree = 2, inner_knots1, inner_knots2){
+predict_bi_differential <- function(residuals, location, location_new, est_beta, est_scale_horizontal, est_scale_vertical, est_a1, est_b1, est_c1, est_d1, est_a2, est_b2, est_c2, est_d2, radius_of_sphere, splines_degree = 0, inner_knots1, inner_knots2){
 
   BETA <- est_beta
   SCALE_HORIZONTAL <- est_scale_horizontal
@@ -1103,25 +1083,19 @@ predict_bi_differential <- function(residuals, location, location_new, est_beta,
   B1 <- est_b1
   A2 <- est_a2
   B2 <- est_b2
-  C1_coef <- est_c1_coef
-  C2_coef <- est_c2_coef
+  C1 <- est_c1
+  C2 <- est_c2
   D1 <- est_d1
   D2 <- est_d2
 
   location_full <- rbind(location, location_new)
 
-  basis1 <- bsplineBasis(location_full[, 3], splines_degree, inner_knots1)
-  nb1 <- ncol(basis1)
-  basis2 <- bsplineBasis(location_full[, 3], splines_degree, inner_knots2)
-  nb2 <- ncol(basis2)
-
-  C1 <- basis1 %*% matrix(C1_coef, ncol = 1)
-  C2 <- basis2 %*% matrix(C2_coef, ncol = 1)
-
   cov_mat <- cov_bi_differential(location = location_full, beta = BETA,
                                  scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL,
                                  a1 = A1, b1 = B1, c1 = C1, d1 = D1, a2 = A2, b2 = B2, c2 = C2, d2 = D2,
-                                 radius = radius)
+                                 radius_of_sphere = radius_of_sphere,
+                                 splines_degree = splines_degree,
+                                 inner_knots1 = inner_knots1, inner_knots2 = inner_knots1)
 
   INDEX_OUT = c(nrow(location) + 1:nrow(location_new), nrow(location) + nrow(location_new) + nrow(location) + 1:nrow(location_new))
 

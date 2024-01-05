@@ -5,7 +5,7 @@
 \title{Compute the kernel smooth empirical cross-covariance values}
 \usage{
 compute_emp_cov(location, variable1_residuals, variable2_residuals,
-bandwidth_horizontal, bandwidth_vertical, radius)
+bandwidth_horizontal, bandwidth_vertical, radius_of_sphere)
 }
 \arguments{
 \item{location}{An \eqn{n \times 3} matrix of coordinates.}
@@ -20,7 +20,7 @@ in the horizontal direction.}
 \item{bandwidth_vertical}{A numeric constant parameter for the bandwidth
 in the vertical direction.}
 
-\item{radius}{A numeric constant indicating the radius of the sphere.}
+\item{radius_of_sphere}{A numeric constant indicating the radius of the sphere.}
 }
 \value{
 A matrix of dimension \eqn{2 n \times 2 n}.
@@ -49,7 +49,7 @@ earthRadiusKm = 6371
 variable1_residuals = argo_ref_loc1$TemperatureResiduals,
 variable2_residuals = argo_ref_loc1$SalinityResiduals,
 bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03,
-radius = earthRadiusKm)}
+radius_of_sphere = earthRadiusKm)}
 
 
 }

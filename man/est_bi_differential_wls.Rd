@@ -5,14 +5,14 @@
 \title{Weighted Least Squares Estimation of the parameters of the bivariate differential operator cross-covariance function}
 \usage{
 est_bi_differential_wls(empirical_values, location, init_beta, init_scale_horizontal,
-init_scale_vertical, init_a1, init_b1, init_c1_coef, init_d1,
-init_a2, init_b2, init_c2_coef, init_d2,
+init_scale_vertical, init_a1, init_b1, init_c1, init_d1,
+init_a2, init_b2, init_c2, init_d2,
 beta_fix, scale_horizontal_fix, scale_vertical_fix,
 a1_fix, b1_fix, c1_fix, d1_fix, a2_fix, b2_fix, c2_fix, d2_fix,
 beta_scaling, horizontal_scale_scaling, vertical_scale_scaling,
-a1_scaling, b1_scaling, c1_coef_scaling, d1_scaling,
-a2_scaling, b2_scaling, c2_coef_scaling, d2_scaling,
-radius, splines_degree, inner_knots1, inner_knots2,
+a1_scaling, b1_scaling, c1_scaling, d1_scaling,
+a2_scaling, b2_scaling, c2_scaling, d2_scaling,
+radius_of_sphere, splines_degree, inner_knots1, inner_knots2,
 w1, w2, w12, iterlim, stepmax, hessian)
 }
 \arguments{
@@ -36,7 +36,7 @@ anisotropy in latitude parameter associated with variable 1.}
 \item{init_b1}{A numeric constant indicating the initial value for the
 anisotropy in longitude parameter associated with variable 1.}
 
-\item{init_c1_coef}{A numeric vector indicating the initial value for the
+\item{init_c1}{A numeric vector indicating the initial value for the
 splines coefficients for the nonstationary with depth parameter c1
 associated with variable 1.}
 
@@ -49,7 +49,7 @@ anisotropy in latitude parameter associated with variable 2.}
 \item{init_b2}{A numeric constant indicating the initial value for the
 anisotropy in longitude parameter associated with variable 2.}
 
-\item{init_c2_coef}{A numeric vector indicating the initial value for the
+\item{init_c2}{A numeric vector indicating the initial value for the
 splines coefficients for the nonstationary with depth parameter c2
 associated with variable 12.}
 
@@ -96,7 +96,7 @@ anisotropy in latitude parameter associated with variable 1.}
 \item{b1_scaling}{A numeric constant indicating the scaling applied to the
 anisotropy in longitude parameter associated with variable 1.}
 
-\item{c1_coef_scaling}{A numeric constant indicating the scaling
+\item{c1_scaling}{A numeric constant indicating the scaling
 applied to the splines coefficients for the nonstationary with depth
 parameter c1 associated with variable 1.}
 
@@ -109,14 +109,14 @@ anisotropy in latitude parameter associated with variable 2.}
 \item{b2_scaling}{A numeric constant indicating the scaling applied to the
 anisotropy in longitude parameter associated with variable 2.}
 
-\item{c2_coef_scaling}{A numeric constant indicating the scaling
+\item{c2_scaling}{A numeric constant indicating the scaling
 applied to the splines coefficients for the nonstationary with depth
 parameter c2 associated with variable 2.}
 
 \item{d2_scaling}{A numeric constant indicating the scaling applied to the
 variance parameter from the fully isotropic component associated with variable 2.}
 
-\item{radius}{A numeric constant indicating the radius of the sphere.}
+\item{radius_of_sphere}{A numeric constant indicating the radius of the sphere.}
 
 \item{splines_degree}{A number indicating the degree of the splines.}
 
@@ -167,7 +167,7 @@ earthRadiusKm = 6371
 variable1_residuals = argo_ref_loc1$TemperatureResiduals,
 variable2_residuals = argo_ref_loc1$SalinityResiduals,
 bandwidth_horizontal = 0.009, bandwidth_vertical = 0.03,
-radius = earthRadiusKm)}
+radius_of_sphere = earthRadiusKm)}
 
 INNER_KNOTS1 <- c(0.1, 0.5, 0.9)
 INNER_KNOTS2 <- c(0.1, 0.5, 0.9)
@@ -192,13 +192,13 @@ INIT_C2 <- runif(length(INNER_KNOTS2) + SPLINES_DEGREE + 1, -5, 5)
                                  init_scale_horizontal = INIT_SCALE_HORIZONTAL,
                                  init_scale_vertical = INIT_SCALE_VERTICAL,
                                  init_a1 = INIT_A1, init_b1 = INIT_B1,
-                                 init_c1_coef = INIT_C1, init_d1 = INIT_D1,
+                                 init_c1 = INIT_C1, init_d1 = INIT_D1,
                                  init_a2 = INIT_A2, init_b2 = INIT_B2,
-                                 init_c2_coef = INIT_C2, init_d2 = INIT_D2,
+                                 init_c2 = INIT_C2, init_d2 = INIT_D2,
                                  d1_fix = TRUE, d2_fix = TRUE,
                                  a1_scaling = 1e-3, b1_scaling = 1e-3,
                                  a2_scaling = 1e-3, b2_scaling = 1e-3,
-                                 radius = earthRadiusKm,
+                                 radius_of_sphere = earthRadiusKm,
                                  splines_degree = SPLINES_DEGREE,
                                  inner_knots1 = INNER_KNOTS1,
                                  inner_knots2 = INNER_KNOTS2,
