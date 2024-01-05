@@ -15,7 +15,8 @@ transformParams <- function(theta, init_beta,
 
   if(!beta_fix){
 
-    BETA <- 2 / (1 + exp(-theta[1] * beta_scaling)) - 1
+    #BETA <- 2 / (1 + exp(-theta[1] * beta_scaling)) - 1
+    BETA <- 1 / (1 + exp(-theta[1] * beta_scaling))
 
     if(scale_horizontal_fix & scale_vertical_fix){
 
