@@ -935,6 +935,7 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
                                    splines_degree = splines_degree,
                                    inner_knots1 = inner_knots1, inner_knots2 = inner_knots1)
 
+    print(range(cov_mat))
     diag(cov_mat) <- diag(cov_mat) + 1e-4
 
     L <- tryCatch(t(chol(cov_mat)), error = function(a) numeric(0))
