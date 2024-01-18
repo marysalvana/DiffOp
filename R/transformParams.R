@@ -456,6 +456,31 @@ transformParams <- function(theta, init_beta,
             C2 <- theta[2 + nb1 + 3 + 1:nb2] * c2_scaling
             D2 <- theta[2 + nb1 + 3 + nb2 + 1] * d1_scaling
           }
+        }else if(!c1_fix & c2_fix){
+
+          if(d1_fix & d2_fix){
+
+            A1 <- exp(theta[1]) * a1_scaling
+            B1 <- theta[2] * b1_scaling
+            C1 <- C2 <- theta[2 + 1:nb1] * c1_scaling
+            D1 <- init_d1
+
+            A2 <- theta[2 + nb1 + 1] * a2_scaling
+            B2 <- theta[2 + nb1 + 2] * b2_scaling
+            D2 <- init_d2
+
+          }else if(!d1_fix & !d2_fix){
+
+            A1 <- exp(theta[1]) * a1_scaling
+            B1 <- theta[2] * b1_scaling
+            C1 <- theta[2 + 1:nb1] * c1_scaling
+            D1 <- theta[2 + nb1 + 1] * d1_scaling
+
+            A2 <- theta[2 + nb1 + 2] * a2_scaling
+            B2 <- theta[2 + nb1 + 3] * b2_scaling
+            C2 <- theta[2 + nb1 + 3 + 1:nb2] * c2_scaling
+            D2 <- theta[2 + nb1 + 3 + nb2 + 1] * d1_scaling
+          }
         }
       }
     }else if(!scale_horizontal_fix & !scale_vertical_fix){

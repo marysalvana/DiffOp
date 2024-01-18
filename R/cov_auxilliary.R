@@ -926,6 +926,8 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
     C2 <- param$C2
     D2 <- param$D2
 
+    print(paste("theta = c(", paste(round(theta, 8), collapse=","), ")", sep = ''))
+
     cov_mat <- cov_bi_differential(location = location, beta = BETA,
                                    scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL,
                                    a1 = A1, b1 = B1, c1 = C1, d1 = D1, a2 = A2, b2 = B2, c2 = C2, d2 = D2,
