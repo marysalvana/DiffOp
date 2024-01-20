@@ -330,45 +330,19 @@ compute_emp_cov <- function(location, variable1_residuals, variable2_residuals, 
 #' @export
 cov_bi_differential <- function(location, beta, scale_horizontal, scale_vertical, a1, b1, c1, d1, a2, b2, c2, d2, radius_of_sphere, splines_degree = 0, inner_knots1 = NULL, inner_knots2 = NULL){
 
-  LAT1D <- matrix(location[, 2], nrow(location), nrow(location), byrow = F)
-  LON1D <- matrix(location[, 1], nrow(location), nrow(location), byrow = F)
-  PRES1 <- matrix(location[, 3], nrow(location), nrow(location), byrow = F)
-  LAT2D <- matrix(location[, 2], nrow(location), nrow(location), byrow = T)
-  LON2D <- matrix(location[, 1], nrow(location), nrow(location), byrow = T)
-  PRES2 <- matrix(location[, 3], nrow(location), nrow(location), byrow = T)
+  cov_mat <- CalculateCovBiDifferential(x = location[, 1],
+                                        y = location[, 2],
+                                        z = location[, 3],
+                                        a1 = a1, b1 = b1, c1 = c1, d1 = d1,
+                                        a2 = a2, b2 = b2, c2 = c2, d2 = d2,
+                                        scale_h = scale_horizontal,
+                                        scale_v = scale_vertical,
+                                        nu = 2, sigsq1 = 1, sigsq2 = 1, beta = beta,
+                                        splines_degree = splines_degree,
+                                        inner_knots1 = inner_knots1,
+                                        inner_knots2 = inner_knots1)
 
-  if(splines_degree > 0){
-    basis1 <- bsplineBasis(location[, 3], splines_degree, inner_knots1)
-    nb1 <- ncol(basis1)
-    basis2 <- bsplineBasis(location[, 3], splines_degree, inner_knots2)
-    nb2 <- ncol(basis2)
-
-    c1 <- basis1 %*% matrix(c1, ncol = 1)
-    c2 <- basis2 %*% matrix(c2, ncol = 1)
-  }
-
-  fd_eval_mat_loc1 <- matrix(c1, nrow(location), nrow(location), byrow = F)
-  fd_eval_mat_loc2 <- matrix(c1, nrow(location), nrow(location), byrow = T)
-
-  fd_eval2_mat_loc1 <- matrix(c2, nrow(location), nrow(location), byrow = F)
-  fd_eval2_mat_loc2 <- matrix(c2, nrow(location), nrow(location), byrow = T)
-
-  PARAM <- c(1, scale_horizontal, scale_vertical, 2, a1, b1, d1, a1, b1, d1)
-
-  cov_val <- uni_differential(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius_of_sphere)
-
-  PARAM <- c(1, scale_horizontal, scale_vertical, 2, a2, b2, d2, a2, b2, d2)
-
-  cov_val2 <- uni_differential(PARAM, fd_eval2_mat_loc1, fd_eval2_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius_of_sphere)
-
-  PARAM <- c(beta, scale_horizontal, scale_vertical, 2, a1, b1, d1, a2, b2, d2)
-
-  cov_val3 <- uni_differential(PARAM, fd_eval_mat_loc1, fd_eval2_mat_loc2, LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius_of_sphere)
-
-  Sigma <- rbind(cbind(cov_val, cov_val3), cbind(t(cov_val3), cov_val2))
-
-  return(Sigma)
-
+  return(cov_mat)
 }
 
 #' Weighted Least Squares Estimation of the parameters of the bivariate differential operator cross-covariance function
@@ -925,8 +899,6 @@ est_bi_differential_mle <- function(residuals, location, init_beta,
     B2 <- param$B2
     C2 <- param$C2
     D2 <- param$D2
-
-    print(paste("theta = c(", paste(round(theta, 8), collapse=","), ")", sep = ''))
 
     cov_mat <- cov_bi_differential(location = location, beta = BETA,
                                    scale_horizontal = SCALE_HORIZONTAL, scale_vertical = SCALE_VERTICAL,
