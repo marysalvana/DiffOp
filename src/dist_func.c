@@ -201,7 +201,9 @@ double uni_differential (double x1, double y1, double z1, double x2, double y2, 
   lat2r = deg2rad(y2);
   lon2r = deg2rad(x2);
 
-  //printf("%f %f \n", y1, lat1r);
+  //printf("%f %f %f %f %f %f %f %f \n", lat1r, lon1r, z1, lat2r, lon2r, z2, scale_h, scale_v);
+
+  //printf("%f \n", H(lat1r, lon1r, z1, lat2r, lon2r, z2, scale_h, scale_v, radius_of_sphere));
 
   expr = pow(H(lat1r, lon1r, z1, lat2r, lon2r, z2, scale_h, scale_v, radius_of_sphere), 0.5);
 
@@ -213,14 +215,15 @@ double uni_differential (double x1, double y1, double z1, double x2, double y2, 
               a1, b1, c1, d1, a2, b2, c2, d2,
               scale_h, scale_v, nu);
 
-  //printf("%f \n", expr);
+  //printf("%f %f %f %f %f %f %f %f %f \n", lat1r, lon1r, z1, lat2r, lon2r, z2, expr, C1_val, C2_val);
 
+  //double nug = 0.0001;
   if(expr == 0){
-    cov_val = con * (C1_val + C2_val) + sigma_square * d1 * d2;
+    cov_val = con * (C1_val + C2_val) ;//+ sigma_square * d1 * d2;// + nug;
   }else{
     f = pow(expr, nu - 1) * gsl_sf_bessel_Knu(nu - 1, expr);
     f_prime = pow(expr, nu - 2) * gsl_sf_bessel_Knu(nu - 2, expr);
-    cov_val = con * (C1_val * f_prime + C2_val * f + d1 * d2 * (pow(expr, 2) * f_prime + 2 * (nu - 1) * f));
+    cov_val = con * (C1_val * f_prime + C2_val * f) ; // + d1 * d2 * (pow(expr, 2) * f_prime + 2 * (nu - 1) * f));
   }
 
   return(cov_val);
@@ -240,6 +243,7 @@ void CovBiDifferential (double * x, double * y, double * z,
   for (i = 0; i < nn; i++) {
     for (j = 0; j < nn ; j++) {
 
+      //printf("%f %f %f %f %f %f \n", x[i], y[i], z[i], x[j], y[j], z[j]);
       dist[p * nn * i + j] = uni_differential(x[i], y[i], z[i], x[j], y[j], z[j],
                                           A1, B1, c1[i], D1, A1, B1, c1[j], D2,
                                           SCALE_H, SCALE_V, NU, SIGSQ1);

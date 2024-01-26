@@ -18,8 +18,10 @@ calculateDistanceEarth <- function (y, x) {
 CalculateCovBiDifferential <- function (x, y, z, a1, b1, c1, d1, a2, b2, c2, d2,
                                         scale_h, scale_v, nu, sigsq1, sigsq2, beta,
                                         splines_degree, inner_knots1, inner_knots2) {
+
   n <- length(y)
-  dist <- rep (0, (2*n)*(2*n))
+
+  dist <- rep(0, (2*n)*(2*n))
 
   if(splines_degree > 0){
     basis1 <- bsplineBasis(z, splines_degree, inner_knots1)
