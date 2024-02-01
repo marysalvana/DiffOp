@@ -217,12 +217,12 @@ double uni_differential (double x1, double y1, double z1, double x2, double y2, 
 
   //printf("%f %f %f %f %f %f %f %f %f \n", lat1r, lon1r, z1, lat2r, lon2r, z2, expr, C1_val, C2_val);
 
-  //double nug = 0.0001;
+  double nug = 0.00001;
   if(expr == 0){
-    cov_val = con * (C1_val + C2_val) ;//+ sigma_square * d1 * d2;// + nug;
+    cov_val = con * (C1_val + C2_val) + nug;//+ sigma_square * d1 * d2;// + nug;
   }else{
-    f = pow(expr, nu) * gsl_sf_bessel_Knu(nu, expr);
-    f_prime = pow(expr, nu - 1) * gsl_sf_bessel_Knu(nu - 1, expr);
+    f = pow(expr, nu-1) * gsl_sf_bessel_Knu(nu-1, expr);
+    f_prime = pow(expr, nu - 2) * gsl_sf_bessel_Knu(nu - 2, expr);
     cov_val = con * (C1_val * f_prime + C2_val * f) ; // + d1 * d2 * (pow(expr, 2) * f_prime + 2 * (nu - 1) * f));
   }
 
