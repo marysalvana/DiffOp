@@ -35,16 +35,16 @@ nonstationary with depth parameter c1 associated with variable 1.}
 
 \item{d2}{A numeric constant indicating the variance parameter from the fully isotropic component associated with variable 2.}
 
-\item{radius_of_sphere}{A numeric constant indicating the radius of the sphere.}
-
-\item{splines_degree}{A number indicating the degree of the splines when
-using splines to characterize the nonstationary parameters c1 and c2.}
-
 \item{inner_knots1}{A vector of knot locations for variable 1 when using splines to
 characterize c1.}
 
 \item{inner_knots2}{A vector of knot locations for variable 2 when using splines to
 characterize c2.}
+
+\item{radius_of_sphere}{A numeric constant indicating the radius of the sphere.}
+
+\item{splines_degree}{A number indicating the degree of the splines when
+using splines to characterize the nonstationary parameters c1 and c2.}
 }
 \value{
 A matrix of dimension \eqn{2 n \times 2 n}.
