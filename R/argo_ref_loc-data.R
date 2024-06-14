@@ -175,3 +175,21 @@
 #' head(argo_ref_loc6$TemperatureResiduals)}
 "argo_ref_loc6"
 
+#' Argo profile TESTING dataset around Reference Location 1
+"argo_ref_loc1_testing"
+
+#' Argo profile TESTING dataset around Reference Location 2
+"argo_ref_loc2_testing"
+
+#' Argo profile TESTING dataset around Reference Location 3
+"argo_ref_loc3_testing"
+
+#' Argo profile TESTING dataset around Reference Location 4
+"argo_ref_loc4_testing"
+
+#' Argo profile TESTING dataset around Reference Location 5
+"argo_ref_loc5_testing"
+
+#' Argo profile TESTING dataset around Reference Location 6
+"argo_ref_loc6_testing"
+
