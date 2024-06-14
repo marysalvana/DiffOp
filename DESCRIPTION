@@ -23,7 +23,8 @@ Maintainer: Mary Lai Salvana <yourlainess@gmail.com>
 Depends:
     R (>= 2.15.0)
 Imports:
-    stats
+    stats,
+    pracma
 Suggests:
     MASS,
     dplyr,
