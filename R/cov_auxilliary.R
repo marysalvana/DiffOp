@@ -259,6 +259,8 @@ uni_differential <- function(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, LAT1D, L
 #' @param inner_knots2 A vector of knot locations for variable 2 when using splines to
 #' characterize c2.
 #'
+#' @importFrom pracma legendre
+#'
 #' @useDynLib DiffOp, .registration=TRUE
 #'
 #' @return A matrix of dimension \eqn{2 n \times 2 n}.
