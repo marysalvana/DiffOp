@@ -12,4 +12,5 @@
 ^testing\.R$
 ^README\.md$
 ^.*\.out$
-^output/*\.R$
+^output/*$
+^archived/*$
