@@ -344,7 +344,6 @@ cov_bi_differential=function (location, sigma1, sigma2, beta, scale_horizontal, 
       
     }
   }
-  
   fd_eval_mat_loc1 <- matrix(c1, nrow(location), nrow(location), 
                              byrow = F)
   fd_eval_mat_loc2 <- matrix(c1, nrow(location), nrow(location), 
@@ -354,16 +353,16 @@ cov_bi_differential=function (location, sigma1, sigma2, beta, scale_horizontal, 
   fd_eval2_mat_loc2 <- matrix(c2, nrow(location), nrow(location), 
                               byrow = T)
   
-  PARAM <- c(sigma1, sigma1,scale_horizontal, scale_vertical, 2, 1,a1, b1, 
+  PARAM <- c(sigma1, sigma1,scale_horizontal, scale_vertical, 1.5, 1,a1, b1, 
              d1, a1, b1, d1)
   cov_val <- uni_differential(PARAM, fd_eval_mat_loc1, fd_eval_mat_loc2, 
                               LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius)
-  PARAM <- c(sigma2,sigma2, scale_horizontal, scale_vertical, 2,1, a2, b2, 
+  PARAM <- c(sigma2,sigma2, scale_horizontal, scale_vertical, 1.5, 1, a2, b2, 
              d2, a2, b2, d2)
   
   cov_val2 <- uni_differential(PARAM, fd_eval2_mat_loc1, fd_eval2_mat_loc2, 
                                LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius)
-  PARAM <- c(sigma1,sigma2, scale_horizontal, scale_vertical, 2,beta, a1, 
+  PARAM <- c(sigma1,sigma2, scale_horizontal, scale_vertical, 1.5,beta, a1, 
              b1, d1, a2, b2, d2)
   cov_val3 <- uni_differential(PARAM, fd_eval_mat_loc1, fd_eval2_mat_loc2, 
                                LAT1D, LON1D, PRES1, LAT2D, LON2D, PRES2, radius)
